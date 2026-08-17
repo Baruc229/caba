@@ -1,4 +1,4 @@
-# WhatsApp et Notifications — Caba Résidence
+# WhatsApp et Notifications — Caba Résidence.
 
 Ce document décrit l'intégration WhatsApp et le système de notifications de la plateforme.
 
