@@ -1,10 +1,15 @@
+import { redirect } from "next/navigation";
+import { auth } from "@/lib/auth/config";
 import { DashboardSidebar, DashboardMobileNav } from "@/components/dashboard/sidebar";
 
-export default function ClientLayout({
+export default async function ClientLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const session = await auth();
+  if (!session?.user) redirect("/connexion");
+
   return (
     <div className="flex min-h-screen bg-gray-50">
       <DashboardSidebar />
