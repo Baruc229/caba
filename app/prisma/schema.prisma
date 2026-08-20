@@ -1,0 +1,537 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── ENUMS ───────────────────────────────────────────────
+
+enum UserRole {
+  client
+  administrateur
+  gestionnaire
+  reception
+  comptabilite
+  editeur
+}
+
+enum PropertyType {
+  chambre
+  chambre_avec_salon
+  studio
+  appartement_meuble
+  suite
+  villa
+  duplex
+  maison_entiere
+  personnalise
+}
+
+enum PropertyCategory {
+  chambre_privee
+  logement_entier
+}
+
+enum PropertyStatus {
+  brouillon
+  publie
+  depublie
+  desactive
+  maintenance
+}
+
+enum BookingStatus {
+  demande_en_attente
+  reservation_temporaire
+  en_attente_paiement
+  confirmee
+  payee
+  modifiee
+  annulee
+  terminee
+}
+
+enum BookingType {
+  heure
+  plusieurs_heures
+  demi_journee
+  journee
+  nuee
+  vingt_quatre_heures
+  semaine
+  mois
+}
+
+enum BookingSource {
+  site_web
+  whatsapp
+  manuelle
+  ical
+}
+
+enum PricingType {
+  standard
+  horaire
+  demi_journee
+  journee
+  nuee
+  vingt_quatre_heures
+  hebdomadaire
+  mensuel
+}
+
+enum DayOfWeek {
+  tous
+  lundi
+  mardi
+  mercredi
+  jeudi
+  vendredi
+  samedi
+  dimanche
+}
+
+enum DiscountType {
+  pourcentage
+  montant_fixe
+}
+
+enum PaymentStatus {
+  en_attente
+  confirme
+  echoue
+  rembourse
+}
+
+enum PaymentMethod {
+  carte_bancaire
+  paypal
+  virement_bancaire
+  autre
+}
+
+enum AvailabilityStatus {
+  disponible
+  reserve
+  bloque
+  maintenance
+}
+
+enum AvailabilitySource {
+  manuelle
+  reservation
+  ical
+  maintenance
+}
+
+enum ReviewStatus {
+  en_attente
+  publique
+  masquee
+  supprimee
+}
+
+enum ReviewSource {
+  interne
+  google
+}
+
+enum NotificationType {
+  nouvelle_reservation
+  demande_whatsapp
+  paiement
+  annulation
+  modification
+  nouveau_message
+  nouvel_avis
+  rappel_arrivee
+  rappel_depart
+  disponibilite_liberee
+  erreur_sync
+}
+
+enum CharacteristicCategory {
+  equipements
+  chambres_et_salles_de_bains
+  installations
+  autre
+}
+
+enum RuleType {
+  annulation
+  modification
+  check_in
+  check_out
+  sejour
+  autre
+}
+
+enum ICalSyncType {
+  import
+  export
+}
+
+enum ICalSyncFrequency {
+  manuelle
+  horaire
+  quotidienne
+}
+
+enum ICalSyncStatus {
+  active
+  erreur
+  desactivee
+}
+
+enum BookingHistoryAction {
+  creation
+  modification
+  annulation
+  confirmation
+  paiement
+}
+
+// ─── MODÈLES ─────────────────────────────────────────────
+
+model User {
+  id               String    @id @default(uuid())
+  email            String    @unique
+  password         String
+  nom              String
+  prenom           String
+  telephone        String?
+  role             UserRole  @default(client)
+  avatarUrl        String?
+  emailConfirme    Boolean   @default(false)
+  actif            Boolean   @default(true)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  lastLogin        DateTime?
+
+  // Relations
+  properties       Property[]
+  bookings         Booking[]
+  reviews          Review[]
+  notifications    Notification[]
+  favorites        Favorite[]
+  sentMessages     Message[]   @relation("SentMessages")
+  receivedMessages Message[]   @relation("ReceivedMessages")
+  bookingHistory   BookingHistory[]
+}
+
+model Property {
+  id                String           @id @default(uuid())
+  nom               String
+  type              PropertyType
+  descriptionCourte String?
+  descriptionComplete String?
+  statut            PropertyStatus   @default(brouillon)
+  proprietaireId    String
+  superCategorie    PropertyCategory @default(logement_entier)
+  capaciteMaximale  Int
+  adultesMax        Int
+  enfantsMax        Int
+  bebesMax          Int
+  nombreChambres    Int
+  nombreLits        Int
+  nombreSallesDeBains Int
+  superficieM2      Int?
+  adresse           String
+  ville             String
+  pays              String
+  codePostal        String?
+  latitude          Decimal?
+  longitude         Decimal?
+  fuseauHoraire     String           @default("Africa/Porto-Novo")
+  languePrincipale  String           @default("fr")
+  devise            String           @default("EUR")
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  // Relations
+  proprietaire      User             @relation(fields: [proprietaireId], references: [id])
+  photos            PropertyPhoto[]
+  tarifs            Tarif[]
+  promotions        Promotion[]
+  disponibilites    Disponibilite[]
+  reservations      Booking[]
+  avis              Review[]
+  caracteristiques  PropertyCaracteristique[]
+  regles            Regle[]
+  contact           PropertyContact?
+  syncsIcal         SynchronisationICal[]
+  favoris           Favorite[]
+}
+
+model PropertyPhoto {
+  id            String   @id @default(uuid())
+  propertyId    String
+  url           String
+  urlThumbnail  String?
+  urlMedium     String?
+  urlLarge      String?
+  ordre         Int      @default(0)
+  estPrincipale Boolean  @default(false)
+  legende       String?
+  createdAt     DateTime @default(now())
+
+  // Relations
+  property      Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+}
+
+model Tarif {
+  id            String     @id @default(uuid())
+  propertyId    String
+  typeTarif     PricingType
+  prix          Decimal    @db.Decimal(10, 2)
+  devise        String     @default("EUR")
+  jourSemaine   DayOfWeek  @default(tous)
+  dateDebut     DateTime
+  dateFin       DateTime
+  saison        String?
+  actif         Boolean    @default(true)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  // Relations
+  property      Property   @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+}
+
+model Promotion {
+  id                  String       @id @default(uuid())
+  propertyId          String
+  nom                 String
+  typeReduction       DiscountType
+  valeur              Decimal      @db.Decimal(10, 2)
+  dateDebut           DateTime
+  dateFin             DateTime
+  dureeMinimaleNuits  Int?
+  conditions          String?
+  actif               Boolean      @default(true)
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+
+  // Relations
+  property            Property     @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+}
+
+model Disponibilite {
+  id            String             @id @default(uuid())
+  propertyId    String
+  date          DateTime           @db.Date
+  heureDebut    String?            // HH:mm
+  heureFin      String?            // HH:mm
+  statut        AvailabilityStatus @default(disponible)
+  reservationId String?
+  source        AvailabilitySource @default(manuelle)
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+
+  // Relations
+  property      Property           @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  reservation   Booking?           @relation(fields: [reservationId], references: [id])
+}
+
+model Booking {
+  id                    String        @id @default(uuid())
+  numero                String        @unique
+  statut                BookingStatus @default(demande_en_attente)
+  propertyId            String
+  clientId              String
+  dateArrivee           DateTime      @db.Date
+  dateDepart            DateTime      @db.Date
+  heureArrivee          String?       // HH:mm
+  heureDepart           String?       // HH:mm
+  typeReservation       BookingType
+  nombreAdultes         Int
+  nombreEnfants         Int           @default(0)
+  nombreBebes           Int           @default(0)
+  nombreVoyageursTotal  Int           @default(0)
+  prixSejour            Decimal       @db.Decimal(10, 2)
+  fraisMenage           Decimal       @db.Decimal(10, 2) @default(0)
+  taxeSejour            Decimal       @db.Decimal(10, 2) @default(0)
+  supplements           Decimal       @db.Decimal(10, 2) @default(0)
+  reductions            Decimal       @db.Decimal(10, 2) @default(0)
+  prixTotal             Decimal       @db.Decimal(10, 2)
+  devise                String        @default("EUR")
+  source                BookingSource @default(site_web)
+  notesInternes         String?
+  motifAnnulation       String?
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+
+  // Relations
+  property              Property      @relation(fields: [propertyId], references: [id])
+  client                User          @relation(fields: [clientId], references: [id])
+  paiements             Paiement[]
+  historique             BookingHistory[]
+  messages              Message[]
+  disponibilites        Disponibilite[]
+  reviews               Review[]
+}
+
+model Paiement {
+  id                  String        @id @default(uuid())
+  numero              String        @unique
+  reservationId       String
+  montant             Decimal       @db.Decimal(10, 2)
+  devise              String        @default("EUR")
+  statut              PaymentStatus @default(en_attente)
+  moyenPaiement       PaymentMethod
+  referenceExterne    String?
+  datePaiement        DateTime?
+  remboursementMontant Decimal?     @db.Decimal(10, 2)
+  remboursementDate   DateTime?
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+
+  // Relations
+  reservation         Booking       @relation(fields: [reservationId], references: [id])
+}
+
+model Review {
+  id            String       @id @default(uuid())
+  propertyId    String
+  clientId      String
+  reservationId String?
+  note          Int          // 1-5
+  commentaire   String?
+  statut        ReviewStatus @default(en_attente)
+  reponseAdmin  String?
+  dateReponse   DateTime?
+  source        ReviewSource @default(interne)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  // Relations
+  property      Property     @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  client        User         @relation(fields: [clientId], references: [id])
+  reservation   Booking?     @relation(fields: [reservationId], references: [id])
+}
+
+model Caracteristique {
+  id          String                 @id @default(uuid())
+  nom         String
+  categorie   CharacteristicCategory
+  icone       String?
+  ordre       Int                    @default(0)
+  actif       Boolean                @default(true)
+  createdAt   DateTime               @default(now())
+
+  // Relations
+  properties  PropertyCaracteristique[]
+}
+
+model PropertyCaracteristique {
+  propertyId          String
+  caracteristiqueId   String
+
+  property            Property         @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  caracteristique     Caracteristique  @relation(fields: [caracteristiqueId], references: [id], onDelete: Cascade)
+
+  @@id([propertyId, caracteristiqueId])
+}
+
+model Regle {
+  id            String   @id @default(uuid())
+  propertyId    String
+  typeRegle     RuleType
+  description   String
+  valeur        String?
+  actif         Boolean  @default(true)
+  createdAt     DateTime @default(now())
+
+  // Relations
+  property      Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+}
+
+model PropertyContact {
+  id                    String   @id @default(uuid())
+  propertyId            String   @unique
+  adresse               String
+  telephone             String
+  telephoneSecondaire   String?
+  email                 String
+  whatsapp              String?
+  nomEtablissement      String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  // Relations
+  property              Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+}
+
+model Notification {
+  id            String           @id @default(uuid())
+  utilisateurId String
+  type          NotificationType
+  titre         String
+  message       String
+  lue           Boolean          @default(false)
+  lien          String?
+  donnees       Json?
+  createdAt     DateTime         @default(now())
+
+  // Relations
+  utilisateur   User             @relation(fields: [utilisateurId], references: [id])
+}
+
+model Message {
+  id              String    @id @default(uuid())
+  reservationId   String?
+  expediteurId    String
+  destinataireId  String
+  contenu         String
+  lu              Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+
+  // Relations
+  reservation     Booking?  @relation(fields: [reservationId], references: [id])
+  expediteur      User      @relation("SentMessages", fields: [expediteurId], references: [id])
+  destinataire    User      @relation("ReceivedMessages", fields: [destinataireId], references: [id])
+}
+
+model Favorite {
+  id          String   @id @default(uuid())
+  clientId    String
+  propertyId  String
+  createdAt   DateTime @default(now())
+
+  // Relations
+  client      User     @relation(fields: [clientId], references: [id])
+  property    Property @relation(fields: [propertyId], references: [id])
+
+  @@unique([clientId, propertyId])
+}
+
+model BookingHistory {
+  id              String              @id @default(uuid())
+  reservationId   String
+  action          BookingHistoryAction
+  details         Json?
+  effectuePar     String?
+  createdAt       DateTime            @default(now())
+
+  // Relations
+  reservation     Booking             @relation(fields: [reservationId], references: [id])
+  utilisateur     User?               @relation(fields: [effectuePar], references: [id])
+}
+
+model SynchronisationICal {
+  id              String            @id @default(uuid())
+  propertyId      String
+  urlSource       String
+  typeSync        ICalSyncType
+  frequence       ICalSyncFrequency @default(manuelle)
+  derniereSync    DateTime?
+  statut          ICalSyncStatus    @default(active)
+  messageErreur   String?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  // Relations
+  property        Property          @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+}
