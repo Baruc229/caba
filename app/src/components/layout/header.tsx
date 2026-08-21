@@ -3,27 +3,19 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { FaBars, FaPhone, FaUser, FaXmark } from "react-icons/fa6";
+import { FaBars, FaXmark } from "react-icons/fa6";
 
 const NAV_LINKS = [
   { href: "/", label: "Accueil" },
-  { href: "/logements", label: "Logements" },
-  { href: "/recherche", label: "Rechercher" },
+  { href: "/logements", label: "Chambres" },
+  { href: "/a-propos", label: "À propos" },
+  { href: "/contact", label: "Contact" },
 ];
 
 export function Header() {
   const pathname = usePathname();
-  const [scrolled, setScrolled] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [accountOpen, setAccountOpen] = useState(false);
   const [lang, setLang] = useState<"fr" | "en">("fr");
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
   useEffect(() => {
     document.body.style.overflow = drawerOpen ? "hidden" : "";
@@ -43,120 +35,88 @@ export function Header() {
 
   const closeDrawer = useCallback(() => setDrawerOpen(false), []);
 
+  const langSwitch = (
+    <div className="flex items-center gap-1 text-sm" role="group" aria-label="Choix de la langue">
+      <button
+        type="button"
+        onClick={() => setLang("fr")}
+        aria-pressed={lang === "fr"}
+        className={`px-1 transition-colors ${
+          lang === "fr" ? "font-semibold text-text-primary" : "text-text-secondary hover:text-text-primary"
+        }`}
+      >
+        FR
+      </button>
+      <span className="text-border-subtle" aria-hidden="true">|</span>
+      <button
+        type="button"
+        onClick={() => setLang("en")}
+        aria-pressed={lang === "en"}
+        className={`px-1 transition-colors ${
+          lang === "en" ? "font-semibold text-text-primary" : "text-text-secondary hover:text-text-primary"
+        }`}
+      >
+        EN
+      </button>
+    </div>
+  );
+
   return (
-    <header
-      className={`sticky top-0 z-[1000] border-b bg-bg-primary transition-colors duration-200 ${
-        scrolled ? "border-border-subtle" : "border-transparent"
-      }`}
-    >
-      <div className="container-caba relative flex h-[72px] items-center justify-between gap-4">
-        <button
-          type="button"
-          className="flex h-10 w-10 items-center justify-center text-xl text-text-primary lg:hidden"
-          aria-label="Ouvrir le menu"
-          onClick={() => setDrawerOpen(true)}
-        >
-          <FaBars aria-hidden="true" />
-        </button>
-
-        <Link
-          href="/"
-          className="heading-display absolute left-1/2 -translate-x-1/2 text-lg sm:text-xl lg:static lg:translate-x-0 lg:text-2xl"
-        >
-          Caba Résidence
-        </Link>
-
-        <div className="hidden items-center gap-3 lg:flex" data-taborder>
-          <div
-            className="flex items-center gap-1 text-sm"
-            role="group"
-            aria-label="Choix de la langue"
-          >
-            <button
-              type="button"
-              onClick={() => setLang("fr")}
-              aria-pressed={lang === "fr"}
-              className={`px-1 py-2 transition-colors ${
-                lang === "fr" ? "font-semibold text-text-primary" : "text-text-secondary hover:text-text-primary"
-              }`}
-            >
-              FR
-            </button>
-            <span className="text-border-subtle" aria-hidden="true">|</span>
-            <button
-              type="button"
-              onClick={() => setLang("en")}
-              aria-pressed={lang === "en"}
-              className={`px-1 py-2 transition-colors ${
-                lang === "en" ? "font-semibold text-text-primary" : "text-text-secondary hover:text-text-primary"
-              }`}
-            >
-              EN
-            </button>
-          </div>
-
-          <a
-            href="tel:+33123456789"
-            className="btn-pill border border-border-subtle px-4 py-2 text-sm font-medium text-text-primary hover:border-accent hover:text-accent"
-          >
-            <FaPhone aria-hidden="true" className="text-accent" />
-            +33 1 23 45 67 89
-          </a>
-
-          <Link
-            href="/inscription"
-            className="btn-pill px-3 py-2 text-sm text-text-secondary hover:text-accent"
-          >
-            <FaUser aria-hidden="true" />
-            S&apos;inscrire
+    <header className="sticky top-0 z-[1000] px-3 pt-3 lg:px-5 lg:pt-5">
+      <div className="mx-auto max-w-[1400px] rounded-2xl border-[0.5px] border-[#2A2A2A] bg-[#141414]">
+        <div className="flex h-[72px] items-center justify-between gap-6 px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center gap-6">
+          <Link href="/" className="heading-display whitespace-nowrap text-xl lg:text-2xl">
+            Caba Résidence
           </Link>
 
-          <Link
-            href="/connexion"
-            className="btn-pill px-3 py-2 text-sm font-medium text-text-secondary hover:text-accent"
+          <nav
+            aria-label="Navigation principale"
+            className="hidden items-center gap-1 rounded-full border border-border-subtle p-2 lg:flex"
           >
-            <FaUser aria-hidden="true" />
-            Se connecter
-          </Link>
+            {NAV_LINKS.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                aria-current={pathname === link.href ? "page" : undefined}
+                className={`rounded-full px-4 py-2 text-sm transition-colors ${
+                  pathname === link.href
+                    ? "bg-bg-card font-semibold text-accent"
+                    : "text-text-secondary hover:bg-bg-card hover:text-text-primary"
+                }`}
+              >
+                {link.label}
+              </Link>
+            ))}
+          </nav>
         </div>
 
-        <button
-          type="button"
-          className="relative flex h-10 w-10 items-center justify-center text-xl text-text-primary lg:hidden"
-          aria-label="Ouvrir le menu du compte"
-          aria-expanded={accountOpen}
-          onClick={() => setAccountOpen((v) => !v)}
-        >
-          <FaUser aria-hidden="true" />
-        </button>
+        <div className="hidden items-center gap-4 lg:flex">
+          <Link
+            href="/connexion"
+            className="rounded-full px-4 py-2 text-sm font-medium text-text-secondary transition-colors hover:text-accent"
+          >
+            Connexion
+          </Link>
+          <Link href="/recherche" className="btn-pill btn-primary px-8">
+            Réserver
+          </Link>
+          {langSwitch}
+        </div>
 
-        {accountOpen && (
-          <>
-            <button
-              type="button"
-              className="fixed inset-0 z-[1001] cursor-default"
-              aria-label="Fermer le menu du compte"
-              tabIndex={-1}
-              onClick={() => setAccountOpen(false)}
-            />
-            <div className="absolute right-4 top-[64px] z-[1002] w-48 rounded-xl border border-border-subtle bg-bg-card p-2 shadow-xl lg:hidden">
-              <Link
-                href="/inscription"
-                className="block rounded-lg px-4 py-3 text-sm text-text-secondary hover:bg-bg-primary hover:text-text-primary"
-                onClick={() => setAccountOpen(false)}
-              >
-                S&apos;inscrire
-              </Link>
-              <Link
-                href="/connexion"
-                className="block rounded-lg px-4 py-3 text-sm font-medium text-text-secondary hover:bg-bg-primary hover:text-text-primary"
-                onClick={() => setAccountOpen(false)}
-              >
-                Se connecter
-              </Link>
-            </div>
-          </>
-        )}
+        <div className="flex items-center gap-3 lg:hidden">
+          {langSwitch}
+          <button
+            type="button"
+            className="flex h-10 w-10 items-center justify-center text-xl text-text-primary"
+            aria-label="Ouvrir le menu"
+            aria-expanded={drawerOpen}
+            onClick={() => setDrawerOpen(true)}
+          >
+            <FaBars aria-hidden="true" />
+          </button>
+        </div>
+        </div>
       </div>
 
       {drawerOpen && (
@@ -172,11 +132,11 @@ export function Header() {
         role="dialog"
         aria-modal="true"
         aria-label="Menu principal"
-        className={`fixed inset-y-0 left-0 z-[1002] flex w-80 max-w-[85vw] flex-col bg-bg-card transition-transform duration-300 lg:hidden ${
-          drawerOpen ? "translate-x-0" : "-translate-x-full"
+        className={`fixed inset-y-0 right-0 z-[1002] flex w-80 max-w-[85vw] flex-col bg-bg-card transition-transform duration-300 lg:hidden ${
+          drawerOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
-        <div className="flex h-[72px] items-center justify-between border-b border-border-subtle px-5">
+        <div className="flex h-[72px] items-center justify-between border-b border-border-subtle px-6">
           <span className="heading-display text-lg">Menu</span>
           <button
             type="button"
@@ -206,53 +166,14 @@ export function Header() {
           ))}
         </nav>
 
-        <div className="mt-auto flex flex-col gap-4 border-t border-border-subtle p-5">
-          <a
-            href="tel:+33123456789"
-            className="btn-pill border border-border-subtle px-4 py-3 text-sm font-medium text-text-primary"
+        <div className="mt-auto flex flex-col gap-4 border-t border-border-subtle p-6">
+          <Link
+            href="/connexion"
+            className="btn-pill btn-primary w-full"
+            onClick={closeDrawer}
           >
-            <FaPhone aria-hidden="true" className="text-accent" />
-            +33 1 23 45 67 89
-          </a>
-          <div className="flex gap-4">
-            <Link
-              href="/inscription"
-              className="btn-pill flex-1 border border-border-subtle px-4 py-3 text-sm text-text-primary"
-              onClick={closeDrawer}
-            >
-              S&apos;inscrire
-            </Link>
-            <Link
-              href="/connexion"
-              className="btn-pill flex-1 bg-accent px-4 py-3 text-sm font-semibold text-bg-primary hover:bg-accent-hover"
-              onClick={closeDrawer}
-            >
-              Se connecter
-            </Link>
-          </div>
-          <div className="flex items-center gap-2 text-sm" role="group" aria-label="Choix de la langue">
-            <button
-              type="button"
-              onClick={() => setLang("fr")}
-              aria-pressed={lang === "fr"}
-              className={`px-1 ${
-                lang === "fr" ? "font-semibold text-text-primary" : "text-text-secondary"
-              }`}
-            >
-              FR
-            </button>
-            <span className="text-border-subtle" aria-hidden="true">|</span>
-            <button
-              type="button"
-              onClick={() => setLang("en")}
-              aria-pressed={lang === "en"}
-              className={`px-1 ${
-                lang === "en" ? "font-semibold text-text-primary" : "text-text-secondary"
-              }`}
-            >
-              EN
-            </button>
-          </div>
+            Connexion
+          </Link>
         </div>
       </aside>
     </header>
