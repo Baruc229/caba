@@ -1151,18 +1151,30 @@ Le design doit être :
 * élégant ;
 * clair.
 
-Palette :
+Thème sombre intégral (dark mode). Palette :
 
-* bleu clair ;
-* noir ;
-* blanc ;
-* gris.
+* noir anthracite (#0D0D0D) en fond principal ;
+* gris anthracite (#1A1A1A) pour les cards ;
+* vert menthe (#4ADE80) comme couleur d'accent (CTA, icônes) ;
+* blanc (#FFFFFF) pour les titres et les CTA secondaires ;
+* gris (#A0A0A0) pour le texte courant.
 
 Conteneur :
 
 **1400 px maximum.**
 
-Le bleu doit être utilisé comme couleur d'accent et non comme couleur dominante partout.
+Typographie :
+
+* Titres H1/H2 : police grasse, condensée, italique, tout en majuscules (style Anton / Archivo Black) ;
+* Corps de texte : sans-serif régulière, casse normale (Inter / Poppins / Manrope).
+
+Composants :
+
+* boutons en forme pilule ; CTA principal vert plein/texte noir ; CTA secondaire blanc plein/texte noir ;
+* cards fond #1A1A1A, coins arrondis 12-16px, icônes line-icons vertes ;
+* images à coins « cassés » avec repères décoratifs aux angles.
+
+Le vert menthe doit être utilisé comme couleur d'accent et non comme couleur dominante partout.
 
 Les icônes doivent appartenir à une même famille graphique.
 

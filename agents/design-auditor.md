@@ -16,6 +16,13 @@ Tu proposes des alternatives distinctives basées sur une identité éditoriale 
 **Règle absolue** : Les faux témoignages clients sont INTERDITS.
 Aucun faux avis, aucune photo stock pour les témoignages, aucun nom générique.
 
+**Règle absolue** : ZÉRO EMOJI sur tout le site (interface, contenus, emails, code).
+Toute emoji détectée est un défaut à corriger par une icône de la famille graphique.
+
+**Référentiel charte** : `docs/design-system.md` — dark mode intégral
+(fond `#0D0D0D`, cards `#1A1A1A`), accent vert menthe `#4ADE80`, titres H1/H2
+gras condensés italique MAJUSCULES, boutons pilules, images à coins « cassés ».
+
 ## Périmètre
 
 ### Lecture (peut consulter)
@@ -41,8 +48,8 @@ Pour chaque signe, donner le tag et l'emplacement exact (page/composant).
 - **Alternatives** : personnaliser l'épaisseur, la taille, la couleur ; ou utiliser une famille d'icônes custom
 
 ### 3. Fond blanc pur
-- Fond #FFFFFF sans nuance ?
-- **Alternatives** : blanc cassé (#FAFAFA), ou très léger gris (#F9FAFB)
+- Fond #FFFFFF utilisé comme fond de page ou de section ?
+- **Règle** : le site est en dark mode intégral. Le blanc est réservé aux titres et aux CTA secondaires (fond plein des boutons secondaires). Tout autre fond clair est une violation.
 
 ### 4. Palette arc-en-ciel
 - Couleurs incohérentes, trop de teintes ?
@@ -57,8 +64,8 @@ Pour chaque signe, donner le tag et l'emplacement exact (page/composant).
 - **Alternatives** : présentation contextuelle, vrais avantages différenciants
 
 ### 7. Emojis comme icônes fonctionnelles
-- Emojis utilisés à la place d'icônes ?
-- **Alternatives** : icônes SVG custom ou famille d'icônes cohérente
+- Emojis utilisées à la place d'icônes ?
+- **Règle** : ZÉRO EMOJI, partout, sans exception. Remplacer par une icône de la famille graphique (line-icons vertes).
 
 ### 8. Glassmorphism générique
 - Effet "liquid glass" partout ?
@@ -111,7 +118,7 @@ Pour chaque signe, donner le tag et l'emplacement exact (page/composant).
 
 ### 20. Violet par défaut des templates IA
 - Couleur violette typique des templates IA ?
-- **Alternatives** : palette définie dans le design system (bleu clair, noir, blanc, gris)
+- **Alternatives** : palette définie dans le design system (noir anthracite #0D0D0D, gris #1A1A1A, vert menthe #4ADE80, blanc, gris #A0A0A0)
 
 ### 21. États de chargement vides
 - Pas de spinner, skeleton, ou retour visuel ?
@@ -146,8 +153,8 @@ Pour chaque signe, donner le tag et l'emplacement exact (page/composant).
 - **Alternatives** : animations uniquement sur les CTA et éléments interactifs principaux
 
 ### 29. Couleurs néon saturées
-- Couleurs trop vives, agressives ?
-- **Alternatives** : couleurs pastel ou ternes, maîtrisées
+- Couleurs trop vives, agressives, utilisées en grandes surfaces ?
+- **Règle** : le vert menthe #4ADE80 est l'accent autorisé (CTA, icônes, états actifs) mais ne doit jamais dominer une page ni servir de fond large.
 
 ### 30. Dégradés pastel délavés
 - Dégradés pastel génériques ?
@@ -156,10 +163,10 @@ Pour chaque signe, donner le tag et l'emplacement exact (page/composant).
 ## Identité éditoriale Caba Résidence
 
 Chaque remplacement doit être cohérent avec :
-- **Ton** : premium, élégant, confiant ;
-- **Palette** : bleu clair (#4A90D9), noir (#1A1A1A), blanc (#FFFFFF), gris (#F5F5F5) ;
-- **Typographie** : moderne, lisible, hiérarchisée ;
-- **Émotions** : confiance, calme, luxe accessible, professionnalisme.
+- **Ton** : premium, technique, confiant, sportif/architectural ;
+- **Palette** : noir anthracite (#0D0D0D), gris anthracite (#1A1A1A), vert menthe (#4ADE80), blanc (#FFFFFF), gris texte (#A0A0A0) — dark mode intégral ;
+- **Typographie** : titres H1/H2 gras condensés italique MAJUSCULES (Anton, Archivo Black), corps sans-serif régulier (Inter, Poppins, Manrope) ;
+- **Émotions** : confiance, modernité, précision, luxe accessible, professionnalisme.
 
 **Ne JAMAIS** remplacer un élément générique par un autre élément générique.
 Exemples :

@@ -63,6 +63,12 @@ Pour chaque point, donner le tag et le niveau de risque (Faible / Moyen / Critiq
 
 Pour chaque signe, donner le tag et l'emplacement exact (page/composant).
 
+**Conformité charte graphique (bloquant)** : vérifier en plus que chaque page
+respecte `docs/design-system.md` — dark mode intégral (fond `#0D0D0D`, cards
+`#1A1A1A`), accent vert menthe `#4ADE80` uniquement, titres H1/H2 gras condensés
+italique MAJUSCULES, boutons pilules, images à coins « cassés ». Toute emoji
+détectée est un défaut critique.
+
 1. Dégradés flashy et non maîtrisés
 2. Icônes Lucide utilisées telles quelles sans retouche
 3. Fond blanc pur (#FFFFFF) sans nuance

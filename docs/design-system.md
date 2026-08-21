@@ -18,65 +18,73 @@ Le design de Caba Résidence doit être :
 
 ---
 
-## 2. Palette de couleurs
+## 2. Palette de couleurs — Dark mode intégral
 
-### 2.1 Couleurs principales
+Le site est en **dark mode intégral** : aucun fond clair sur le site public.
+Contraste fort noir / blanc / vert.
 
-| Couleur | Rôle | Valeur approximative |
-|---------|------|----------------------|
-| Bleu clair | Couleur d'accent (CTA, liens, éléments actifs) | #4A90D9 |
-| Noir | Texte principal, titres | #1A1A1A |
-| Blanc | Fond principal, espaces | #FFFFFF |
-| Gris clair | Fond secondaire, bordures | #F5F5F5 |
-| Gris moyen | Texte secondaire, icônes | #6B7280 |
-| Gris foncé | Séparateurs, bordures | #D1D5DB |
+### 2.1 Tokens CSS
+
+```css
+--bg-primary: #0D0D0D;      /* fond principal noir anthracite */
+--bg-card: #1A1A1A;         /* fond des cards, légèrement plus clair */
+--accent-green: #4ADE80;    /* vert menthe : accent principal, CTA, icônes */
+--text-primary: #FFFFFF;    /* titres */
+--text-secondary: #A0A0A0;  /* texte courant, paragraphes */
+--btn-secondary-bg: #FFFFFF;
+--btn-secondary-text: #0D0D0D;
+```
 
 ### 2.2 Règles d'utilisation
 
-- Le **bleu** doit être utilisé comme couleur d'accent et **non comme couleur dominante partout** ;
-- Le **noir** est réservé au texte principal et aux titres ;
-- Le **blanc** est la couleur de fond par défaut ;
-- Le **gris** est utilisé pour les éléments secondaires et les séparateurs.
+- Le **vert menthe (#4ADE80)** est la couleur d'accent unique et **non une couleur dominante partout** : CTA principaux, icônes, états actifs, liens ;
+- Le **blanc pur (#FFFFFF)** est réservé aux titres et aux CTA secondaires ;
+- Le **gris (#A0A0A0)** est utilisé pour tout le texte courant ;
+- Les fonds sont toujours `#0D0D0D` (pages) ou `#1A1A1A` (cards) ;
+- Aucune autre teinte ne doit être introduite sans validation du product-tech-lead ;
+- Erreur : rouge (`#EF4444`) ; succès : vert accent ; attention : ambre (`#F59E0B`).
 
 ### 2.3 États interactifs
 
 | État | Couleur | Description |
 |------|---------|-------------|
 | Normal | Couleur de base | État par défaut |
-| Survol (hover) | Couleur assombrie de 10 % | Au passage de la souris |
-| Actif (active) | Couleur assombrie de 20 % | Au clic |
-| Focus | Contour bleu | Sélection au clavier |
-| Désactivé | Gris clair, opacity 50 % | Élément non interactif |
+| Survol (hover) | Vert accent éclairci (CTA) ou blanc (liens) | Au passage de la souris |
+| Actif (active) | Vert accent assombri de 10 % | Au clic |
+| Focus | Contour vert accent | Sélection au clavier |
+| Désactivé | Gris #A0A0A0, opacity 50 % | Élément non interactif |
 | Erreur | Rouge | Message d'erreur |
-| Succès | Vert | Confirmation |
+| Succès | Vert accent | Confirmation |
 
 ---
 
 ## 3. Typographie
 
-### 3.1 Police principale
+### 3.1 Polices
 
-Utiliser une police moderne et lisible :
-- **Titres** : police sans-serif élégante (ex. : Inter, Plus Jakarta Sans) ;
-- **Corps de texte** : police sans-serif lisible (ex. : Inter, DM Sans).
+- **Titres (H1/H2)** : police grasse, condensée, italique/oblique, **TOUT EN MAJUSCULES** — style impactant, sportif/architectural. Polices cibles : **Anton**, **Archivo Black** (condensé) ou similaire ;
+- **Corps de texte** : sans-serif classique, régulière, casse normale, bonne lisibilité sur fond sombre. Polices cibles : **Inter**, **Poppins** ou **Manrope**.
 
 ### 3.2 Hiérarchie
 
-| Élément | Taille | Poids | Espacement |
-|---------|--------|-------|------------|
-| H1 | 36-48px | Bold (700) | -0.02em |
-| H2 | 28-36px | Semi-Bold (600) | -0.01em |
-| H3 | 22-28px | Semi-Bold (600) | Normal |
-| H4 | 18-22px | Medium (500) | Normal |
-| Corps | 16px | Regular (400) | 1.5-1.6 |
-| Petit | 14px | Regular (400) | 1.4-1.5 |
-| Légende | 12px | Regular (400) | 1.3-1.4 |
+Hiérarchie forte : gros titres très larges vs texte courant plus discret en gris.
+
+| Élément | Style |
+|---------|-------|
+| H1 | 48-72px, Anton/Archivo Black, italique, MAJUSCULES, blanc |
+| H2 | 36-56px, Anton/Archivo Black, italique, MAJUSCULES, blanc |
+| H3 | 22-28px, Semi-Bold (600), casse normale, blanc |
+| H4 | 18-22px, Medium (500), casse normale, blanc |
+| Corps | 16px, Regular (400), #A0A0A0, line-height 1.5-1.6 |
+| Petit | 14px, Regular (400), #A0A0A0, line-height 1.4-1.5 |
+| Légende | 12px, Regular (400), #A0A0A0, line-height 1.3-1.4 |
 
 ### 3.3 Règles
 
 - Maximum 2 polices différentes sur le site ;
+- Les titres H1/H2 sont **toujours en majuscules**, en italique ;
 - Line-height : 1.5 minimum pour le corps de texte ;
-- Contraste respecté (WCAG AA minimum) ;
+- Contraste respecté sur fond sombre (WCAG AA minimum) ;
 - Aucun texte en dessous de 12px.
 
 ---
@@ -104,10 +112,21 @@ Recommandations :
 
 ### 4.3 Style
 
-- Style outline (trait) par défaut ;
+- Style outline (trait / line-icons) par défaut ;
 - Style filled pour les états actifs ;
 - Épaisseur de trait : 1.5px ou 2px ;
+- **Couleur : vert accent (#4ADE80)** par défaut, blanc sur les CTA secondaires ;
 - Toujours accompagnées d'un label ou d'un tooltip si non évidentes.
+
+### 4.4 Interdiction absolue d'emojis
+
+**ZÉRO EMOJI sur tout le site.** Aucune emoji dans :
+- l'interface (boutons, menus, cartes, formulaires) ;
+- les contenus (titres, textes, descriptions, avis) ;
+- les emails et notifications ;
+- le code et la documentation.
+
+Les icônes proviennent exclusivement de la famille graphique définie en §4.1.
 
 ---
 
@@ -191,15 +210,15 @@ Le header doit être **sticky au scroll** : il reste fixé en haut de l'écran
 lorsque l'utilisateur fait défiler la page.
 
 - **Hauteur** : 70-80px ;
-- **Fond** : blanc avec légère ombre portée au scroll ;
-- **Transition** : apparition de l'ombre lors du scroll (pas de changement brutal) ;
+- **Fond** : `--bg-primary` (#0D0D0D) avec bordure inférieure subtile (#262626) au scroll ;
+- **Transition** : apparition de la bordure lors du scroll (pas de changement brutal) ;
 - **Z-index** : 1000 (toujours au-dessus du contenu).
 
 ### 7.2 Disposition Desktop (> 1024px)
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│  [Logo]    [FR|EN]     [rounded-pill: 📞 +33 1 23 45 67]    [👤 Inscrire] [Se connecter]  │
+│  [Logo]    [FR|EN]     [rounded-pill: Phone +33 1 23 45 67]    [User Inscrire] [Se connecter]  │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -209,30 +228,30 @@ lorsque l'utilisateur fait défiler la page.
 |------|---------|-------|
 | Gauche | Logo Caba Résidence | Image, hauteur max 40-50px, lien vers l'accueil |
 | Centre-gauche | Sélecteur de langue (FR / EN) | Toggle ou dropdown discret, texte 14px |
-| Centre | Numéro de téléphone + icône téléphone | **Bordure arrondie (pill shape)**, bordure 1px gris moyen, padding horizontal 16px, padding vertical 8px, icône 📞 à gauche du numéro |
+| Centre | Numéro de téléphone + icône téléphone | **Forme pilule (border-radius: 999px)**, bordure 1px #262626, padding horizontal 16px, padding vertical 8px, icône Lucide `Phone` à gauche du numéro |
 | Droite | Liens « S'inscrire » et « Se connecter » | Icône utilisateur à gauche du texte, style ghost ou text |
 
 **Règles du numéro de téléphone** :
-- **Bordures arrondies** : `border-radius: 999px` (pill) ;
-- **Bordure** : 1px solid gris moyen (#D1D5DB) ;
+- **Bordures arrondies** : `border-radius: 999px` (pilule) ;
+- **Bordure** : 1px solid #262626 ;
 - **Padding** : 8px horizontal, 6px vertical ;
-- **Icône** : téléphone (📞 ou icône Lucide `Phone`) à gauche ;
-- **Texte** : numéro formaté, 14px, poids medium ;
-- **Hover** : bordure passe à bleu accent, texte passe à bleu ;
+- **Icône** : Lucide `Phone` (vert accent) à gauche ;
+- **Texte** : numéro formaté, 14px, poids medium, blanc ;
+- **Hover** : bordure passe au vert accent, texte passe au vert ;
 - **Clic** : déclenche l'appel (`tel:`) ou copie le numéro.
 
 **Règles des liens d'authentification** :
-- **Icône utilisateur** (👤 ou icône Lucide `User`) à gauche du texte ;
+- **Icône utilisateur** (Lucide `User`) à gauche du texte ;
 - **Style** : texte seul (ghost), pas de bordure ;
 - **S'inscrire** : texte + icône ;
 - **Se connecter** : texte + icône, légèrement plus visible (poids medium) ;
-- **Hover** : couleur passe à bleu accent.
+- **Hover** : couleur passe au vert accent.
 
 ### 7.3 Disposition Mobile (< 1024px)
 
 ```
 ┌───────────────────────────────┐
-│    [☰]    [Logo]    [👤]     │
+│    [Menu]    [Logo]    [User] │
 └───────────────────────────────┘
 ```
 
@@ -240,9 +259,9 @@ lorsque l'utilisateur fait défiler la page.
 
 | Zone | Contenu | Style |
 |------|---------|-------|
-| Gauche | Icône burger (☰) | Icône menu, 24px, ouvre un panneau latéral |
+| Gauche | Icône burger | Lucide `Menu`, 24px, ouvre un panneau latéral |
 | Centre | Logo Caba Résidence | Centré, hauteur max 35-40px |
-| Droite | Icône utilisateur (👤) | Icône Lucide `User`, ouvre un dropdown ou modal avec « S'inscrire » et « Se connecter » |
+| Droite | Icône utilisateur | Icône Lucide `User`, ouvre un dropdown ou modal avec « S'inscrire » et « Se connecter » |
 
 **Règles du burger** :
 - Icône burger classique (3 lignes) ;
@@ -263,7 +282,7 @@ lorsque l'utilisateur fait défiler la page.
 ### 7.4 Accessibilité
 
 - **ARIA labels** sur tous les boutons (ex. : `aria-label="Menu principal"`) ;
-- **Focus visible** : contour bleu au focus clavier ;
+- **Focus visible** : contour vert accent au focus clavier ;
 - **Tab order** : logo → langue → téléphone → inscription → connexion ;
 - **Skip link** : lien « Aller au contenu principal » invisible mais accessible au clavier.
 
@@ -320,7 +339,7 @@ La première section contient **3 colonnes** avec **bordures arrondies** sur cha
 **Style** :
 - **Bordures arrondies** : `border-radius: 12px` ;
 - **Padding** : 24-32px ;
-- **Fond** : gris très clair (#F9FAFB) ou blanc avec bordure ;
+- **Fond** : `--bg-card` (#1A1A1A) avec bordure subtile #262626 ;
 - **Largeur** : 1/3 du footer (desktop).
 
 #### Colonne 2 : Contact
@@ -329,8 +348,8 @@ La première section contient **3 colonnes** avec **bordures arrondies** sur cha
 ┌─────────────────────────────────┐
 │           CONTACT               │
 │                                 │
-│  📞 +33 1 23 45 67 89          │
-│  📧 info@caba-residence.com     │
+│  Phone +33 1 23 45 67 89        │
+│  Mail info@caba-residence.com   │
 │                                 │
 │  [Icônes réseaux sociaux]       │
 │  Facebook | Instagram | Twitter │
@@ -353,14 +372,14 @@ La première section contient **3 colonnes** avec **bordures arrondies** sur cha
 ┌─────────────────────────────────┐
 │        LISTINGS RÉCENTS         │
 │                                 │
-│  🏠 Appartement Vue Mer         │
-│     ⭐ 4.8 (12 avis)           │
+│  [photo] Appartement Vue Mer    │
+│     Star 4.8 (12 avis)          │
 │                                 │
-│  🏠 Chambre Premium             │
-│     ⭐ 4.9 (8 avis)            │
+│  [photo] Chambre Premium        │
+│     Star 4.9 (8 avis)           │
 │                                 │
-│  🏠 Villa avec Piscine          │
-│     ⭐ 4.7 (15 avis)           │
+│  [photo] Villa avec Piscine     │
+│     Star 4.7 (15 avis)          │
 │                                 │
 │  [Voir tous les logements →]    │
 └─────────────────────────────────┘
@@ -441,14 +460,15 @@ avec un espace vide au milieu.
 
 | Propriété | Valeur |
 |-----------|--------|
-| Fond | Gris très clair (#F9FAFB) ou noir très foncé (#111827) selon le thème |
-| Texte | Gris moyen (#6B7280) pour le corps, blanc si fond sombre |
-| Liens | Gris moyen, passe à bleu accent au hover |
+| Fond | `--bg-primary` (#0D0D0D) |
+| Colonnes | `--bg-card` (#1A1A1A), bordure subtile #262626 |
+| Texte | Gris (#A0A0A0) pour le corps, blanc pour les titres |
+| Liens | Gris, passe au vert accent au hover |
 | Bordures colonnes | `border-radius: 12px` |
 | Padding colonnes | 24-32px |
 | Espacement entre colonnes | 24px (mobile), 32px (desktop) |
 | Padding global | 48-64px vertical, 32px horizontal |
-| Séparateur | Ligne fine entre section 1 et section 2 (optionnel) |
+| Séparateur | Ligne fine #262626 entre section 1 et section 2 (optionnel) |
 
 ### 8.5 Responsive
 
@@ -473,55 +493,81 @@ avec un espace vide au milieu.
 
 ## 9. Composants réutilisables
 
-### 7.1 Boutons
+### 9.1 Boutons
+
+Tous les boutons sont en **forme pilule** (`border-radius: 999px`).
 
 | Type | Usage | Style |
 |------|-------|-------|
-| Primaire | Action principale (Réserver, Payer) | Fond bleu, texte blanc |
-| Secondaire | Action alternative (Contacter, Partager) | Fond blanc, bordure grise, texte noir |
-| Tertiaire | Action discrète (En savoir plus) | Fond transparent, texte bleu |
-| Danger | Action destructive (Annuler, Supprimer) | Fond rouge, texte blanc |
-| Ghost | Navigation, filtres | Fond transparent, texte gris/noir |
+| Primaire (CTA) | Action principale (Réserver, Payer) | **Fond vert plein (#4ADE80), texte noir (#0D0D0D)** |
+| Secondaire (CTA) | Action alternative (Contacter, Partager) | **Fond blanc plein (#FFFFFF), texte noir (#0D0D0D)** |
+| Tertiaire | Action discrète (En savoir plus) | Fond transparent, texte vert accent |
+| Danger | Action destructive (Annuler, Supprimer) | Fond rouge (#EF4444), texte blanc |
+| Ghost | Navigation, filtres | Fond transparent, texte gris (#A0A0A0) |
 
-### 7.2 Champs de formulaire
+### 9.2 Champs de formulaire
 
 - Label au-dessus du champ ;
 - Placeholder descriptif ;
 - Message d'erreur sous le champ ;
-- Border : 1px gris moyen au repos, 1px bleu au focus.
+- Fond : `--bg-card` (#1A1A1A) ;
+- Border : 1px #262626 au repos, 1px vert accent au focus ;
+- Texte saisi : blanc.
 
-### 7.3 Cartes (Cards)
+### 9.3 Cartes (Cards)
 
-- Border-radius : 8-12px ;
-- Ombre subtile (box-shadow) ;
+- **Fond : `--bg-card` (#1A1A1A)** ;
+- **Border-radius : 12-16px** ;
+- Bordure subtile #262626 (pas d'ombre portée systématique) ;
 - Padding intérieur : 16-24px ;
-- Hover : légère élévation supplémentaire.
+- Icônes en line-icons vertes (#4ADE80) ;
+- Hover : bordure légèrement plus claire ou élévation discrète.
 
-### 7.4 Badges / Étiquettes
+### 9.4 Badges / Étiquettes
 
 - Background color selon le statut ;
-- Texte blanc ou foncé selon le contraste ;
-- Border-radius : 999px (pill shape) ou 4px (rectangle).
+- Texte blanc ou noir selon le contraste ;
+- Border-radius : 999px (pilule).
+
+### 9.5 Images
+
+Les images ont des **coins « cassés » avec petits repères décoratifs aux angles**
+(effet cadre technique / architecte) :
+
+- Découpe d'angle (clip-path) sur un ou plusieurs coins ;
+- Petits repères / équerres décoratifs aux angles, en vert accent ou blanc ;
+- Border-radius de base : 12px sur les coins non coupés ;
+- L'effet doit rester discret et cohérent sur toutes les images du site.
 
 ---
 
-## 10. Identité visuelle
+## 10. Layout
 
-## 10.1 Ce que le site ne doit PAS être
+- **Dark mode intégral**, fort contraste noir/blanc/vert ;
+- **Grande respiration** : whitespace généreux entre les sections (96-160px vertical desktop) ;
+- **Grilles en colonnes** : 3 colonnes pour les cards de services (desktop), empilement sur mobile ;
+- **Sections centrées** : chaque section commence par un titre (H2, majuscules italique) + sous-titre (gris), centrés, avant le contenu ;
+- Conteneur : 1400px maximum.
+
+---
+
+## 11. Identité visuelle
+
+## 11.1 Ce que le site ne doit PAS être
 
 - Un template WordPress ;
 - Un dashboard SaaS ;
 - Un site généré automatiquement par IA ;
 - Un clone Airbnb.
 
-## 10.2 Ce que le site DOIT être
+## 11.2 Ce que le site DOIT être
 
 - Une identité visuelle **propre à Caba Résidence** ;
 - Un design qui évoque le **confort, la qualité et l'élégance** ;
 - Une expérience utilisateur **fluide et intuitive** ;
 - Un sentiment de **confiance et de professionnalisme**.
 
-## 10.3 Emotions à transmettre
+## 11.3 Emotions à transmettre
 
 - Confiance ;
 - Calme ;
@@ -531,9 +577,9 @@ avec un espace vide au milieu.
 
 ---
 
-## 11. Accessibilité
+## 12. Accessibilité
 
-### 11.1 Conformité WCAG
+### 12.1 Conformité WCAG
 
 - Niveau AA minimum ;
 - Contraste des couleurs respecté ;
@@ -541,7 +587,7 @@ avec un espace vide au milieu.
 - Labels associés aux champs de formulaire ;
 - Textes alternatifs pour les images.
 
-### 11.2 Bonnes pratiques
+### 12.2 Bonnes pratiques
 
 - Utiliser des couleurs suffisamment contrastées ;
 - Fournir des labels pour tous les éléments interactifs ;

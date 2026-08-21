@@ -164,7 +164,7 @@ export async function exportICal(propertyId: string): Promise<string> {
   const now = new Date();
   const dtstamp = formatICalDate(now);
 
-  let ical = [
+  const ical = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
     "PRODID:-//Caba Residence//iCal Export//FR",

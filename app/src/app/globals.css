@@ -1,73 +1,28 @@
 @import "tailwindcss";
 
-:root {
-  /* Colors */
-  --color-primary: #4A90D9;
-  --color-primary-hover: #3A7BC8;
-  --color-primary-active: #2A6AB7;
-  
-  --color-black: #1A1A1A;
-  --color-white: #FFFFFF;
-  
-  --color-gray-50: #F9FAFB;
-  --color-gray-100: #F5F5F5;
-  --color-gray-200: #E5E7EB;
-  --color-gray-300: #D1D5DB;
-  --color-gray-400: #9CA3AF;
-  --color-gray-500: #6B7280;
-  --color-gray-600: #4B5563;
-  --color-gray-700: #374151;
-  --color-gray-800: #1F2937;
-  --color-gray-900: #111827;
-  
-  --color-success: #10B981;
-  --color-error: #EF4444;
-  --color-warning: #F59E0B;
-  
-  /* Typography */
-  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
-  
-  /* Spacing */
-  --container-max: 1400px;
-  --header-height: 72px;
-  
-  /* Shadows */
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+/* ─── Charte graphique Caba Résidence — Dark mode intégral ─── */
+
+@theme {
+  --color-bg-primary: #0d0d0d;
+  --color-bg-card: #1a1a1a;
+  --color-border-subtle: #262626;
+  --color-accent: #4ade80;
+  --color-accent-hover: #6ee7a0;
+  --color-accent-active: #22c55e;
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #a0a0a0;
+  --color-error: #ef4444;
+  --color-warning: #f59e0b;
+
+  --font-display: var(--font-anton), "Arial Black", sans-serif;
+  --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
+
+  --radius-card: 12px;
+  --radius-card-lg: 16px;
 }
 
-@theme inline {
-  --color-primary: #4A90D9;
-  --color-primary-hover: #3A7BC8;
-  --color-primary-active: #2A6AB7;
-  --color-caba-blue: #4A90D9;
-  --color-caba-blue-dark: #3A7BC8;
-  --color-caba-gold: #F59E0B;
-  --color-black: #1A1A1A;
-  --color-white: #FFFFFF;
-  
-  --color-gray-50: #F9FAFB;
-  --color-gray-100: #F5F5F5;
-  --color-gray-200: #E5E7EB;
-  --color-gray-300: #D1D5DB;
-  --color-gray-400: #9CA3AF;
-  --color-gray-500: #6B7280;
-  --color-gray-600: #4B5563;
-  --color-gray-700: #374151;
-  --color-gray-800: #1F2937;
-  --color-gray-900: #111827;
-  
-  --color-success: #10B981;
-  --color-error: #EF4444;
-  --color-warning: #F59E0B;
-  
-  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+:root {
+  --container-max: 1400px;
 }
 
 * {
@@ -78,18 +33,34 @@
 
 html {
   scroll-behavior: smooth;
+  color-scheme: dark;
 }
 
 body {
   font-family: var(--font-sans);
-  color: var(--color-black);
-  background-color: var(--color-white);
+  color: var(--color-text-secondary);
+  background-color: var(--color-bg-primary);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Container utility */
+::selection {
+  background-color: var(--color-accent);
+  color: var(--color-bg-primary);
+}
+
+/* Titres display : gras, condensé, italique, MAJUSCULES */
+.heading-display {
+  font-family: var(--font-display);
+  font-style: italic;
+  text-transform: uppercase;
+  color: var(--color-text-primary);
+  letter-spacing: 0.01em;
+  line-height: 1.05;
+}
+
+/* Conteneur 1400px */
 .container-caba {
   width: 100%;
   max-width: var(--container-max);
@@ -113,19 +84,31 @@ body {
   }
 }
 
-/* Focus visible */
+/* Boutons pilules */
+.btn-pill {
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+}
+
+/* Focus visible : contour vert accent */
 :focus-visible {
-  outline: 2px solid var(--color-primary);
+  outline: 2px solid var(--color-accent);
   outline-offset: 2px;
 }
 
 /* Skip link */
 .skip-link {
   position: absolute;
-  top: -40px;
+  top: -48px;
   left: 0;
-  background: var(--color-primary);
-  color: var(--color-white);
+  background: var(--color-accent);
+  color: var(--color-bg-primary);
   padding: 8px 16px;
   z-index: 9999;
   transition: top 0.2s;
