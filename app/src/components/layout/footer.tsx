@@ -47,49 +47,51 @@ export function Footer() {
         </section>
 
         <section aria-label="Informations">
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-3 lg:gap-6">
-            <div className={CARD}>
-              <p className="heading-display text-lg">Caba Résidence</p>
-              <p className="mt-3">
-                Complexe résidentiel proposant des chambres, studios, suites et
-                villas à louer pour tous types de séjours.
-              </p>
-              <address className="mt-3 not-italic">
-                Cotonou, Bénin
-              </address>
+          <div className={CARD}>
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-3 lg:gap-8">
+              <div>
+                <p className="heading-display text-lg">Caba Résidence</p>
+                <p className="mt-3">
+                  Complexe résidentiel proposant des chambres, studios, suites et
+                  villas à louer pour tous types de séjours.
+                </p>
+                <address className="mt-3 not-italic">
+                  Cotonou, Bénin
+                </address>
+              </div>
+
+              <nav aria-label="Pages rapides">
+                <h3 className="heading-display text-base">Navigation</h3>
+                <ul className="mt-3 space-y-2">
+                  {QUICK_LINKS.map((link) => (
+                    <li key={link.href}>
+                      <Link
+                        href={link.href}
+                        className="text-text-secondary transition-colors duration-200 hover:text-accent"
+                      >
+                        {link.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </nav>
+
+              <nav aria-label="Pages légales">
+                <h3 className="heading-display text-base">Légal</h3>
+                <ul className="mt-3 space-y-2">
+                  {LEGAL_LINKS.map((link) => (
+                    <li key={link.href}>
+                      <Link
+                        href={link.href}
+                        className="text-text-secondary transition-colors duration-200 hover:text-accent"
+                      >
+                        {link.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </nav>
             </div>
-
-            <nav aria-label="Pages rapides" className={CARD}>
-              <h3 className="heading-display text-base">Navigation</h3>
-              <ul className="mt-3 space-y-2">
-                {QUICK_LINKS.map((link) => (
-                  <li key={link.href}>
-                    <Link
-                      href={link.href}
-                      className="text-text-secondary transition-colors duration-200 hover:text-accent"
-                    >
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </nav>
-
-            <nav aria-label="Pages légales" className={CARD}>
-              <h3 className="heading-display text-base">Légal</h3>
-              <ul className="mt-3 space-y-2">
-                {LEGAL_LINKS.map((link) => (
-                  <li key={link.href}>
-                    <Link
-                      href={link.href}
-                      className="text-text-secondary transition-colors duration-200 hover:text-accent"
-                    >
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </nav>
           </div>
         </section>
 
