@@ -103,19 +103,24 @@ export function Footer() {
               </small>
             </div>
             <div className={CARD}>
-              <ul className="flex items-center justify-end gap-3">
-                {SOCIALS.map(({ href, label, Icon }) => (
-                  <li key={label}>
-                    <a
-                      href={href}
-                      aria-label={label}
-                      className="text-text-secondary transition-colors duration-200 hover:text-accent"
-                    >
-                      <Icon aria-hidden="true" size={18} />
-                    </a>
-                  </li>
-                ))}
-              </ul>
+              <div className="flex items-center justify-end gap-4">
+                <span className="text-sm font-semibold text-text-primary">
+                  Nos réseaux sociaux
+                </span>
+                <ul className="flex gap-3">
+                  {SOCIALS.map(({ href, label, Icon }) => (
+                    <li key={label}>
+                      <a
+                        href={href}
+                        aria-label={label}
+                        className="text-text-secondary transition-colors duration-200 hover:text-accent"
+                      >
+                        <Icon aria-hidden="true" size={18} />
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </div>
           </div>
         </section>

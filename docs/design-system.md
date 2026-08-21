@@ -312,8 +312,9 @@ Liens : gris `#6B6459` → bleu `#001489` au survol (200ms), jamais soulignés.
 ### 8.4 Section Pied de page
 
 - Card gauche : copyright (année calculée côté serveur), 12px gris ;
-- Card droite : icônes Font Awesome Facebook / Instagram / X / WhatsApp, 18px,
-  gap 12px, alignées à droite de la card, gris → rouge accent au survol.
+- Card droite : libellé « Nos réseaux sociaux » + icônes Font Awesome
+  Facebook / Instagram / X / WhatsApp, 18px, gap 12px, ensemble aligné à droite
+  de la card, gris → rouge accent au survol.
 
 ### 8.5 Style global du footer
 
