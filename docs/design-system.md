@@ -18,43 +18,53 @@ Le design de Caba Résidence doit être :
 
 ---
 
-## 2. Palette de couleurs — Dark mode intégral
+## 2. Palette de couleurs — Thème clair (palette Panama)
 
-Le site est en **dark mode intégral** : aucun fond clair sur le site public.
-Contraste fort noir / blanc / vert.
+Le site est en **thème clair** : palette inspirée du drapeau du Panama.
+Contraste fort rouge / bleu / gris foncé sur fonds clairs.
 
 ### 2.1 Tokens CSS
 
 ```css
---bg-primary: #0D0D0D;      /* fond principal noir anthracite */
---bg-card: #1A1A1A;         /* fond des cards, légèrement plus clair */
---accent-green: #4ADE80;    /* vert menthe : accent principal, CTA, icônes */
---text-primary: #FFFFFF;    /* titres */
---text-secondary: #A0A0A0;  /* texte courant, paragraphes */
+--bg-primary: #F7F5F1;      /* fond principal blanc cassé */
+--bg-card: #FFFFFF;         /* fond des cards/conteneurs, blanc pur */
+--border-subtle: #EAE6DE;   /* bordure fine des cards (décorative) */
+--border-input: #8A8175;    /* bordure des champs de formulaire (WCAG 1.4.11) */
+--accent-red: #D21034;      /* rouge Panama : CTA uniquement */
+--accent-red-hover: #B70E2E;
+--accent-red-active: #9C0B25;
+--accent-blue: #001489;     /* bleu Panama : logo, sur-titres, liens actifs */
+--on-accent: #FFFFFF;       /* texte sur fond rouge */
+--text-primary: #1A1A1A;    /* titres */
+--text-secondary: #6B6459;  /* texte courant, paragraphes */
 --btn-secondary-bg: #FFFFFF;
---btn-secondary-text: #0D0D0D;
+--btn-secondary-text: #1A1A1A;
+/* Ombre card (bicouche chaude) :
+   0 1px 2px rgba(31,26,20,.06), 0 8px 24px -8px rgba(31,26,20,.10) */
 ```
 
 ### 2.2 Règles d'utilisation
 
-- Le **vert menthe (#4ADE80)** est la couleur d'accent unique et **non une couleur dominante partout** : CTA principaux, icônes, états actifs, liens ;
-- Le **blanc pur (#FFFFFF)** est réservé aux titres et aux CTA secondaires ;
-- Le **gris (#A0A0A0)** est utilisé pour tout le texte courant ;
-- Les fonds sont toujours `#0D0D0D` (pages) ou `#1A1A1A` (cards) ;
+- Le **rouge Panama (#D21034)** est l'accent principal mais **réservé aux boutons d'action** (Réserver, Découvrir, Book now, formulaires). Jamais en texte informatif, décoratif ni en fond large ;
+- Le **bleu Panama (#001489)** identifie le **logo**, les **sur-titres** et les **liens actifs/sélectionnés** ;
+- Le **gris très foncé (#1A1A1A)** est réservé aux titres ;
+- Le **brun-gris (#6B6459)** est utilisé pour tout le texte courant ;
+- Les fonds sont toujours `#F7F5F1` (pages) ou `#FFFFFF` (cards), avec bordure fine `#EAE6DE` **et** ombre portée douce pour la profondeur ;
+- La bordure `#EAE6DE` est décorative (contraste < 3:1 assumé) ; les champs interactifs utilisent `#8A8175` (≥ 3:1, WCAG 1.4.11) ;
 - Aucune autre teinte ne doit être introduite sans validation du product-tech-lead ;
-- Erreur : rouge (`#EF4444`) ; succès : vert accent ; attention : ambre (`#F59E0B`).
+- Erreur : rouge (`#EF4444`) ; succès : vert (`#16A34A`) ; attention : ambre (`#F59E0B`).
 
 ### 2.3 États interactifs
 
 | État | Couleur | Description |
 |------|---------|-------------|
 | Normal | Couleur de base | État par défaut |
-| Survol (hover) | Vert accent éclairci (CTA) ou blanc (liens) | Au passage de la souris |
-| Actif (active) | Vert accent assombri de 10 % | Au clic |
-| Focus | Contour vert accent | Sélection au clavier |
-| Désactivé | Gris #A0A0A0, opacity 50 % | Élément non interactif |
+| Survol (hover) | Rouge assombri `#B70E2E` (CTA) ou bleu `#001489` (liens) | Au passage de la souris |
+| Actif (active) | Rouge encore plus sombre `#9C0B25` | Au clic |
+| Focus | Contour bleu `#001489` | Sélection au clavier |
+| Désactivé | Gris #6B6459, opacity 50 % | Élément non interactif |
 | Erreur | Rouge | Message d'erreur |
-| Succès | Vert accent | Confirmation |
+| Succès | Vert | Confirmation |
 
 ---
 
@@ -63,28 +73,28 @@ Contraste fort noir / blanc / vert.
 ### 3.1 Polices
 
 - **Titres (H1/H2)** : police grasse, condensée, italique/oblique, **TOUT EN MAJUSCULES** — style impactant, sportif/architectural. Polices cibles : **Anton**, **Archivo Black** (condensé) ou similaire ;
-- **Corps de texte** : sans-serif classique, régulière, casse normale, bonne lisibilité sur fond sombre. Polices cibles : **Inter**, **Poppins** ou **Manrope**.
+- **Corps de texte** : sans-serif classique, régulière, casse normale, bonne lisibilité sur fond clair. Polices cibles : **Inter**, **Poppins** ou **Manrope**.
 
 ### 3.2 Hiérarchie
 
-Hiérarchie forte : gros titres très larges vs texte courant plus discret en gris.
+Hiérarchie forte : gros titres très larges vs texte courant plus discret en brun-gris.
 
 | Élément | Style |
 |---------|-------|
-| H1 | 48-72px, Anton/Archivo Black, italique, MAJUSCULES, blanc |
-| H2 | 36-56px, Anton/Archivo Black, italique, MAJUSCULES, blanc |
-| H3 | 22-28px, Semi-Bold (600), casse normale, blanc |
-| H4 | 18-22px, Medium (500), casse normale, blanc |
-| Corps | 16px, Regular (400), #A0A0A0, line-height 1.5-1.6 |
-| Petit | 14px, Regular (400), #A0A0A0, line-height 1.4-1.5 |
-| Légende | 12px, Regular (400), #A0A0A0, line-height 1.3-1.4 |
+| H1 | 48-72px, Anton/Archivo Black, italique, MAJUSCULES, #1A1A1A |
+| H2 | 36-56px, Anton/Archivo Black, italique, MAJUSCULES, #1A1A1A |
+| H3 | 22-28px, Semi-Bold (600), casse normale, #1A1A1A |
+| H4 | 18-22px, Medium (500), casse normale, #1A1A1A |
+| Corps | 16px, Regular (400), #6B6459, line-height 1.5-1.6 |
+| Petit | 14px, Regular (400), #6B6459, line-height 1.4-1.5 |
+| Légende | 12px, Regular (400), #6B6459, line-height 1.3-1.4 |
 
 ### 3.3 Règles
 
 - Maximum 2 polices différentes sur le site ;
 - Les titres H1/H2 sont **toujours en majuscules**, en italique ;
 - Line-height : 1.5 minimum pour le corps de texte ;
-- Contraste respecté sur fond sombre (WCAG AA minimum) ;
+- Contraste respecté sur fond clair (WCAG AA minimum — tous les couples de la palette sont validés, voir §2.1) ;
 - Aucun texte en dessous de 12px.
 
 ---
@@ -115,7 +125,7 @@ Recommandations :
 - Style outline (trait / line-icons) par défaut ;
 - Style filled pour les états actifs ;
 - Épaisseur de trait : 1.5px ou 2px ;
-- **Couleur : vert accent (#4ADE80)** par défaut, blanc sur les CTA secondaires ;
+- **Couleur : bleu foncé (#001489)** ou gris foncé selon le contexte, survol rouge accent ;
 - Toujours accompagnées d'un label ou d'un tooltip si non évidentes.
 
 ### 4.4 Interdiction absolue d'emojis
@@ -206,19 +216,20 @@ Aucun :
 
 ### 7.1 Comportement
 
-Le header doit être **sticky au scroll** : il reste fixé en haut de l'écran
-lorsque l'utilisateur fait défiler la page.
+Le header est une **bannière flottante sticky** : elle reste fixée en haut de
+l'écran lorsque l'utilisateur fait défiler la page.
 
-- **Hauteur** : 70-80px ;
-- **Fond** : `--bg-primary` (#0D0D0D) avec bordure inférieure subtile (#262626) au scroll ;
-- **Transition** : apparition de la bordure lors du scroll (pas de changement brutal) ;
+- **Forme** : bannière arrondie (radius 16px), marge extérieure ~12px mobile / ~20px desktop ;
+- **Fond** : `--bg-card` (#FFFFFF), bordure 0.5px `#EAE6DE`, ombre douce (`shadow-header`) ;
+- **Largeur** : 1400px maximum, centrée ;
+- **Hauteur interne** : 72px ;
 - **Z-index** : 1000 (toujours au-dessus du contenu).
 
 ### 7.2 Disposition Desktop (> 1024px)
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│  [Logo]    [FR|EN]     [rounded-pill: Phone +33 1 23 45 67]    [User Inscrire] [Se connecter]  │
+│ [Logo] [Accueil|Chambres|À propos|Contact]   Connexion (Réserver) FR | EN │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -226,64 +237,41 @@ lorsque l'utilisateur fait défiler la page.
 
 | Zone | Contenu | Style |
 |------|---------|-------|
-| Gauche | Logo Caba Résidence | Image, hauteur max 40-50px, lien vers l'accueil |
-| Centre-gauche | Sélecteur de langue (FR / EN) | Toggle ou dropdown discret, texte 14px |
-| Centre | Numéro de téléphone + icône téléphone | **Forme pilule (border-radius: 999px)**, bordure 1px #262626, padding horizontal 16px, padding vertical 8px, icône Lucide `Phone` à gauche du numéro |
-| Droite | Liens « S'inscrire » et « Se connecter » | Icône utilisateur à gauche du texte, style ghost ou text |
-
-**Règles du numéro de téléphone** :
-- **Bordures arrondies** : `border-radius: 999px` (pilule) ;
-- **Bordure** : 1px solid #262626 ;
-- **Padding** : 8px horizontal, 6px vertical ;
-- **Icône** : Lucide `Phone` (vert accent) à gauche ;
-- **Texte** : numéro formaté, 14px, poids medium, blanc ;
-- **Hover** : bordure passe au vert accent, texte passe au vert ;
-- **Clic** : déclenche l'appel (`tel:`) ou copie le numéro.
+| Gauche | Logo Caba Résidence | Titre display (Anton italique MAJUSCULES), lien vers l'accueil |
+| Centre-gauche | Menu de navigation dans un conteneur pilule | Bordure fine `--border-subtle`, padding interne 8px, gap 4px entre liens ; lien **actif** : fond `--bg-primary` + texte bleu `#001489` ; liens inactifs : gris `#6B6459` |
+| Droite | « Connexion » (ghost) → CTA « Réserver » → sélecteur FR/EN | Connexion : texte gris, hover bleu ; Réserver : **pilule rouge plein `#D21034` / texte blanc** ; FR/EN : actif en foncé, séparateur `|` gris |
 
 **Règles des liens d'authentification** :
-- **Icône utilisateur** (Lucide `User`) à gauche du texte ;
-- **Style** : texte seul (ghost), pas de bordure ;
-- **S'inscrire** : texte + icône ;
-- **Se connecter** : texte + icône, légèrement plus visible (poids medium) ;
-- **Hover** : couleur passe au vert accent.
+- Style texte seul (ghost), pas de bordure ;
+- Hover : couleur passe au bleu accent secondaire.
 
 ### 7.3 Disposition Mobile (< 1024px)
 
 ```
-┌───────────────────────────────┐
-│    [Menu]    [Logo]    [User] │
-└───────────────────────────────┘
+┌───────────────────┐
+│ [Logo]  [FR|EN] ☰ │
+└───────────────────┘
 ```
 
-**Zones de gauche à droite** :
+**Zones** :
 
 | Zone | Contenu | Style |
 |------|---------|-------|
-| Gauche | Icône burger | Lucide `Menu`, 24px, ouvre un panneau latéral |
-| Centre | Logo Caba Résidence | Centré, hauteur max 35-40px |
-| Droite | Icône utilisateur | Icône Lucide `User`, ouvre un dropdown ou modal avec « S'inscrire » et « Se connecter » |
+| Gauche | Logo Caba Résidence | Identique au desktop |
+| Droite | Sélecteur FR/EN puis icône burger | Burger 40×40px, ouvre un panneau latéral |
 
 **Règles du burger** :
 - Icône burger classique (3 lignes) ;
-- Ouvre un **panneau latéral gauche** (drawer) ;
-- Le panneau contient :
-  - Numéro de téléphone (avec icône) ;
-  - Liens de navigation ;
-  - Liens d'authentification ;
-  - Sélecteur de langue.
-
-**Règles de l'icône utilisateur** :
-- Icône `User` (cercle avec silhouette) ;
-- Clic → **dropdown** ou **modal** avec :
-  - « S'inscrire » (lien vers inscription) ;
-  - « Se connecter » (lien vers connexion) ;
-  - Si connecté : « Mon compte », « Mes réservations », « Déconnexion ».
+- Ouvre un **panneau latéral droit** (drawer) avec overlay assombri (`bg-black/40`) ;
+- Le panneau contient : liens de navigation empilés + bouton « Connexion » (CTA primaire pleine largeur) ;
+- Le CTA « Réserver » est masqué sur mobile (présent dans les pages) ;
+- Fermeture : croix, clic sur l'overlay ou touche Échap.
 
 ### 7.4 Accessibilité
 
-- **ARIA labels** sur tous les boutons (ex. : `aria-label="Menu principal"`) ;
-- **Focus visible** : contour vert accent au focus clavier ;
-- **Tab order** : logo → langue → téléphone → inscription → connexion ;
+- **ARIA labels** sur tous les boutons (ex. : `aria-label="Ouvrir le menu"`) ;
+- **Focus visible** : contour bleu `#001489` au focus clavier ;
+- **Tab order** : logo → navigation → connexion → réserver → langue ;
 - **Skip link** : lien « Aller au contenu principal » invisible mais accessible au clavier.
 
 ---
@@ -292,202 +280,63 @@ lorsque l'utilisateur fait défiler la page.
 
 ### 8.1 Structure générale
 
-Le footer est organisé en **deux sections verticales** empilées.
+Le footer est organisé en **trois sections verticales** empilées :
 
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                         SECTION 1 : CONTENU                                │
-│  ┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐         │
-│  │     ABOUT        │  │     CONTACT      │  │    LISTINGS      │         │
-│  │                  │  │                  │  │    RÉCENTS       │         │
-│  └──────────────────┘  └──────────────────┘  └──────────────────┘         │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                         SECTION 2 : LÉGAL                                  │
-│  ┌──────────────────────────────┐      ┌──────────────────────────────┐   │
-│  │         COPYRIGHT            │      │  MENTIONS LÉGALES  |  POLITIQUE │   │
-│  │     © 2026 Caba Résidence    │      │  DE CONFIDENTIALITÉ          │   │
-│  └──────────────────────────────┘      └──────────────────────────────┘   │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
+1. **Section Newsletter** (2 cards) : titre + description | formulaire email + téléphone ;
+2. **Section Informations** (1 grande card, 3 colonnes internes) : logo/description/adresse | Navigation | Légal ;
+3. **Section Pied de page** (2 cards) : copyright | icônes réseaux sociaux.
 
-### 8.2 Section 1 : Contenu principal (3 colonnes)
+Chaque card : fond `--bg-card` (#FFFFFF), bordure fine `#EAE6DE`, ombre douce
+(`shadow-card`), coins arrondis 16px, padding interne 16px mobile → 32px desktop.
 
-La première section contient **3 colonnes** avec **bordures arrondies** sur chaque colonne.
+### 8.2 Section Newsletter
 
-#### Colonne 1 : About
+- Card gauche : titre display « Restons en contact » + paragraphe gris `#6B6459` ;
+- Card droite : champ email (requis) + champ téléphone (optionnel), pilules fond
+  blanc bordure `--border-input`, bouton « S'inscrire » pilule rouge/texte blanc.
+- Empilés sur mobile, côte à côte ≥ 640px.
 
-```
-┌─────────────────────────────────┐
-│           ABOUT                 │
-│                                 │
-│  [Logo Caba Résidence]          │
-│                                 │
-│  Description courte de Caba     │
-│  Résidence, son emplacement     │
-│  et ses valeurs.                │
-│                                 │
-│  [Icônes réseaux sociaux]       │
-│  Facebook | Instagram | Twitter │
-└─────────────────────────────────┘
-```
+### 8.3 Section Informations (une seule grande card)
 
-**Contenu** :
-- Logo Caba Résidence ;
-- Description courte (2-3 phrases) ;
-- Icônes des réseaux sociaux (Facebook, Instagram, Twitter/X).
+Les 3 colonnes sont à l'intérieur d'une **unique card** (pas de bordures individuelles),
+séparées par des gaps de 24-32px :
 
-**Style** :
-- **Bordures arrondies** : `border-radius: 12px` ;
-- **Padding** : 24-32px ;
-- **Fond** : `--bg-card` (#1A1A1A) avec bordure subtile #262626 ;
-- **Largeur** : 1/3 du footer (desktop).
+| Colonne | Contenu |
+|---------|---------|
+| Logo | Titre display « Caba Résidence » + description + adresse (`<address>`) |
+| Navigation | Liens rapides (Accueil, Chambres, À propos, Contact), un par ligne, espacés de 8px |
+| Légal | Mentions légales, Politique de confidentialité, CGV |
 
-#### Colonne 2 : Contact
+Liens : gris `#6B6459` → bleu `#001489` au survol (200ms), jamais soulignés.
 
-```
-┌─────────────────────────────────┐
-│           CONTACT               │
-│                                 │
-│  Phone +33 1 23 45 67 89        │
-│  Mail info@caba-residence.com   │
-│                                 │
-│  [Icônes réseaux sociaux]       │
-│  Facebook | Instagram | Twitter │
-└─────────────────────────────────┘
-```
+### 8.4 Section Pied de page
 
-**Contenu** :
-- Numéro de téléphone (icône téléphone) ;
-- Email (icône email) ;
-- Lien WhatsApp (icône WhatsApp) ;
-- Icônes réseaux sociaux.
+- Card gauche : copyright (année calculée côté serveur), 12px gris ;
+- Card droite : icônes Font Awesome Facebook / Instagram / X / WhatsApp, 18px,
+  gap 12px, gris → rouge accent au survol.
 
-**Style** :
-- Même style que la colonne About ;
-- **Bordures arrondies** : `border-radius: 12px`.
-
-#### Colonne 3 : Listings récents
-
-```
-┌─────────────────────────────────┐
-│        LISTINGS RÉCENTS         │
-│                                 │
-│  [photo] Appartement Vue Mer    │
-│     Star 4.8 (12 avis)          │
-│                                 │
-│  [photo] Chambre Premium        │
-│     Star 4.9 (8 avis)           │
-│                                 │
-│  [photo] Villa avec Piscine     │
-│     Star 4.7 (15 avis)          │
-│                                 │
-│  [Voir tous les logements →]    │
-└─────────────────────────────────┘
-```
-
-**Contenu** :
-- Titre « Listings récents » ;
-- 3-5 derniers logements ajoutés avec :
-  - Petite photo miniature ;
-  - Nom du logement ;
-  - Note (étoiles) ;
-  - Nombre d'avis ;
-- Lien « Voir tous les logements ».
-
-**Style** :
-- Même style que les autres colonnes ;
-- **Bordures arrondies** : `border-radius: 12px`.
-
-### 8.3 Section 2 : Légal (2 colonnes aux extrémités)
-
-La deuxième section contient **2 colonnes positionnées aux extrémités** (gauche et droite),
-avec un espace vide au milieu.
-
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│  ┌──────────────────────────┐                    ┌──────────────────────┐  │
-│  │       COPYRIGHT          │                    │  MENTIONS LÉGALES    │  │
-│  │  © 2026 Caba Résidence   │                    │  Politique de        │  │
-│  │  Tous droits réservés    │                    │  confidentialité     │  │
-│  └──────────────────────────┘                    └──────────────────────┘  │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
-
-#### Colonne gauche : Copyright
-
-```
-┌──────────────────────────┐
-│       COPYRIGHT          │
-│  © 2026 Caba Résidence   │
-│  Tous droits réservés    │
-└──────────────────────────┘
-```
-
-**Contenu** :
-- Symbole copyright ;
-- Année ;
-- Nom de Caba Résidence ;
-- « Tous droits réservés ».
-
-**Style** :
-- **Bordures arrondies** : `border-radius: 12px` ;
-- **Alignement** : gauche ;
-- **Texte** : 14px, gris moyen.
-
-#### Colonne droite : Liens légaux
-
-```
-┌──────────────────────────┐
-│  Mentions légales        │
-│  Politique de            │
-│  confidentialité         │
-└──────────────────────────┘
-```
-
-**Contenu** :
-- Lien « Mentions légales » ;
-- Lien « Politique de confidentialité » ;
-- Lien « Conditions générales » (optionnel) ;
-- Lien « Politique d'annulation » (optionnel).
-
-**Style** :
-- **Bordures arrondies** : `border-radius: 12px` ;
-- **Alignement** : droite ;
-- **Disposition** : horizontal (côte à côte) ou vertical ;
-- **Texte** : 14px, gris moyen, souligné au hover.
-
-### 8.4 Style global du footer
+### 8.5 Style global du footer
 
 | Propriété | Valeur |
 |-----------|--------|
-| Fond | `--bg-primary` (#0D0D0D) |
-| Colonnes | `--bg-card` (#1A1A1A), bordure subtile #262626 |
-| Texte | Gris (#A0A0A0) pour le corps, blanc pour les titres |
-| Liens | Gris, passe au vert accent au hover |
-| Bordures colonnes | `border-radius: 12px` |
-| Padding colonnes | 24-32px |
-| Espacement entre colonnes | 24px (mobile), 32px (desktop) |
-| Padding global | 48-64px vertical, 32px horizontal |
-| Séparateur | Ligne fine #262626 entre section 1 et section 2 (optionnel) |
+| Fond page | `--bg-primary` (#F7F5F1) |
+| Cards | `--bg-card` (#FFFFFF), bordure `#EAE6DE`, ombre douce |
+| Texte | Gris (#6B6459) pour le corps, #1A1A1A pour les titres |
+| Liens | Gris → bleu #001489 au hover ; icônes sociales → rouge au hover |
+| Espacement entre sections | 24px (mobile), 32px (desktop) |
+| Padding global | 16px horizontal mobile, conteneur max 1400px |
 
-### 8.5 Responsive
+### 8.6 Responsive
 
-#### Mobile (< 640px)
+#### Mobile (< 768px)
 
-- Les 3 colonnes de la section 1 s'empilent verticalement ;
-- Chaque colonne prend 100 % de la largeur ;
-- La section 2 passe en colonnes empilées (copyright au-dessus, liens légaux en dessous) ;
-- Espacement réduit à 16px.
+- Toutes les sections s'empilent en 1 colonne (gap 16px) ;
+- Chaque card prend 100 % de la largeur, aucun débordement horizontal (testé à 320px).
 
-#### Tablette (640px - 1024px)
+#### Desktop (≥ 768px)
 
-- Les 3 colonnes de la section 1 s'affichent en 2 colonnes (2+1) ;
-- La section 2 reste en 2 colonnes.
-
-#### Desktop (> 1024px)
-
-- Disposition complète en 3 colonnes pour la section 1 ;
-- Disposition en 2 colonnes aux extrémités pour la section 2.
+- Newsletter et pied de page en 2 colonnes ;
+- Informations : 3 colonnes internes dans une seule card.
 
 ---
 
@@ -499,29 +348,29 @@ Tous les boutons sont en **forme pilule** (`border-radius: 999px`).
 
 | Type | Usage | Style |
 |------|-------|-------|
-| Primaire (CTA) | Action principale (Réserver, Payer) | **Fond vert plein (#4ADE80), texte noir (#0D0D0D)** |
-| Secondaire (CTA) | Action alternative (Contacter, Partager) | **Fond blanc plein (#FFFFFF), texte noir (#0D0D0D)** |
-| Tertiaire | Action discrète (En savoir plus) | Fond transparent, texte vert accent |
+| Primaire (CTA) | Action principale (Réserver, Payer, S'inscrire) | **Fond rouge plein (#D21034), texte blanc (#FFFFFF)** — hover `#B70E2E`, active `#9C0B25` |
+| Secondaire (CTA) | Action alternative (Contacter, Partager) | **Fond blanc plein (#FFFFFF), texte foncé (#1A1A1A)** |
+| Tertiaire | Action discrète (En savoir plus) | Fond transparent, texte bleu accent secondaire |
 | Danger | Action destructive (Annuler, Supprimer) | Fond rouge (#EF4444), texte blanc |
-| Ghost | Navigation, filtres | Fond transparent, texte gris (#A0A0A0) |
+| Ghost | Navigation, filtres | Fond transparent, texte gris (#6B6459), hover bleu |
 
 ### 9.2 Champs de formulaire
 
 - Label au-dessus du champ ;
 - Placeholder descriptif ;
 - Message d'erreur sous le champ ;
-- Fond : `--bg-card` (#1A1A1A) ;
-- Border : 1px #262626 au repos, 1px vert accent au focus ;
-- Texte saisi : blanc.
+- Fond : `--bg-card` (#FFFFFF) ;
+- Border : 0.5-1px `--border-input` (#8A8175) au repos (WCAG 1.4.11), ring bleu #001489 au focus ;
+- Texte saisi : #1A1A1A ; placeholder : #6B6459 pleine opacité.
 
 ### 9.3 Cartes (Cards)
 
-- **Fond : `--bg-card` (#1A1A1A)** ;
+- **Fond : `--bg-card` (#FFFFFF)** ;
 - **Border-radius : 12-16px** ;
-- Bordure subtile #262626 (pas d'ombre portée systématique) ;
-- Padding intérieur : 16-24px ;
-- Icônes en line-icons vertes (#4ADE80) ;
-- Hover : bordure légèrement plus claire ou élévation discrète.
+- Bordure subtile `#EAE6DE` (décorative) + **ombre portée douce obligatoire** (`shadow-card`) pour la profondeur sur fond clair ;
+- Padding intérieur : 16-24px mobile, 24-32px desktop ;
+- Icônes en bleu foncé (#001489) ou gris foncé, survol rouge accent (#D21034) ;
+- Hover : élévation discrète (ombre renforcée).
 
 ### 9.4 Badges / Étiquettes
 
@@ -543,7 +392,7 @@ Les images ont des **coins « cassés » avec petits repères décoratifs aux an
 
 ## 10. Layout
 
-- **Dark mode intégral**, fort contraste noir/blanc/vert ;
+- **Thème clair (palette Panama)**, fort contraste rouge/bleu/gris foncé sur fonds clairs ;
 - **Grande respiration** : whitespace généreux entre les sections (96-160px vertical desktop) ;
 - **Grilles en colonnes** : 3 colonnes pour les cards de services (desktop), empilement sur mobile ;
 - **Sections centrées** : chaque section commence par un titre (H2, majuscules italique) + sous-titre (gris), centrés, avant le contenu ;

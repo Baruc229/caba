@@ -19,8 +19,9 @@ Aucun faux avis, aucune photo stock pour les témoignages, aucun nom générique
 **Règle absolue** : ZÉRO EMOJI sur tout le site (interface, contenus, emails, code).
 Toute emoji détectée est un défaut à corriger par une icône de la famille graphique.
 
-**Référentiel charte** : `docs/design-system.md` — dark mode intégral
-(fond `#0D0D0D`, cards `#1A1A1A`), accent vert menthe `#4ADE80`, titres H1/H2
+**Référentiel charte** : `docs/design-system.md` — thème clair palette Panama
+(fond `#F7F5F1`, cards `#FFFFFF` bordure `#EAE6DE`), accent rouge `#D21034` (CTA
+uniquement) + bleu `#001489` (logo/sur-titres/liens actifs), titres H1/H2
 gras condensés italique MAJUSCULES, boutons pilules, images à coins « cassés ».
 
 ## Périmètre
@@ -47,9 +48,9 @@ Pour chaque signe, donner le tag et l'emplacement exact (page/composant).
 - Icônes utilisées telles quelles sans personnalisation ?
 - **Alternatives** : personnaliser l'épaisseur, la taille, la couleur ; ou utiliser une famille d'icônes custom
 
-### 3. Fond blanc pur
-- Fond #FFFFFF utilisé comme fond de page ou de section ?
-- **Règle** : le site est en dark mode intégral. Le blanc est réservé aux titres et aux CTA secondaires (fond plein des boutons secondaires). Tout autre fond clair est une violation.
+### 3. Fond noir pur
+- Fond noir (#000000) utilisé comme fond de page ou de section ?
+- **Règle** : le site est en thème clair (palette Panama). Le fond de page est blanc cassé #F7F5F1, les cards sont blanches #FFFFFF. Tout fond sombre large est une violation ; le rouge #D21034 est réservé aux boutons d'action.
 
 ### 4. Palette arc-en-ciel
 - Couleurs incohérentes, trop de teintes ?
@@ -118,7 +119,7 @@ Pour chaque signe, donner le tag et l'emplacement exact (page/composant).
 
 ### 20. Violet par défaut des templates IA
 - Couleur violette typique des templates IA ?
-- **Alternatives** : palette définie dans le design system (noir anthracite #0D0D0D, gris #1A1A1A, vert menthe #4ADE80, blanc, gris #A0A0A0)
+- **Alternatives** : palette définie dans le design system (blanc cassé #F7F5F1, blanc #FFFFFF, rouge #D21034, bleu #001489, gris #6B6459)
 
 ### 21. États de chargement vides
 - Pas de spinner, skeleton, ou retour visuel ?
@@ -154,7 +155,7 @@ Pour chaque signe, donner le tag et l'emplacement exact (page/composant).
 
 ### 29. Couleurs néon saturées
 - Couleurs trop vives, agressives, utilisées en grandes surfaces ?
-- **Règle** : le vert menthe #4ADE80 est l'accent autorisé (CTA, icônes, états actifs) mais ne doit jamais dominer une page ni servir de fond large.
+- **Règle** : le rouge Panama #D21034 est l'accent autorisé mais réservé aux boutons d'action (CTA) — jamais en texte informatif, décoratif ni en fond large. Le bleu #001489 identifie logo, sur-titres et liens actifs.
 
 ### 30. Dégradés pastel délavés
 - Dégradés pastel génériques ?
@@ -164,7 +165,7 @@ Pour chaque signe, donner le tag et l'emplacement exact (page/composant).
 
 Chaque remplacement doit être cohérent avec :
 - **Ton** : premium, technique, confiant, sportif/architectural ;
-- **Palette** : noir anthracite (#0D0D0D), gris anthracite (#1A1A1A), vert menthe (#4ADE80), blanc (#FFFFFF), gris texte (#A0A0A0) — dark mode intégral ;
+- **Palette** : blanc cassé (#F7F5F1), blanc pur (#FFFFFF), rouge Panama (#D21034), bleu Panama (#001489), gris titres (#1A1A1A), brun-gris texte (#6B6459) — thème clair ;
 - **Typographie** : titres H1/H2 gras condensés italique MAJUSCULES (Anton, Archivo Black), corps sans-serif régulier (Inter, Poppins, Manrope) ;
 - **Émotions** : confiance, modernité, précision, luxe accessible, professionnalisme.
 

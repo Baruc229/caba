@@ -8,7 +8,7 @@ export function NewsletterForm() {
   const [phone, setPhone] = useState("");
 
   const inputClass =
-    "w-full rounded-full border-[0.5px] border-[#2A2A2A] bg-bg-primary px-4 py-3 text-sm text-text-primary placeholder:text-text-secondary focus:outline-none focus:ring-1 focus:ring-accent";
+    "w-full rounded-full border-[0.5px] border-border-input bg-bg-card px-4 py-3 text-sm text-text-primary placeholder:text-text-secondary focus:outline-none focus:ring-1 focus:ring-accent-secondary";
 
   return (
     <form onSubmit={(e) => e.preventDefault()} className="grid grid-cols-1 gap-3 sm:grid-cols-2">

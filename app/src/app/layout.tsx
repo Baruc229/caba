@@ -15,6 +15,10 @@ const inter = Inter({
   subsets: ["latin"],
 });
 
+export const viewport = {
+  themeColor: "#f7f5f1",
+};
+
 export const metadata: Metadata = {
   title: "Caba Residence - Location de logements de qualite",
   description:

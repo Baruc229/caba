@@ -23,7 +23,7 @@ const SOCIALS = [
 ];
 
 const CARD =
-  "rounded-2xl border-[0.5px] border-[#2A2A2A] bg-[#141414] p-4 sm:p-6 lg:p-8";
+  "rounded-2xl border-[0.5px] border-border-subtle bg-bg-card p-4 shadow-card sm:p-6 lg:p-8";
 
 export function Footer() {
   const year = new Date().getFullYear();
@@ -67,7 +67,7 @@ export function Footer() {
                     <li key={link.href}>
                       <Link
                         href={link.href}
-                        className="text-text-secondary transition-colors duration-200 hover:text-accent"
+                        className="text-text-secondary transition-colors duration-200 hover:text-accent-secondary"
                       >
                         {link.label}
                       </Link>
@@ -83,7 +83,7 @@ export function Footer() {
                     <li key={link.href}>
                       <Link
                         href={link.href}
-                        className="text-text-secondary transition-colors duration-200 hover:text-accent"
+                        className="text-text-secondary transition-colors duration-200 hover:text-accent-secondary"
                       >
                         {link.label}
                       </Link>

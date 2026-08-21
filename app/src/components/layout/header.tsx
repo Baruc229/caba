@@ -63,7 +63,7 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-[1000] px-3 pt-3 lg:px-5 lg:pt-5">
-      <div className="mx-auto max-w-[1400px] rounded-2xl border-[0.5px] border-[#2A2A2A] bg-[#141414]">
+      <div className="mx-auto max-w-[1400px] rounded-2xl border-[0.5px] border-border-subtle bg-bg-card shadow-header">
         <div className="flex h-[72px] items-center justify-between gap-6 px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-6">
           <Link href="/" className="heading-display whitespace-nowrap text-xl lg:text-2xl">
@@ -81,8 +81,8 @@ export function Header() {
                 aria-current={pathname === link.href ? "page" : undefined}
                 className={`rounded-full px-4 py-2 text-sm transition-colors ${
                   pathname === link.href
-                    ? "bg-bg-card font-semibold text-accent"
-                    : "text-text-secondary hover:bg-bg-card hover:text-text-primary"
+                    ? "bg-bg-primary font-semibold text-accent-secondary"
+                    : "text-text-secondary hover:bg-bg-primary hover:text-text-primary"
                 }`}
               >
                 {link.label}
@@ -94,7 +94,7 @@ export function Header() {
         <div className="hidden items-center gap-4 lg:flex">
           <Link
             href="/connexion"
-            className="rounded-full px-4 py-2 text-sm font-medium text-text-secondary transition-colors hover:text-accent"
+            className="rounded-full px-4 py-2 text-sm font-medium text-text-secondary transition-colors hover:text-accent-secondary"
           >
             Connexion
           </Link>
@@ -122,7 +122,7 @@ export function Header() {
       {drawerOpen && (
         <button
           type="button"
-          className="fixed inset-0 z-[1001] bg-black/60"
+          className="fixed inset-0 z-[1001] bg-black/40"
           aria-label="Fermer le menu"
           tabIndex={-1}
           onClick={closeDrawer}
@@ -154,11 +154,11 @@ export function Header() {
               key={link.href}
               href={link.href}
               aria-current={pathname === link.href ? "page" : undefined}
-              className={`rounded-lg px-4 py-3 text-base ${
-                pathname === link.href
-                  ? "bg-bg-primary font-semibold text-accent"
-                  : "text-text-secondary hover:bg-bg-primary hover:text-text-primary"
-              }`}
+                className={`rounded-lg px-4 py-3 text-base ${
+                  pathname === link.href
+                    ? "bg-bg-primary font-semibold text-accent-secondary"
+                    : "text-text-secondary hover:bg-bg-primary hover:text-text-primary"
+                }`}
               onClick={closeDrawer}
             >
               {link.label}

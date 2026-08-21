@@ -1,18 +1,25 @@
 @import "tailwindcss";
 
-/* ─── Charte graphique Caba Résidence — Dark mode intégral ─── */
+/* ─── Charte graphique Caba Résidence — Thème clair (palette Panama) ─── */
 
 @theme {
-  --color-bg-primary: #0d0d0d;
-  --color-bg-card: #1a1a1a;
-  --color-border-subtle: #262626;
-  --color-accent: #4ade80;
-  --color-accent-hover: #6ee7a0;
-  --color-accent-active: #22c55e;
-  --color-text-primary: #ffffff;
-  --color-text-secondary: #a0a0a0;
+  --color-bg-primary: #f7f5f1;
+  --color-bg-card: #ffffff;
+  --color-border-subtle: #eae6de;
+  --color-border-input: #8a8175;
+  --color-accent: #d21034;
+  --color-accent-hover: #b70e2e;
+  --color-accent-active: #9c0b25;
+  --color-accent-secondary: #001489;
+  --color-on-accent: #ffffff;
+  --color-text-primary: #1a1a1a;
+  --color-text-secondary: #6b6459;
   --color-error: #ef4444;
   --color-warning: #f59e0b;
+
+  --shadow-card: 0 1px 2px rgba(31, 26, 20, 0.06),
+    0 8px 24px -8px rgba(31, 26, 20, 0.1);
+  --shadow-header: 0 4px 20px -6px rgba(31, 26, 20, 0.12);
 
   --font-display: var(--font-anton), "Arial Black", sans-serif;
   --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
@@ -28,7 +35,7 @@
 @layer base {
   html {
     scroll-behavior: smooth;
-    color-scheme: dark;
+    color-scheme: light;
   }
 
   body {
@@ -41,12 +48,12 @@
   }
 
   ::selection {
-    background-color: var(--color-accent);
-    color: var(--color-bg-primary);
+    background-color: var(--color-accent-secondary);
+    color: var(--color-bg-card);
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-accent);
+    outline: 2px solid var(--color-accent-secondary);
     outline-offset: 2px;
   }
 }
@@ -107,10 +114,10 @@
       opacity 200ms ease;
   }
 
-  /* CTA principal : vert plein, texte foncé */
+  /* CTA principal : rouge plein, texte blanc */
   .btn-primary {
     background-color: var(--color-accent);
-    color: #08331b;
+    color: var(--color-on-accent);
   }
 
   .btn-primary:hover {
@@ -121,9 +128,9 @@
     background-color: var(--color-accent-active);
   }
 
-  /* CTA secondaire : blanc plein, texte noir */
+  /* CTA secondaire : blanc plein, texte foncé */
   .btn-secondary {
-    background-color: #ffffff;
+    background-color: var(--color-bg-card);
     color: var(--color-bg-primary);
   }
 
@@ -137,7 +144,7 @@
     top: -48px;
     left: 0;
     background: var(--color-accent);
-    color: var(--color-bg-primary);
+    color: var(--color-on-accent);
     padding: 8px 16px;
     z-index: 9999;
     transition: top 0.2s;

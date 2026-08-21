@@ -4,7 +4,7 @@ export default function HomePage() {
   return (
     <section className="flex min-h-[70vh] items-center justify-center px-4 py-12 text-center md:py-20 lg:py-24">
       <div>
-        <p className="text-sm font-semibold uppercase tracking-[0.3em] text-accent">
+        <p className="text-sm font-semibold uppercase tracking-[0.3em] text-accent-secondary">
           Caba Résidence
         </p>
         <h1 className="heading-display mx-auto mt-6 max-w-4xl text-5xl sm:text-7xl lg:text-8xl">

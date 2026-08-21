@@ -10,12 +10,12 @@ Développe les composants du site public et les intégrations UI de la plateform
 
 Source de vérité : `docs/design-system.md`. Résumé contraignant :
 
-- **Dark mode intégral** : fond `#0D0D0D`, cards `#1A1A1A`, fort contraste noir/blanc/vert ;
-- **Accent unique** : vert menthe `#4ADE80` (CTA principaux, icônes, états actifs, liens) ;
+- **Thème clair (palette Panama)** : fond `#F7F5F1`, cards `#FFFFFF` avec bordure fine `#EAE6DE` et ombre portée douce ;
+- **Accent principal** : rouge Panama `#D21034` (CTA uniquement, jamais en texte informatif/décoratif) ; accent secondaire bleu Panama `#001489` (logo, sur-titres, liens actifs) ;
 - **Titres H1/H2** : police grasse, condensée, italique/oblique, TOUT EN MAJUSCULES (Anton, Archivo Black ou similaire) ;
-- **Corps de texte** : sans-serif régulière, casse normale (Inter, Poppins, Manrope), texte courant `#A0A0A0` ;
-- **Boutons** : forme pilule (border-radius complet). Primaire : fond vert plein / texte noir. Secondaire : fond blanc plein / texte noir ;
-- **Cards** : fond `#1A1A1A`, coins arrondis 12-16px, icônes line-icons vertes ;
+- **Corps de texte** : sans-serif régulière, casse normale (Inter, Poppins, Manrope), texte courant `#6B6459` ;
+- **Boutons** : forme pilule (border-radius complet). Primaire : fond rouge plein / texte blanc. Secondaire : fond blanc plein / texte foncé ;
+- **Cards** : fond `#FFFFFF`, bordure fine `#EAE6DE`, ombre douce, coins arrondis 12-16px, icônes bleu foncé ou gris foncé avec survol rouge ;
 - **Images** : coins « cassés » avec petits repères décoratifs aux angles (effet cadre technique/architecte) ;
 - **Layout** : whitespace généreux, grilles 3 colonnes pour les cards de services, sections centrées avec titre + sous-titre avant le contenu.
 

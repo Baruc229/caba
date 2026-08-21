@@ -1151,13 +1151,14 @@ Le design doit être :
 * élégant ;
 * clair.
 
-Thème sombre intégral (dark mode). Palette :
+Thème clair (palette inspirée du drapeau du Panama). Palette :
 
-* noir anthracite (#0D0D0D) en fond principal ;
-* gris anthracite (#1A1A1A) pour les cards ;
-* vert menthe (#4ADE80) comme couleur d'accent (CTA, icônes) ;
-* blanc (#FFFFFF) pour les titres et les CTA secondaires ;
-* gris (#A0A0A0) pour le texte courant.
+* blanc cassé (#F7F5F1) en fond principal ;
+* blanc pur (#FFFFFF) pour les cards/conteneurs, bordure fine #EAE6DE et ombre portée douce ;
+* rouge Panama (#D21034) comme accent principal, réservé aux boutons d'action (CTA) ;
+* bleu Panama (#001489) comme accent secondaire : logo, sur-titres, liens actifs ;
+* gris très foncé (#1A1A1A) pour les titres ;
+* brun-gris (#6B6459) pour le texte courant.
 
 Conteneur :
 
@@ -1170,11 +1171,11 @@ Typographie :
 
 Composants :
 
-* boutons en forme pilule ; CTA principal vert plein/texte noir ; CTA secondaire blanc plein/texte noir ;
-* cards fond #1A1A1A, coins arrondis 12-16px, icônes line-icons vertes ;
+* boutons en forme pilule ; CTA principal rouge plein/texte blanc ; CTA secondaire blanc plein/texte foncé ;
+* cards fond #FFFFFF, coins arrondis 12-16px, icônes bleu foncé ou gris foncé avec survol rouge ;
 * images à coins « cassés » avec repères décoratifs aux angles.
 
-Le vert menthe doit être utilisé comme couleur d'accent et non comme couleur dominante partout.
+Le rouge est réservé aux éléments d'action (boutons), jamais pour du texte informatif ou décoratif. Le bleu identifie le logo, les sur-titres et les liens actifs.
 
 Les icônes doivent appartenir à une même famille graphique.
 
