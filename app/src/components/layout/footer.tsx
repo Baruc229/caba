@@ -103,7 +103,7 @@ export function Footer() {
               </small>
             </div>
             <div className={CARD}>
-              <ul className="flex gap-3">
+              <ul className="flex items-center justify-end gap-3">
                 {SOCIALS.map(({ href, label, Icon }) => (
                   <li key={label}>
                     <a
