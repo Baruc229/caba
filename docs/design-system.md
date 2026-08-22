@@ -280,11 +280,14 @@ l'écran lorsque l'utilisateur fait défiler la page.
 
 ### 8.1 Structure générale
 
-Le footer est organisé en **deux sections verticales collées** (aucun espace entre elles) :
+Le footer est organisé en **deux sections verticales** séparées d'un espace fin (8px) :
 
 1. **Section Informations et newsletter** (1 grande card, 4 colonnes internes) :
    logo/description/adresse/**réseaux sociaux** | Navigation | Légal | Newsletter ;
-2. **Section Pied de page** : copyright seul, **centré**, sans card.
+2. **Section Pied de page** : copyright seul dans **sa propre card**, texte centré.
+
+Ordre des colonnes sur mobile : logo → Restons en contact → Navigation → Légal
+(newsletter en 2e position). Ordre desktop : logo | Navigation | Légal | Newsletter.
 
 Chaque card : fond `--bg-card` (#FFFFFF), bordure fine `#EAE6DE`, ombre douce
 (`shadow-card`), coins arrondis 16px, padding interne 16px mobile → 32px desktop.

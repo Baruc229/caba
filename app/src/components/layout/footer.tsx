@@ -33,7 +33,7 @@ export function Footer() {
 
   return (
     <footer className="px-4 pb-8 pt-4 sm:px-6">
-      <div className="mx-auto flex max-w-[1400px] flex-col">
+      <div className="mx-auto flex max-w-[1400px] flex-col gap-2">
         <section aria-label="Informations et newsletter">
           <div className={CARD}>
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8">
@@ -47,7 +47,7 @@ export function Footer() {
                   Cotonou, Bénin
                 </address>
                 <div className="mt-3 flex items-center gap-3">
-                  <span className="text-sm font-semibold text-text-primary">
+                  <span className="text-base font-semibold text-text-primary">
                     Nos réseaux
                   </span>
                   <ul className="flex gap-3">
@@ -66,7 +66,7 @@ export function Footer() {
                 </div>
               </div>
 
-              <nav aria-label="Pages rapides">
+              <nav aria-label="Pages rapides" className="order-3 lg:order-2">
                 <h3 className="heading-display text-base">Navigation</h3>
                 <ul className="mt-3 space-y-2">
                   {QUICK_LINKS.map((link) => (
@@ -82,7 +82,7 @@ export function Footer() {
                 </ul>
               </nav>
 
-              <nav aria-label="Pages légales">
+              <nav aria-label="Pages légales" className="order-4 lg:order-3">
                 <h3 className="heading-display text-base">Légal</h3>
                 <ul className="mt-3 space-y-2">
                   {LEGAL_LINKS.map((link) => (
@@ -98,7 +98,7 @@ export function Footer() {
                 </ul>
               </nav>
 
-              <div>
+              <div className="order-2 lg:order-4">
                 <h3 className="heading-display text-base">Restons en contact</h3>
                 <p className="mt-3">
                   Recevez nos meilleures offres et soyez informé de
@@ -113,9 +113,11 @@ export function Footer() {
         </section>
 
         <section aria-label="Pied de page">
-          <p className="text-center text-xs text-text-secondary">
-            © {year} Caba Résidence. Tous droits réservés.
-          </p>
+          <div className={CARD}>
+            <p className="text-center text-xs text-text-secondary">
+              © {year} Caba Résidence. Tous droits réservés.
+            </p>
+          </div>
         </section>
       </div>
     </footer>
