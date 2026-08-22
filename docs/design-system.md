@@ -308,8 +308,9 @@ séparées par des gaps de 24-32px : 1 colonne mobile, 2 ≥ 640px, 4 ≥ 1024px
 
 Liens : gris `#6B6459` → bleu `#001489` au survol (200ms), jamais soulignés.
 Icônes sociales : 18px, gris → rouge accent au survol.
-Formulaire : champs empilés (pilules fond blanc, bordure `--border-input`),
-bouton « S'inscrire » pilule rouge/texte blanc pleine largeur.
+Formulaire : champs empilés, largeur maximale 320px (pilules fond blanc,
+bordure `--border-input`, centrés sur mobile), bouton « S'inscrire » pilule
+rouge/texte blanc à la largeur de son contenu.
 
 ### 8.3 Section Pied de page
 
@@ -324,8 +325,8 @@ réservés. » — 12px gris (#6B6459), année calculée côté serveur.
 | Cards | `--bg-card` (#FFFFFF), bordure `#EAE6DE`, ombre douce |
 | Texte | Gris (#6B6459) pour le corps, #1A1A1A pour les titres |
 | Liens | Gris → bleu #001489 au hover ; icônes sociales → rouge au hover |
-| Espacement entre sections | 12px (mobile), 16px (desktop) — sections resserrées |
-| Padding global | 16px horizontal mobile, conteneur max 1400px |
+| Espacement entre sections | 8px — sections resserrées |
+| Padding global | 16px horizontal mobile, 32-48px vertical, conteneur max 1400px |
 
 ### 8.6 Responsive
 

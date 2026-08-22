@@ -32,7 +32,7 @@ export function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="px-4 pb-8 pt-4 sm:px-6">
+    <footer className="px-4 py-8 sm:px-6 lg:py-12">
       <div className="mx-auto flex max-w-[1400px] flex-col gap-2">
         <section aria-label="Informations et newsletter">
           <div className={CARD}>
