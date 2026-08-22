@@ -6,6 +6,9 @@ const QUICK_LINKS = [
   { href: "/", label: "Accueil" },
   { href: "/logements", label: "Chambres" },
   { href: "/a-propos", label: "À propos" },
+  { href: "/services", label: "Nos services" },
+  { href: "/equipements", label: "Nos équipements" },
+  { href: "/blog", label: "Blog" },
   { href: "/contact", label: "Contact" },
 ];
 
@@ -30,7 +33,7 @@ export function Footer() {
 
   return (
     <footer className="px-4 pb-8 pt-4 sm:px-6">
-      <div className="mx-auto flex max-w-[1400px] flex-col gap-3 lg:gap-4">
+      <div className="mx-auto flex max-w-[1400px] flex-col">
         <section aria-label="Informations et newsletter">
           <div className={CARD}>
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8">
@@ -43,6 +46,24 @@ export function Footer() {
                 <address className="mt-3 not-italic">
                   Cotonou, Bénin
                 </address>
+                <div className="mt-3 flex items-center gap-3">
+                  <span className="text-sm font-semibold text-text-primary">
+                    Nos réseaux
+                  </span>
+                  <ul className="flex gap-3">
+                    {SOCIALS.map(({ href, label, Icon }) => (
+                      <li key={label}>
+                        <a
+                          href={href}
+                          aria-label={label}
+                          className="text-text-secondary transition-colors duration-200 hover:text-accent"
+                        >
+                          <Icon aria-hidden="true" size={18} />
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </div>
 
               <nav aria-label="Pages rapides">
@@ -92,33 +113,9 @@ export function Footer() {
         </section>
 
         <section aria-label="Pied de page">
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:gap-6">
-            <div className={CARD}>
-              <small className="text-xs text-text-secondary">
-                © {year} Caba Résidence. Tous droits réservés.
-              </small>
-            </div>
-            <div className={CARD}>
-              <div className="flex items-center justify-start gap-4 md:justify-end">
-                <span className="text-sm font-semibold text-text-primary">
-                  Nos réseaux sociaux
-                </span>
-                <ul className="flex gap-3">
-                  {SOCIALS.map(({ href, label, Icon }) => (
-                    <li key={label}>
-                      <a
-                        href={href}
-                        aria-label={label}
-                        className="text-text-secondary transition-colors duration-200 hover:text-accent"
-                      >
-                        <Icon aria-hidden="true" size={18} />
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          </div>
+          <p className="text-center text-xs text-text-secondary">
+            © {year} Caba Résidence. Tous droits réservés.
+          </p>
         </section>
       </div>
     </footer>

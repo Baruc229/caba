@@ -280,12 +280,11 @@ l'écran lorsque l'utilisateur fait défiler la page.
 
 ### 8.1 Structure générale
 
-Le footer est organisé en **deux sections verticales** empilées :
+Le footer est organisé en **deux sections verticales collées** (aucun espace entre elles) :
 
 1. **Section Informations et newsletter** (1 grande card, 4 colonnes internes) :
-   logo/description/adresse | Navigation | Légal | Newsletter (titre + description
-   + formulaire email/téléphone) ;
-2. **Section Pied de page** (2 cards) : copyright | libellé « Nos réseaux sociaux » + icônes.
+   logo/description/adresse/**réseaux sociaux** | Navigation | Légal | Newsletter ;
+2. **Section Pied de page** : copyright seul, **centré**, sans card.
 
 Chaque card : fond `--bg-card` (#FFFFFF), bordure fine `#EAE6DE`, ombre douce
 (`shadow-card`), coins arrondis 16px, padding interne 16px mobile → 32px desktop.
@@ -297,22 +296,20 @@ séparées par des gaps de 24-32px : 1 colonne mobile, 2 ≥ 640px, 4 ≥ 1024px
 
 | Colonne | Contenu |
 |---------|---------|
-| Logo | Titre display « Caba Résidence » + description + adresse (`<address>`) |
-| Navigation | Liens rapides (Accueil, Chambres, À propos, Contact), un par ligne, espacés de 8px |
+| Logo | Titre display « Caba Résidence » + description + adresse + libellé « Nos réseaux » et icônes sociales (Facebook, Instagram, X, WhatsApp) |
+| Navigation | Accueil, Chambres, À propos, Nos services, Nos équipements, Blog, Contact — un par ligne, espacés de 8px |
 | Légal | Mentions légales, Politique de confidentialité, CGV |
 | Restons en contact | Titre + description + formulaire newsletter (email requis, téléphone optionnel, bouton pilule pleine largeur) |
 
 Liens : gris `#6B6459` → bleu `#001489` au survol (200ms), jamais soulignés.
+Icônes sociales : 18px, gris → rouge accent au survol.
 Formulaire : champs empilés (pilules fond blanc, bordure `--border-input`),
 bouton « S'inscrire » pilule rouge/texte blanc pleine largeur.
 
 ### 8.3 Section Pied de page
 
-- Card gauche : copyright (année calculée côté serveur), 12px gris ;
-- Card droite : libellé « Nos réseaux sociaux » + icônes Font Awesome
-  Facebook / Instagram / X / WhatsApp, 18px, gap 12px, ensemble aligné à gauche
-  sur mobile (comme les autres contenus) puis à droite ≥ 768px,
-  gris → rouge accent au survol.
+Copyright seul, centré, sans card : « © {année} Caba Résidence. Tous droits
+réservés. » — 12px gris (#6B6459), année calculée côté serveur.
 
 ### 8.5 Style global du footer
 
