@@ -292,7 +292,8 @@ des colonnes sont **centrés** et l'écart entre colonnes est porté à 32px.
 Champs et bouton du formulaire en taille réduite (padding vertical 8px).
 
 Chaque card : fond `--bg-card` (#FFFFFF), bordure fine `#EAE6DE`, ombre douce
-(`shadow-card`), coins arrondis 16px, padding interne 16px mobile → 32px desktop.
+(`shadow-card`), coins arrondis 16px, padding interne généreux 24px mobile →
+32px tablette → 48px desktop (le contenu respire sur les 4 côtés).
 
 ### 8.2 Section Informations et newsletter (une seule grande card)
 
@@ -301,16 +302,16 @@ séparées par des gaps de 24-32px : 1 colonne mobile, 2 ≥ 640px, 4 ≥ 1024px
 
 | Colonne | Contenu |
 |---------|---------|
-| Logo | Titre display « Caba Résidence » + description + adresse + libellé « Nos réseaux » et icônes sociales (Facebook, Instagram, X, WhatsApp) |
+| Logo | Titre display « Caba Résidence » + description + adresse + icônes sociales seules (Facebook, Instagram, X, WhatsApp) |
 | Navigation | Accueil, Chambres, À propos, Nos services, Nos équipements, Blog, Contact — un par ligne, espacés de 8px |
 | Légal | Mentions légales, Politique de confidentialité, CGV |
 | Restons en contact | Titre + description + formulaire newsletter (email requis, téléphone optionnel, bouton pilule pleine largeur) |
 
 Liens : gris `#6B6459` → bleu `#001489` au survol (200ms), jamais soulignés.
 Icônes sociales : 18px, gris → rouge accent au survol.
-Formulaire : champs empilés, largeur maximale 320px (pilules fond blanc,
-bordure `--border-input`, centrés sur mobile), bouton « S'inscrire » pilule
-rouge/texte blanc à la largeur de son contenu.
+Formulaire : bloc plafonné à 320px de large, champs empilés pleine largeur
+(pilules fond blanc, bordure `--border-input`, centrés sur mobile), bouton
+« S'inscrire » pilule rouge/texte blanc pleine largeur.
 
 ### 8.3 Section Pied de page
 

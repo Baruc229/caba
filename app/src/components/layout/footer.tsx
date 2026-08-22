@@ -26,7 +26,7 @@ const SOCIALS = [
 ];
 
 const CARD =
-  "rounded-2xl border-[0.5px] border-border-subtle bg-bg-card p-4 shadow-card sm:p-6 lg:p-8";
+  "rounded-2xl border-[0.5px] border-border-subtle bg-bg-card p-6 shadow-card sm:p-8 lg:p-12";
 
 export function Footer() {
   const year = new Date().getFullYear();
@@ -46,24 +46,19 @@ export function Footer() {
                 <address className="mt-3 not-italic">
                   Cotonou, Bénin
                 </address>
-                <div className="mt-3 flex items-center justify-center gap-3 sm:justify-start">
-                  <span className="text-base font-semibold text-text-primary">
-                    Nos réseaux
-                  </span>
-                  <ul className="flex gap-3">
-                    {SOCIALS.map(({ href, label, Icon }) => (
-                      <li key={label}>
-                        <a
-                          href={href}
-                          aria-label={label}
-                          className="text-text-secondary transition-colors duration-200 hover:text-accent"
-                        >
-                          <Icon aria-hidden="true" size={18} />
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+                <ul className="mt-3 flex justify-center gap-3 sm:justify-start">
+                  {SOCIALS.map(({ href, label, Icon }) => (
+                    <li key={label}>
+                      <a
+                        href={href}
+                        aria-label={label}
+                        className="text-text-secondary transition-colors duration-200 hover:text-accent"
+                      >
+                        <Icon aria-hidden="true" size={18} />
+                      </a>
+                    </li>
+                  ))}
+                </ul>
               </div>
 
               <nav aria-label="Pages rapides" className="text-center sm:text-left">

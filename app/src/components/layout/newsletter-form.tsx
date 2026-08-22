@@ -8,10 +8,13 @@ export function NewsletterForm() {
   const [phone, setPhone] = useState("");
 
   const inputClass =
-    "w-full max-w-xs rounded-full border-[0.5px] border-border-input bg-bg-card px-4 py-3 text-sm text-text-primary placeholder:text-text-secondary focus:outline-none focus:ring-1 focus:ring-accent-secondary";
+    "w-full rounded-full border-[0.5px] border-border-input bg-bg-card px-4 py-3 text-sm text-text-primary placeholder:text-text-secondary focus:outline-none focus:ring-1 focus:ring-accent-secondary";
 
   return (
-    <form onSubmit={(e) => e.preventDefault()} className="flex flex-col items-center gap-3 sm:items-start">
+    <form
+      onSubmit={(e) => e.preventDefault()}
+      className="mx-auto flex w-full max-w-xs flex-col gap-3 sm:mx-0"
+    >
       <label htmlFor="newsletter-email" className="sr-only">
         Recevoir nos offres et nouveautés
       </label>
@@ -37,7 +40,7 @@ export function NewsletterForm() {
         onChange={(e) => setPhone(e.target.value)}
         className={inputClass}
       />
-      <button type="submit" className="btn-pill btn-primary">
+      <button type="submit" className="btn-pill btn-primary w-full">
         S&apos;inscrire
         <FaArrowRight aria-hidden="true" />
       </button>
