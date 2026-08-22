@@ -30,7 +30,7 @@ export function Footer() {
 
   return (
     <footer className="px-4 pb-8 pt-4 sm:px-6">
-      <div className="mx-auto flex max-w-[1400px] flex-col gap-6 lg:gap-8">
+      <div className="mx-auto flex max-w-[1400px] flex-col gap-3 lg:gap-4">
         <section aria-label="Newsletter">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:gap-6">
             <div className={CARD}>
@@ -103,7 +103,7 @@ export function Footer() {
               </small>
             </div>
             <div className={CARD}>
-              <div className="flex items-center justify-end gap-4">
+              <div className="flex items-center justify-start gap-4 md:justify-end">
                 <span className="text-sm font-semibold text-text-primary">
                   Nos réseaux sociaux
                 </span>

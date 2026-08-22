@@ -313,8 +313,9 @@ Liens : gris `#6B6459` → bleu `#001489` au survol (200ms), jamais soulignés.
 
 - Card gauche : copyright (année calculée côté serveur), 12px gris ;
 - Card droite : libellé « Nos réseaux sociaux » + icônes Font Awesome
-  Facebook / Instagram / X / WhatsApp, 18px, gap 12px, ensemble aligné à droite
-  de la card, gris → rouge accent au survol.
+  Facebook / Instagram / X / WhatsApp, 18px, gap 12px, ensemble aligné à gauche
+  sur mobile (comme les autres contenus) puis à droite ≥ 768px,
+  gris → rouge accent au survol.
 
 ### 8.5 Style global du footer
 
@@ -324,7 +325,7 @@ Liens : gris `#6B6459` → bleu `#001489` au survol (200ms), jamais soulignés.
 | Cards | `--bg-card` (#FFFFFF), bordure `#EAE6DE`, ombre douce |
 | Texte | Gris (#6B6459) pour le corps, #1A1A1A pour les titres |
 | Liens | Gris → bleu #001489 au hover ; icônes sociales → rouge au hover |
-| Espacement entre sections | 24px (mobile), 32px (desktop) |
+| Espacement entre sections | 12px (mobile), 16px (desktop) — sections resserrées |
 | Padding global | 16px horizontal mobile, conteneur max 1400px |
 
 ### 8.6 Responsive
