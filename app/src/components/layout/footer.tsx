@@ -36,8 +36,8 @@ export function Footer() {
       <div className="mx-auto flex max-w-[1400px] flex-col gap-2">
         <section aria-label="Informations et newsletter">
           <div className={CARD}>
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8">
-              <div>
+            <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8">
+              <div className="text-center sm:text-left">
                 <p className="heading-display text-lg">Caba Résidence</p>
                 <p className="mt-3">
                   Complexe résidentiel proposant des chambres, studios, suites et
@@ -46,7 +46,7 @@ export function Footer() {
                 <address className="mt-3 not-italic">
                   Cotonou, Bénin
                 </address>
-                <div className="mt-3 flex items-center gap-3">
+                <div className="mt-3 flex items-center justify-center gap-3 sm:justify-start">
                   <span className="text-base font-semibold text-text-primary">
                     Nos réseaux
                   </span>
@@ -66,7 +66,7 @@ export function Footer() {
                 </div>
               </div>
 
-              <nav aria-label="Pages rapides" className="order-3 lg:order-2">
+              <nav aria-label="Pages rapides" className="text-center sm:text-left">
                 <h3 className="heading-display text-base">Navigation</h3>
                 <ul className="mt-3 space-y-2">
                   {QUICK_LINKS.map((link) => (
@@ -82,7 +82,7 @@ export function Footer() {
                 </ul>
               </nav>
 
-              <nav aria-label="Pages légales" className="order-4 lg:order-3">
+              <nav aria-label="Pages légales" className="text-center sm:text-left">
                 <h3 className="heading-display text-base">Légal</h3>
                 <ul className="mt-3 space-y-2">
                   {LEGAL_LINKS.map((link) => (
@@ -98,7 +98,7 @@ export function Footer() {
                 </ul>
               </nav>
 
-              <div className="order-2 lg:order-4">
+              <div className="text-center sm:text-left">
                 <h3 className="heading-display text-base">Restons en contact</h3>
                 <p className="mt-3">
                   Recevez nos meilleures offres et soyez informé de
@@ -114,7 +114,7 @@ export function Footer() {
 
         <section aria-label="Pied de page">
           <div className={CARD}>
-            <p className="text-center text-xs text-text-secondary">
+            <p className="text-center text-sm text-text-secondary">
               © {year} Caba Résidence. Tous droits réservés.
             </p>
           </div>

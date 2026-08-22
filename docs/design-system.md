@@ -286,8 +286,10 @@ Le footer est organisé en **deux sections verticales** séparées d'un espace f
    logo/description/adresse/**réseaux sociaux** | Navigation | Légal | Newsletter ;
 2. **Section Pied de page** : copyright seul dans **sa propre card**, texte centré.
 
-Ordre des colonnes sur mobile : logo → Restons en contact → Navigation → Légal
-(newsletter en 2e position). Ordre desktop : logo | Navigation | Légal | Newsletter.
+Ordre des colonnes : logo → Navigation → Légal → Restons en contact (newsletter
+en dernière position, mobile comme desktop). Sur mobile (< 640px) les contenus
+des colonnes sont **centrés** et l'écart entre colonnes est porté à 32px.
+Champs et bouton du formulaire en taille réduite (padding vertical 8px).
 
 Chaque card : fond `--bg-card` (#FFFFFF), bordure fine `#EAE6DE`, ombre douce
 (`shadow-card`), coins arrondis 16px, padding interne 16px mobile → 32px desktop.

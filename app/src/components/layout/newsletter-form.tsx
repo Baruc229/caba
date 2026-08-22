@@ -8,7 +8,7 @@ export function NewsletterForm() {
   const [phone, setPhone] = useState("");
 
   const inputClass =
-    "w-full rounded-full border-[0.5px] border-border-input bg-bg-card px-4 py-3 text-sm text-text-primary placeholder:text-text-secondary focus:outline-none focus:ring-1 focus:ring-accent-secondary";
+    "w-full rounded-full border-[0.5px] border-border-input bg-bg-card px-4 py-2 text-sm text-text-primary placeholder:text-text-secondary focus:outline-none focus:ring-1 focus:ring-accent-secondary";
 
   return (
     <form onSubmit={(e) => e.preventDefault()} className="flex flex-col gap-3">
@@ -37,7 +37,7 @@ export function NewsletterForm() {
         onChange={(e) => setPhone(e.target.value)}
         className={inputClass}
       />
-      <button type="submit" className="btn-pill btn-primary w-full">
+      <button type="submit" className="btn-pill btn-primary w-full px-5 py-2">
         S&apos;inscrire
         <FaArrowRight aria-hidden="true" />
       </button>
