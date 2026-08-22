@@ -280,36 +280,33 @@ l'écran lorsque l'utilisateur fait défiler la page.
 
 ### 8.1 Structure générale
 
-Le footer est organisé en **trois sections verticales** empilées :
+Le footer est organisé en **deux sections verticales** empilées :
 
-1. **Section Newsletter** (2 cards) : titre + description | formulaire email + téléphone ;
-2. **Section Informations** (1 grande card, 3 colonnes internes) : logo/description/adresse | Navigation | Légal ;
-3. **Section Pied de page** (2 cards) : copyright | icônes réseaux sociaux.
+1. **Section Informations et newsletter** (1 grande card, 4 colonnes internes) :
+   logo/description/adresse | Navigation | Légal | Newsletter (titre + description
+   + formulaire email/téléphone) ;
+2. **Section Pied de page** (2 cards) : copyright | libellé « Nos réseaux sociaux » + icônes.
 
 Chaque card : fond `--bg-card` (#FFFFFF), bordure fine `#EAE6DE`, ombre douce
 (`shadow-card`), coins arrondis 16px, padding interne 16px mobile → 32px desktop.
 
-### 8.2 Section Newsletter
+### 8.2 Section Informations et newsletter (une seule grande card)
 
-- Card gauche : titre display « Restons en contact » + paragraphe gris `#6B6459` ;
-- Card droite : champ email (requis) + champ téléphone (optionnel), pilules fond
-  blanc bordure `--border-input`, bouton « S'inscrire » pilule rouge/texte blanc.
-- Empilés sur mobile, côte à côte ≥ 640px.
-
-### 8.3 Section Informations (une seule grande card)
-
-Les 3 colonnes sont à l'intérieur d'une **unique card** (pas de bordures individuelles),
-séparées par des gaps de 24-32px :
+Les 4 colonnes sont à l'intérieur d'une **unique card** (pas de bordures individuelles),
+séparées par des gaps de 24-32px : 1 colonne mobile, 2 ≥ 640px, 4 ≥ 1024px.
 
 | Colonne | Contenu |
 |---------|---------|
 | Logo | Titre display « Caba Résidence » + description + adresse (`<address>`) |
 | Navigation | Liens rapides (Accueil, Chambres, À propos, Contact), un par ligne, espacés de 8px |
 | Légal | Mentions légales, Politique de confidentialité, CGV |
+| Restons en contact | Titre + description + formulaire newsletter (email requis, téléphone optionnel, bouton pilule pleine largeur) |
 
 Liens : gris `#6B6459` → bleu `#001489` au survol (200ms), jamais soulignés.
+Formulaire : champs empilés (pilules fond blanc, bordure `--border-input`),
+bouton « S'inscrire » pilule rouge/texte blanc pleine largeur.
 
-### 8.4 Section Pied de page
+### 8.3 Section Pied de page
 
 - Card gauche : copyright (année calculée côté serveur), 12px gris ;
 - Card droite : libellé « Nos réseaux sociaux » + icônes Font Awesome
@@ -332,13 +329,13 @@ Liens : gris `#6B6459` → bleu `#001489` au survol (200ms), jamais soulignés.
 
 #### Mobile (< 768px)
 
-- Toutes les sections s'empilent en 1 colonne (gap 16px) ;
+- Toutes les colonnes s'empilent (gap 16px entre colonnes internes) ;
 - Chaque card prend 100 % de la largeur, aucun débordement horizontal (testé à 320px).
 
-#### Desktop (≥ 768px)
+#### Desktop (≥ 1024px)
 
-- Newsletter et pied de page en 2 colonnes ;
-- Informations : 3 colonnes internes dans une seule card.
+- Informations et newsletter : 4 colonnes internes dans une seule card ;
+- Pied de page : copyright + réseaux sociaux en 2 cards.
 
 ---
 

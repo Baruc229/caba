@@ -11,7 +11,7 @@ export function NewsletterForm() {
     "w-full rounded-full border-[0.5px] border-border-input bg-bg-card px-4 py-3 text-sm text-text-primary placeholder:text-text-secondary focus:outline-none focus:ring-1 focus:ring-accent-secondary";
 
   return (
-    <form onSubmit={(e) => e.preventDefault()} className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+    <form onSubmit={(e) => e.preventDefault()} className="flex flex-col gap-3">
       <label htmlFor="newsletter-email" className="sr-only">
         Recevoir nos offres et nouveautés
       </label>
@@ -37,7 +37,7 @@ export function NewsletterForm() {
         onChange={(e) => setPhone(e.target.value)}
         className={inputClass}
       />
-      <button type="submit" className="btn-pill btn-primary justify-self-start sm:col-span-2">
+      <button type="submit" className="btn-pill btn-primary w-full">
         S&apos;inscrire
         <FaArrowRight aria-hidden="true" />
       </button>

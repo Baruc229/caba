@@ -31,24 +31,9 @@ export function Footer() {
   return (
     <footer className="px-4 pb-8 pt-4 sm:px-6">
       <div className="mx-auto flex max-w-[1400px] flex-col gap-3 lg:gap-4">
-        <section aria-label="Newsletter">
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:gap-6">
-            <div className={CARD}>
-              <h2 className="heading-display text-2xl">Restons en contact</h2>
-              <p className="mt-3">
-                Inscrivez-vous pour recevoir nos meilleures offres et être
-                informé de l&apos;arrivée de nouveaux logements.
-              </p>
-            </div>
-            <div className={CARD}>
-              <NewsletterForm />
-            </div>
-          </div>
-        </section>
-
-        <section aria-label="Informations">
+        <section aria-label="Informations et newsletter">
           <div className={CARD}>
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-3 lg:gap-8">
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8">
               <div>
                 <p className="heading-display text-lg">Caba Résidence</p>
                 <p className="mt-3">
@@ -91,6 +76,17 @@ export function Footer() {
                   ))}
                 </ul>
               </nav>
+
+              <div>
+                <h3 className="heading-display text-base">Restons en contact</h3>
+                <p className="mt-3">
+                  Recevez nos meilleures offres et soyez informé de
+                  l&apos;arrivée de nouveaux logements.
+                </p>
+                <div className="mt-3">
+                  <NewsletterForm />
+                </div>
+              </div>
             </div>
           </div>
         </section>
