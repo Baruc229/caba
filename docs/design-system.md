@@ -216,11 +216,18 @@ Aucun :
 
 ### 7.1 Comportement
 
-Le header est une **bannière flottante sticky** : elle reste fixée en haut de
-l'écran lorsque l'utilisateur fait défiler la page.
+Le header est un **sticky header déclenché au scroll** (scroll-triggered
+sticky header, « detached header ») :
+
+- **Au repos (haut de page)** : il est **incorporé au flux** de la page,
+  transparent, sans bordure ni ombre — il se fond dans le fond `--bg-primary` ;
+- **Au défilement** (> 24px) : il **se décolle** et adopte sa version flottante —
+  fond `--bg-card`, bordure 0.5px `#EAE6DE`, ombre douce (`shadow-header`),
+  transition 300ms ;
+- Il reste fixé en haut de l'écran pendant tout le défilement (`sticky top-0`).
 
 - **Forme** : bannière arrondie (radius 16px), marge extérieure ~12px mobile / ~20px desktop ;
-- **Fond** : `--bg-card` (#FFFFFF), bordure 0.5px `#EAE6DE`, ombre douce (`shadow-header`) ;
+- **Fond (décollé)** : `--bg-card` (#FFFFFF), bordure 0.5px `#EAE6DE`, ombre douce (`shadow-header`) ;
 - **Largeur** : 1400px maximum, centrée ;
 - **Hauteur interne** : 72px ;
 - **Z-index** : 1000 (toujours au-dessus du contenu).
@@ -308,7 +315,8 @@ séparées par des gaps de 24-32px : 1 colonne mobile, 2 ≥ 640px, 4 ≥ 1024px
 | Restons en contact | Titre + description + formulaire newsletter (email requis, téléphone optionnel, bouton pilule pleine largeur) |
 
 Liens : gris `#6B6459` → bleu `#001489` au survol (200ms), jamais soulignés.
-Icônes sociales : 18px, gris → rouge accent au survol.
+Icônes sociales : 18px dans un carré 36px, fond bleu `#001489`, icône blanche,
+coins arrondis 10 %, survol fond rouge accent `#D21034` (200ms).
 Formulaire : bloc plafonné à 320px de large, champs empilés pleine largeur
 (pilules fond blanc, bordure `--border-input`, centrés sur mobile), bouton
 « S'inscrire » pilule rouge/texte blanc pleine largeur.

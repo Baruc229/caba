@@ -52,7 +52,7 @@ export function Footer() {
                       <a
                         href={href}
                         aria-label={label}
-                        className="text-text-secondary transition-colors duration-200 hover:text-accent"
+                        className="flex size-9 items-center justify-center rounded-[10%] bg-accent-secondary text-on-accent transition-colors duration-200 hover:bg-accent"
                       >
                         <Icon aria-hidden="true" size={18} />
                       </a>
