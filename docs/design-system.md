@@ -246,7 +246,7 @@ sticky header, « detached header ») :
 |------|---------|-------|
 | Gauche | Logo Caba Résidence | Titre display (Anton italique MAJUSCULES), lien vers l'accueil |
 | Centre-gauche | Menu de navigation dans un conteneur pilule | Bordure fine `--border-subtle`, padding interne 8px, gap 4px entre liens ; lien **actif** : fond `--bg-primary` + texte bleu `#001489` ; liens inactifs : gris `#6B6459` |
-| Droite | « Connexion » (ghost) → CTA « Réserver » → sélecteur FR/EN | Connexion : texte gris, hover bleu ; Réserver : **pilule rouge plein `#D21034` / texte blanc** ; FR/EN : actif en foncé, séparateur `|` gris |
+| Droite | « Connexion » (ghost) → CTA « Réserver » → sélecteur FR/EN → sélecteur EUR/FCFA | Connexion : texte gris, hover bleu ; Réserver : **pilule rouge plein `#D21034` / texte blanc** ; FR/EN et EUR/FCFA : actif en foncé, séparateur `|` gris |
 
 **Règles des liens d'authentification** :
 - Style texte seul (ghost), pas de bordure ;
@@ -270,7 +270,7 @@ sticky header, « detached header ») :
 **Règles du burger** :
 - Icône burger classique (3 lignes) ;
 - Ouvre un **panneau latéral droit** (drawer) avec overlay assombri (`bg-black/40`) ;
-- Le panneau contient : liens de navigation empilés + bouton « Connexion » (CTA primaire pleine largeur) ;
+- Le panneau contient : liens de navigation empilés + sélecteur de devise EUR/FCFA (centré) + bouton « Connexion » (CTA primaire pleine largeur) ;
 - Le CTA « Réserver » est masqué sur mobile (présent dans les pages) ;
 - Fermeture : croix, clic sur l'overlay ou touche Échap.
 
@@ -278,7 +278,7 @@ sticky header, « detached header ») :
 
 - **ARIA labels** sur tous les boutons (ex. : `aria-label="Ouvrir le menu"`) ;
 - **Focus visible** : contour bleu `#001489` au focus clavier ;
-- **Tab order** : logo → navigation → connexion → réserver → langue ;
+- **Tab order** : logo → navigation → connexion → réserver → langue → devise ;
 - **Skip link** : lien « Aller au contenu principal » invisible mais accessible au clavier.
 
 ---
@@ -454,3 +454,45 @@ Les images ont des **coins « cassés » avec petits repères décoratifs aux an
 - Permettre la navigation au clavier ;
 - Tester avec un lecteur d'écran ;
 - Utiliser desunités relatives (rem, em) plutôt que des px pour le texte.
+
+---
+
+## 13. Hero (page d'accueil)
+
+### 13.1 Section principale
+
+| Propriété | Valeur |
+|-----------|--------|
+| Conteneur | 1300px max, centré (conteneur global du site) |
+| Dimensions | 1300 × 300px desktop, hauteur auto + min-height 280px < 1024px |
+| Coins arrondis | 20px |
+| Fond image | `/hero1.webp` (cover, position `center 65%`) |
+| Dégradé | `linear-gradient(to bottom, rgba(17,14,11,.82), rgba(17,14,11,.45) 55%, rgba(17,14,11,.62))` |
+
+Contenu (centré verticalement, aligné à gauche, max-width 600px) :
+
+1. **Badge** : pilule rouge `#D21034`, texte blanc 12px — « Complexe résidentiel · Bénin » ;
+2. **Titre bicolore** : Anton italique MAJUSCULES blanc, mot clé en or champagne
+   `#F2C572` (`clamp(30px, 4.5vw, 46px)`) ;
+3. **Sous-titre** : crème clair `#E8E2D8`, 15px.
+
+### 13.2 Preuve sociale
+
+Pilule blanche ombre légère : stack de 3 avatars ronds chevauchants (-10px,
+bordure blanche 2px) + 5 étoiles rouges `#D21034` + mention « +240 séjours
+notés 4.8 ».
+
+- Desktop ≥ 1024px : flottante au-dessus du Hero (`top: -54px`), alignée à droite ;
+- Mobile : version identique affichée sous le sous-titre dans le Hero.
+
+### 13.3 Moteur de recherche en chevauchement
+
+Card blanche, radius 16px, ombre marquée :
+
+- **Desktop ≥ 1024px** : `position: absolute; left/right: 60px; bottom: 0;
+  translateY(50%)` — moitié haute sur l'image, moitié basse sur le fond de page
+  (largeur ≈ 1180px). Le conteneur réserve 96px de marge basse ;
+- **Mobile < 1024px** : bloc statique empilé sous le Hero, champs en colonne ;
+- Contenu : onglets « Logements / Chambres » (actif souligné rouge) puis
+  Destination, Date d'arrivée, Date de départ, Voyageurs (encarts bordure fine,
+  label 10px majuscules gris #A29A8C) et bouton « Rechercher » pilule rouge.

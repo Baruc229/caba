@@ -4,6 +4,10 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { FaBars, FaXmark } from "react-icons/fa6";
+import {
+  CurrencySwitcher,
+  useCurrency,
+} from "./currency-switcher";
 
 const NAV_LINKS = [
   { href: "/", label: "Accueil" },
@@ -17,6 +21,7 @@ export function Header() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [lang, setLang] = useState<"fr" | "en">("fr");
   const [scrolled, setScrolled] = useState(false);
+  const [currency, setCurrency] = useCurrency();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -72,7 +77,7 @@ export function Header() {
   return (
     <header className="sticky top-0 z-[1000] px-3 pt-3 lg:px-5 lg:pt-5">
       <div
-        className={`mx-auto max-w-[1400px] rounded-2xl border-[0.5px] transition-all duration-300 ${
+        className={`mx-auto max-w-[1300px] rounded-2xl border-[0.5px] transition-all duration-300 ${
           scrolled
             ? "border-border-subtle bg-bg-card shadow-header"
             : "border-transparent bg-transparent"
@@ -116,6 +121,7 @@ export function Header() {
             Réserver
           </Link>
           {langSwitch}
+          <CurrencySwitcher currency={currency} onChange={setCurrency} />
         </div>
 
         <div className="flex items-center gap-3 lg:hidden">
@@ -180,7 +186,8 @@ export function Header() {
           ))}
         </nav>
 
-        <div className="mt-auto flex flex-col gap-4 border-t border-border-subtle p-6">
+        <div className="mt-auto flex flex-col items-center gap-4 border-t border-border-subtle p-6">
+          <CurrencySwitcher currency={currency} onChange={setCurrency} />
           <Link
             href="/connexion"
             className="btn-pill btn-primary w-full"

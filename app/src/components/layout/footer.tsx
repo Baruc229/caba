@@ -33,7 +33,7 @@ export function Footer() {
 
   return (
     <footer className="px-4 py-8 sm:px-6 lg:py-12">
-      <div className="mx-auto flex max-w-[1400px] flex-col gap-2">
+      <div className="mx-auto flex max-w-[1300px] flex-col gap-2">
         <section aria-label="Informations et newsletter">
           <div className={CARD}>
             <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8">
