@@ -1,7 +1,15 @@
 "use client";
 
-import { useState } from "react";
-import { FaStar } from "react-icons/fa6";
+import { useRef, useState } from "react";
+import {
+  FaCalendarDays,
+  FaLocationDot,
+  FaMinus,
+  FaPlus,
+  FaStar,
+} from "react-icons/fa6";
+
+const TODAY = new Date().toISOString().slice(0, 10);
 
 const TABS = [
   { id: "logements", label: "Logements" },
@@ -43,6 +51,77 @@ function ProofPill({ floating = false }: { floating?: boolean }) {
           ))}
         </div>
         <p className="proof-note">+240 séjours notés 4.8</p>
+      </div>
+    </div>
+  );
+}
+
+function DateField({ id, name, label, min }: { id: string; name: string; label: string; min?: string }) {
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  return (
+    <div className="search-field search-field--date">
+      <label htmlFor={id} className="search-label">
+        {label}
+      </label>
+      <div
+        className="search-value"
+        onClick={() => {
+          const input = inputRef.current;
+          if (input && typeof input.showPicker === "function") {
+            try {
+              input.showPicker();
+            } catch {
+              input.focus();
+            }
+          }
+        }}
+      >
+        <FaCalendarDays aria-hidden="true" size={15} />
+        <input
+          ref={inputRef}
+          id={id}
+          name={name}
+          type="date"
+          min={min}
+          className="search-input"
+        />
+      </div>
+    </div>
+  );
+}
+
+function GuestsField() {
+  const [guests, setGuests] = useState(2);
+
+  return (
+    <div className="search-field">
+      <span className="search-label" id="voyageurs-label">
+        Voyageurs
+      </span>
+      <div className="stepper" role="group" aria-labelledby="voyageurs-label">
+        <button
+          type="button"
+          className="stepper-btn"
+          aria-label="Réduire le nombre de voyageurs"
+          disabled={guests <= 1}
+          onClick={() => setGuests((g) => Math.max(1, g - 1))}
+        >
+          <FaMinus aria-hidden="true" size={10} />
+        </button>
+        <span className="stepper-value" aria-live="polite">
+          {guests} {guests > 1 ? "voyageurs" : "voyageur"}
+        </span>
+        <button
+          type="button"
+          className="stepper-btn"
+          aria-label="Augmenter le nombre de voyageurs"
+          disabled={guests >= 20}
+          onClick={() => setGuests((g) => Math.min(20, g + 1))}
+        >
+          <FaPlus aria-hidden="true" size={10} />
+        </button>
+        <input type="hidden" name="voyageurs" value={guests} />
       </div>
     </div>
   );
@@ -104,43 +183,24 @@ export function Hero() {
               <label htmlFor="destination" className="search-label">
                 Destination
               </label>
-              <input
-                id="destination"
-                name="destination"
-                type="text"
-                placeholder="Cotonou, Bénin"
-                className="search-input"
-              />
+              <div className="search-value">
+                <FaLocationDot aria-hidden="true" size={15} />
+                <input
+                  id="destination"
+                  name="destination"
+                  type="text"
+                  placeholder="Cotonou, Bénin"
+                  autoComplete="off"
+                  className="search-input"
+                />
+              </div>
             </div>
 
-            <div className="search-field">
-              <label htmlFor="arrivee" className="search-label">
-                Date d&apos;arrivée
-              </label>
-              <input id="arrivee" name="arrivee" type="date" className="search-input" />
-            </div>
+            <DateField id="arrivee" name="arrivee" label="Date d'arrivée" min={TODAY} />
 
-            <div className="search-field">
-              <label htmlFor="depart" className="search-label">
-                Date de départ
-              </label>
-              <input id="depart" name="depart" type="date" className="search-input" />
-            </div>
+            <DateField id="depart" name="depart" label="Date de départ" />
 
-            <div className="search-field">
-              <label htmlFor="voyageurs" className="search-label">
-                Voyageurs
-              </label>
-              <input
-                id="voyageurs"
-                name="voyageurs"
-                type="number"
-                min={1}
-                max={20}
-                defaultValue={2}
-                className="search-input"
-              />
-            </div>
+            <GuestsField />
 
             <button type="submit" className="btn-pill btn-primary w-full lg:w-auto lg:px-10">
               Rechercher
