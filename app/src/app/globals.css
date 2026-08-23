@@ -38,6 +38,9 @@
   html {
     scroll-behavior: smooth;
     color-scheme: light;
+    /* Fond du site appliqué dès la racine : aucune page ne peut
+       apparaître avec un fond blanc (overscroll mobile inclus) */
+    background-color: var(--color-bg-primary);
   }
 
   body {
