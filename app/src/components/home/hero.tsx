@@ -1,15 +1,29 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   FaCalendarDays,
+  FaChevronDown,
   FaLocationDot,
   FaMinus,
   FaPlus,
   FaStar,
+  FaUserGroup,
 } from "react-icons/fa6";
 
 const TODAY = new Date().toISOString().slice(0, 10);
+
+const GUEST_TYPES = [
+  { key: "adultes", name: "Adultes", hint: "18 ans et plus", min: 1, partitive: "d'adultes" },
+  { key: "enfants", name: "Enfants", hint: "2 à 17 ans", min: 0, partitive: "d'enfants" },
+  { key: "bebes", name: "Bébés", hint: "Moins de 2 ans", min: 0, partitive: "de bébés" },
+] as const;
+
+type GuestKey = (typeof GUEST_TYPES)[number]["key"];
+
+type GuestCounts = Record<GuestKey, number>;
+
+const MAX_GUESTS_PER_TYPE = 9;
 
 const TABS = [
   { id: "logements", label: "Logements" },
@@ -92,37 +106,101 @@ function DateField({ id, name, label, min }: { id: string; name: string; label: 
 }
 
 function GuestsField() {
-  const [guests, setGuests] = useState(2);
+  const [open, setOpen] = useState(false);
+  const [counts, setCounts] = useState<GuestCounts>({
+    adultes: 2,
+    enfants: 0,
+    bebes: 0,
+  });
+  const wrapRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onPointerDown = (e: PointerEvent) => {
+      if (!wrapRef.current?.contains(e.target as Node)) setOpen(false);
+    };
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    window.addEventListener("pointerdown", onPointerDown);
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      window.removeEventListener("pointerdown", onPointerDown);
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [open]);
+
+  const change = (key: GuestKey, min: number, delta: number) => {
+    setCounts((current) => ({
+      ...current,
+      [key]: Math.max(min, Math.min(MAX_GUESTS_PER_TYPE, current[key] + delta)),
+    }));
+  };
+
+  const summary = [
+    `${counts.adultes} ${counts.adultes > 1 ? "adultes" : "adulte"}`,
+    `${counts.enfants} ${counts.enfants > 1 ? "enfants" : "enfant"}`,
+    `${counts.bebes} ${counts.bebes > 1 ? "bébés" : "bébé"}`,
+  ].join(" · ");
 
   return (
-    <div className="search-field">
-      <span className="search-label" id="voyageurs-label">
-        Voyageurs
-      </span>
-      <div className="stepper" role="group" aria-labelledby="voyageurs-label">
-        <button
-          type="button"
-          className="stepper-btn"
-          aria-label="Réduire le nombre de voyageurs"
-          disabled={guests <= 1}
-          onClick={() => setGuests((g) => Math.max(1, g - 1))}
-        >
-          <FaMinus aria-hidden="true" size={10} />
-        </button>
-        <span className="stepper-value" aria-live="polite">
-          {guests} {guests > 1 ? "voyageurs" : "voyageur"}
-        </span>
-        <button
-          type="button"
-          className="stepper-btn"
-          aria-label="Augmenter le nombre de voyageurs"
-          disabled={guests >= 20}
-          onClick={() => setGuests((g) => Math.min(20, g + 1))}
-        >
-          <FaPlus aria-hidden="true" size={10} />
-        </button>
-        <input type="hidden" name="voyageurs" value={guests} />
-      </div>
+    <div className="search-field guests" ref={wrapRef}>
+      <span className="search-label">Voyageurs</span>
+      <button
+        type="button"
+        className="guests-trigger"
+        aria-haspopup="dialog"
+        aria-expanded={open}
+        onClick={() => setOpen((value) => !value)}
+      >
+        <FaUserGroup aria-hidden="true" size={15} />
+        <span className="guests-summary">{summary}</span>
+        <FaChevronDown
+          aria-hidden="true"
+          size={11}
+          className={`guests-chevron${open ? " is-open" : ""}`}
+        />
+      </button>
+
+      {open && (
+        <div className="guests-popover" role="dialog" aria-label="Choix des voyageurs">
+          {GUEST_TYPES.map((type) => (
+            <div key={type.key} className="guests-row">
+              <div className="guests-type">
+                <span className="guests-name">{type.name}</span>
+                <span className="guests-hint">{type.hint}</span>
+              </div>
+              <div className="stepper">
+                <button
+                  type="button"
+                  className="stepper-btn"
+                  aria-label={`Réduire le nombre ${type.partitive}`}
+                  disabled={counts[type.key] <= type.min}
+                  onClick={() => change(type.key, type.min, -1)}
+                >
+                  <FaMinus aria-hidden="true" size={10} />
+                </button>
+                <span className="stepper-value stepper-value--count" aria-live="polite">
+                  {counts[type.key]}
+                </span>
+                <button
+                  type="button"
+                  className="stepper-btn"
+                  aria-label={`Augmenter le nombre ${type.partitive}`}
+                  disabled={counts[type.key] >= MAX_GUESTS_PER_TYPE}
+                  onClick={() => change(type.key, type.min, 1)}
+                >
+                  <FaPlus aria-hidden="true" size={10} />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <input type="hidden" name="adultes" value={counts.adultes} />
+      <input type="hidden" name="enfants" value={counts.enfants} />
+      <input type="hidden" name="bebes" value={counts.bebes} />
     </div>
   );
 }

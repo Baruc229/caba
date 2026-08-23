@@ -494,5 +494,6 @@ Card blanche, radius 16px, ombre marquée :
   (largeur ≈ 1180px). Le conteneur réserve 96px de marge basse ;
 - **Mobile < 1024px** : bloc statique empilé sous le Hero, champs en colonne ;
 - Contenu : onglets « Logements / Chambres » (actif souligné rouge) puis
-  Destination, Date d'arrivée, Date de départ, Voyageurs (encarts bordure fine,
-  label 10px majuscules gris #A29A8C) et bouton « Rechercher » pilule rouge.
+  Destination, Date d'arrivée, Date de départ, Voyageurs (popover adultes /
+  enfants / bébés avec steppers −/+, bornes 0-9, minimum 1 adulte) et bouton
+  « Rechercher » pilule rouge.
