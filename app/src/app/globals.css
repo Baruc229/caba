@@ -174,13 +174,15 @@
     }
   }
 
-  /* Section 1300 × 300, coins 20px ; dégradé sombre haut → bas
-     superposé à l'image pour la lisibilité du texte blanc */
+  /* Section 1300 de large, coins 20px ; dégradé sombre haut → bas
+     superposé à l'image pour la lisibilité du texte blanc.
+     Hauteur portée à 420px pour laisser respirer le bloc texte
+     au-dessus du moteur de recherche en chevauchement */
   .hero {
     position: relative;
     display: flex;
     align-items: center;
-    height: 300px;
+    height: 420px;
     border-radius: 20px;
     overflow: hidden;
     background-image:

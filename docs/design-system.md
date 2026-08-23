@@ -464,7 +464,7 @@ Les images ont des **coins « cassés » avec petits repères décoratifs aux an
 | Propriété | Valeur |
 |-----------|--------|
 | Conteneur | 1300px max, centré (conteneur global du site) |
-| Dimensions | 1300 × 300px desktop, hauteur auto + min-height 280px < 1024px |
+| Dimensions | 1300 × 420px desktop, hauteur auto + min-height 280px < 1024px |
 | Coins arrondis | 20px |
 | Fond image | `/hero1.webp` (cover, position `center 65%`) |
 | Dégradé | `linear-gradient(to bottom, rgba(17,14,11,.82), rgba(17,14,11,.45) 55%, rgba(17,14,11,.62))` |
