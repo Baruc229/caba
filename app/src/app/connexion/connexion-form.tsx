@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
@@ -12,10 +12,26 @@ import {
   FaStar,
 } from "react-icons/fa6";
 
-export function ConnexionForm({ staffExists }: { staffExists: boolean }) {
+export function ConnexionForm() {
   const searchParams = useSearchParams();
   const echec = searchParams.get("echec");
   const succes = searchParams.get("succes");
+
+  // Contrôle différé après le premier rendu (page instantanée)
+  const [staffManquant, setStaffManquant] = useState(false);
+
+  useEffect(() => {
+    let actif = true;
+    fetch("/api/auth/staff-exists")
+      .then((response) => response.json())
+      .then((data) => {
+        if (actif && data.staffExists === false) setStaffManquant(true);
+      })
+      .catch(() => {});
+    return () => {
+      actif = false;
+    };
+  }, []);
 
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState(
@@ -89,7 +105,7 @@ export function ConnexionForm({ staffExists }: { staffExists: boolean }) {
           <p className="auth-eyebrow">Content de vous revoir</p>
           <h1 className="auth-display">Connexion</h1>
 
-          {!staffExists && (
+          {staffManquant && (
             <div className="auth-banner auth-banner--success" style={{ display: "flex", gap: 8 }}>
               <FaCircleInfo aria-hidden="true" style={{ flexShrink: 0, marginTop: 2 }} />
               <span>

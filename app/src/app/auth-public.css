@@ -573,40 +573,7 @@
   transition: transform 150ms ease;
 }
 
-/* ─── Responsive éditorial ─── */
-@media (max-width: 900px) {
-  /* La forme devient un bandeau haut réduit */
-  .auth-split {
-    grid-template-columns: 1fr;
-  }
-
-  .auth-side {
-    min-height: 150px;
-    padding: 24px 20px 34px;
-  }
-
-  .auth-side-shape {
-    top: 0;
-    right: -5%;
-    width: 110%;
-    height: 100%;
-    clip-path: polygon(0 0, 100% 0, 100% 62%, 0 100%);
-  }
-
-  .auth-proof {
-    display: none;
-  }
-
-  .auth-main {
-    align-items: flex-start;
-    padding: 36px 20px 48px;
-  }
-
-  .auth-display {
-    font-size: clamp(26px, 7vw, 32px);
-    margin-bottom: 28px;
-  }
-}
+/* ─── Responsive éditorial : voir bloc consolidé en fin de fichier ─── */
 
 @media (max-width: 480px) {
   /* Anti-zoom iOS */
@@ -782,24 +749,54 @@ a.auth-btn--link {
   cursor: not-allowed;
 }
 
-/* ─── Responsive inscription ─── */
+/* ═══════════════════════════════════════════════════════
+   MOBILE CONSOLIDÉ (≤900px) — tous les layouts auth
+   Pas de bandeau coloré ni de double marquage : une simple
+   ligne de logo discrète, puis le formulaire.
+   ═══════════════════════════════════════════════════════ */
 @media (max-width: 900px) {
-  /* La colonne citation devient un bandeau haut compact */
+  .auth-split,
   .auth-split--ins {
     grid-template-columns: 1fr;
   }
 
+  /* La colonne gauche dégénère en en-tête minimal */
+  .auth-side,
   .auth-side--quote {
-    gap: 18px;
-    padding: 24px 20px 30px;
+    min-height: 0;
+    gap: 0;
+    padding: 22px 20px 0;
+    background: none;
+    justify-content: flex-start;
   }
 
-  .auth-quote {
+  .auth-side-shape,
+  .auth-quote,
+  .auth-side-sign,
+  .auth-proof {
+    display: none;
+  }
+
+  /* Un seul logo, discret, aux couleurs de la marque */
+  .auth-brand--light {
+    margin-bottom: 0;
     font-size: 17px;
-    line-height: 1.35;
+    color: #001489;
   }
 
   .auth-main {
-    padding-top: 34px;
+    align-items: flex-start;
+    padding: 26px 20px 48px;
+  }
+
+  .auth-display {
+    font-size: clamp(26px, 7vw, 32px);
+    margin-bottom: 24px;
+  }
+
+  .auth-subtitle-v2 {
+    margin-bottom: 26px;
   }
 }
+
+/* ─── Responsive inscription : voir bloc consolidé en fin de fichier ─── */
