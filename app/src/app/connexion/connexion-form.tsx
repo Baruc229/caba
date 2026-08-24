@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
-import { FaArrowRight, FaEye, FaEyeSlash, FaCircleInfo } from "react-icons/fa6";
+import { FaArrowLeft, FaArrowRight, FaEye, FaEyeSlash, FaCircleInfo } from "react-icons/fa6";
 
 export function ConnexionForm() {
   const searchParams = useSearchParams();
@@ -74,8 +74,8 @@ export function ConnexionForm() {
   return (
     <div className="auth-page-v2">
       <div className="auth-panel">
-        <Link href="/" className="auth-brand">
-          Caba Résidence
+        <Link href="/" className="auth-home" aria-label="Retour au site">
+          <FaArrowLeft aria-hidden="true" />
         </Link>
 
         <p className="auth-eyebrow">Content de vous revoir</p>

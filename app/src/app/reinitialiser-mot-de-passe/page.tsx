@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createHash } from "crypto";
+import { FaArrowLeft } from "react-icons/fa6";
 import { prisma } from "@/lib/prisma";
 import { ResetForm } from "./reset-form";
 import "../auth-public.css";
@@ -12,6 +13,9 @@ function TokenInvalide() {
   return (
     <div className="auth-min">
       <div className="auth-panel">
+        <Link href="/" className="auth-home" aria-label="Retour au site">
+          <FaArrowLeft aria-hidden="true" />
+        </Link>
         <p className="auth-eyebrow">Oups</p>
         <h1 className="auth-display auth-display--sm">Lien expiré</h1>
         <p className="auth-subtitle-v2">
@@ -51,6 +55,9 @@ export default async function ReinitialiserMotDePassePage({
   return (
     <div className="auth-min">
       <div className="auth-panel">
+        <Link href="/" className="auth-home" aria-label="Retour au site">
+          <FaArrowLeft aria-hidden="true" />
+        </Link>
         <ResetForm token={token} />
       </div>
     </div>

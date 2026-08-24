@@ -1,6 +1,7 @@
 /* ═══════════════════════════════════════════════════════
    PAGES AUTH PUBLIQUES (connexion, inscription, reset)
-   Charte site public : pilule, Panama #D21034/#001489.
+   Bloc legacy ci-dessous : utilisé par la page d'invitation
+   interne (/invitation/[token]) uniquement.
    Préfixe .auth- — indépendant du back-office (.bo-)
    ═══════════════════════════════════════════════════════ */
 
@@ -84,7 +85,6 @@
     box-shadow 150ms ease;
 }
 
-/* Rangée de deux champs côte à côte (prénom/nom) */
 .auth-row-2 {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -102,10 +102,6 @@
   padding-right: 44px;
 }
 
-.auth-input:hover {
-  border-color: #cfc8ba;
-}
-
 .auth-input:focus {
   border-color: #001489;
   box-shadow: 0 0 0 3px rgba(0, 20, 137, 0.08);
@@ -118,7 +114,7 @@
 .auth-error-text {
   margin: 5px 0 0;
   font-size: 12px;
-  color: #d21034;
+  color: #ef4444;
 }
 
 .auth-eye {
@@ -141,24 +137,7 @@
   color: #001489;
 }
 
-/* Ligne mot de passe oublié */
-.auth-forgot {
-  display: flex;
-  justify-content: flex-end;
-  margin: -4px 0 18px;
-}
-
-.auth-forgot a {
-  font-size: 12.5px;
-  color: #001489;
-  text-decoration: none;
-}
-
-.auth-forgot a:hover {
-  text-decoration: underline;
-}
-
-/* ─── Bouton pilule pleine largeur ─── */
+/* ─── Bouton pilule pleine largeur (legacy invitation) ─── */
 .auth-submit {
   width: 100%;
   margin-top: 10px;
@@ -171,17 +150,15 @@
   font-size: 15px;
   font-weight: 700;
   cursor: pointer;
-  transition:
-    background-color 150ms ease,
-    transform 150ms ease;
+  transition: background-color 150ms ease;
 }
 
 .auth-submit:hover:not(:disabled) {
-  background-color: #b00d2c;
+  background-color: #b70e2e;
 }
 
 .auth-submit:active:not(:disabled) {
-  transform: scale(0.99);
+  background-color: #9c0b25;
 }
 
 .auth-submit:disabled {
@@ -198,15 +175,15 @@
 }
 
 .auth-banner--error {
-  background-color: rgba(210, 16, 52, 0.07);
-  border: 1px solid rgba(210, 16, 52, 0.25);
-  color: #d21034;
+  background-color: rgba(239, 68, 68, 0.07);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  color: #b91c1c;
 }
 
 .auth-banner--success {
-  background-color: rgba(0, 135, 81, 0.07);
-  border: 1px solid rgba(0, 135, 81, 0.25);
-  color: #008751;
+  background-color: rgba(22, 163, 74, 0.07);
+  border: 1px solid rgba(22, 163, 74, 0.25);
+  color: #15803d;
 }
 
 /* ─── Footer de card ─── */
@@ -248,20 +225,20 @@
 }
 
 .auth-strength-seg.is-1 {
-  background-color: #d21034;
+  background-color: #ef4444;
 }
 
 .auth-strength-seg.is-2 {
-  background-color: #ba7517;
+  background-color: #f59e0b;
 }
 
 .auth-strength-seg.is-3 {
-  background-color: #008751;
+  background-color: #16a34a;
 }
 
 .auth-strength-label {
   margin-top: 5px;
-  font-size: 11.5px;
+  font-size: 12px;
   color: #6b6459;
 }
 
@@ -282,7 +259,7 @@
 }
 
 .auth-criteria li.is-ok {
-  color: #008751;
+  color: #16a34a;
 }
 
 /* ─── Cases à cocher ─── */
@@ -291,7 +268,7 @@
   align-items: flex-start;
   gap: 9px;
   margin-bottom: 14px;
-  font-size: 12.5px;
+  font-size: 13px;
   line-height: 1.45;
   color: #6b6459;
 }
@@ -301,7 +278,7 @@
   height: 16px;
   margin-top: 2px;
   flex-shrink: 0;
-  accent-color: #d21034;
+  accent-color: #001489;
   cursor: pointer;
 }
 
@@ -311,10 +288,10 @@
 }
 
 .auth-check.has-error {
-  color: #d21034;
+  color: #ef4444;
 }
 
-/* Écran de succès (après réinitialisation) */
+/* Écran de succès */
 .auth-success-icon {
   display: flex;
   align-items: center;
@@ -323,12 +300,12 @@
   height: 56px;
   margin: 4px auto 16px;
   border-radius: 50%;
-  background-color: rgba(0, 135, 81, 0.09);
-  color: #008751;
+  background-color: rgba(22, 163, 74, 0.09);
+  color: #16a34a;
   font-size: 22px;
 }
 
-/* ─── Responsive ─── */
+/* ─── Responsive legacy ─── */
 @media (max-width: 480px) {
   .auth-page {
     padding: 28px 14px;
@@ -340,7 +317,6 @@
     border-radius: 18px;
   }
 
-  /* Évite le zoom automatique iOS sur les champs */
   .auth-input {
     font-size: 16px;
   }
@@ -352,75 +328,130 @@
   .auth-btn-arrow,
   .auth-strength-seg,
   .auth-input,
-  .lfield-input {
+  .lfield-input,
+  .auth-eye {
     transition: none;
   }
 }
 
 /* ═══════════════════════════════════════════════════════
-   V2 — LAYOUT ÉDITORIAL (direction hospitalité)
-   Titres display italique condensé MAJ, champs en ligne
-   (trait bas), boutons pilule à flèche, alignement gauche.
+   V3 — PAGES AUTH PUBLIQUES, CONFORMES AU DESIGN SYSTEM
+   docs/design-system.md :
+   • tokens @theme exclusivement (aucun hex hors dégradés
+     translucides dérivés des tokens) ;
+   • rouge #D21034 réservé aux boutons d'action ;
+   • sur-titres et liens actifs en bleu Panama #001489 ;
+   • champs : fond blanc, bordure 1px #8A8175 (WCAG 1.4.11),
+     ring bleu au focus, placeholder #6B6459 pleine opacité ;
+   • cards blanches : bordure subtile + ombre bicouche ;
+   • erreurs #EF4444, succès #16A34A, attention #F59E0B ;
+   • aucun texte < 12px, cibles tactiles >= 44px.
    ═══════════════════════════════════════════════════════ */
 
-/* ─── Colonne unique éditoriale ─── */
+/* ─── Gabarit : colonne unique, contenu aligné à gauche ─── */
 .auth-page-v2 {
-  min-height: 100vh;
   display: flex;
+  flex-direction: column;
+  align-items: center;
   justify-content: center;
-  align-items: flex-start;
-  padding: 64px 20px 56px;
-  background-color: #f7f5f1;
+  min-height: 100vh;
+  padding: 32px 16px;
+  background-color: var(--color-bg-primary);
 }
 
-.auth-page-v2 .auth-panel {
-  width: 100%;
-}
-
-/* Logo discret en tête de panneau (une seule fois par page) */
-.auth-page-v2 .auth-brand {
-  margin-bottom: 26px;
-  font-size: 18px;
-}
-
+/* Card du formulaire (§9.3) : fond blanc, bordure décorative
+   subtile ET ombre bicouche obligatoire */
 .auth-panel {
-  max-width: 420px;
+  width: 100%;
+  max-width: 460px;
+  padding: 28px 22px;
+  background-color: var(--color-bg-card);
+  border: 0.5px solid var(--color-border-subtle);
+  border-radius: var(--radius-card-lg);
+  box-shadow: var(--shadow-card);
 }
 
-/* ─── Accroche + titre éditorial ─── */
+.auth-panel--wide {
+  max-width: 560px;
+}
+
+@media (min-width: 640px) {
+  .auth-page-v2 {
+    padding: 48px 24px;
+  }
+
+  .auth-panel {
+    padding: 42px 42px 38px;
+  }
+}
+
+/* Retour site : icône seule — pas de nom de marque répété */
+.auth-home {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin-bottom: 10px;
+  margin-left: -12px;
+  border-radius: 999px;
+  color: var(--color-text-secondary);
+  transition:
+    color 150ms ease,
+    background-color 150ms ease;
+}
+
+.auth-home:hover {
+  color: var(--color-accent-secondary);
+  background-color: rgba(0, 20, 137, 0.06);
+}
+
+/* ─── Sur-titre bleu Panama (§2.2 : les sur-titres sont bleus,
+       le rouge reste réservé aux CTA) ─── */
 .auth-eyebrow {
   margin: 0 0 10px;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: #d21034;
+  color: var(--color-accent-secondary);
 }
 
+/* ─── Titre éditorial (§3 : Anton italique MAJUSCULES) ─── */
 .auth-display {
-  margin: 0 0 36px;
+  margin: 0 0 12px;
   font-family: var(--font-display);
   font-style: italic;
   text-transform: uppercase;
-  font-size: clamp(32px, 3.4vw, 42px);
+  font-size: clamp(30px, 4vw, 44px);
   letter-spacing: 0.01em;
   line-height: 1.05;
-  color: #1a1a1a;
+  color: var(--color-text-primary);
 }
 
-/* ─── Champs en boîte arrondie ─── */
+.auth-display--sm {
+  font-size: clamp(26px, 3vw, 36px);
+}
+
+/* Sous-titre d'hospitalité — corps 16px (§3.2) */
+.auth-subtitle-v2 {
+  margin: -4px 0 26px;
+  font-size: 16px;
+  line-height: 1.55;
+  color: var(--color-text-secondary);
+}
+
+/* ─── Champs de formulaire (§9.2, règle pour règle) ─── */
 .lfield {
-  margin-bottom: 20px;
+  margin-bottom: 18px;
 }
 
 .lfield-label {
   display: block;
-  margin-bottom: 7px;
-  font-size: 11.5px;
+  margin-bottom: 8px;
+  font-size: 13px;
   font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: #6b6459;
+  color: var(--color-text-primary);
 }
 
 .lfield-box {
@@ -432,92 +463,126 @@
 .lfield-input {
   width: 100%;
   padding: 13px 16px;
-  border: 1px solid #e0dad0;
-  border-radius: 12px;
-  background-color: #ffffff;
+  background-color: var(--color-bg-card);
+  border: 1px solid var(--color-border-input); /* #8A8175 — WCAG 1.4.11 */
+  border-radius: var(--radius-card);
   font-family: inherit;
-  font-size: 15px;
-  color: #1a1a1a;
+  font-size: 16px;
+  color: var(--color-text-primary);
   outline: none;
   transition:
     border-color 150ms ease,
     box-shadow 150ms ease;
 }
 
-.lfield-box .lfield-input--eye {
-  padding-right: 46px;
+/* Placeholder descriptif, #6B6459 pleine opacité (§9.2) */
+.lfield-input::placeholder {
+  color: var(--color-text-secondary);
+  opacity: 1;
 }
 
-.lfield-input:hover {
-  border-color: #cfc8ba;
-}
-
+/* Focus : ring bleu Panama (§2.3) */
 .lfield-input:focus {
-  border-color: #001489;
-  box-shadow: 0 0 0 3px rgba(0, 20, 137, 0.08);
+  border-color: var(--color-accent-secondary);
+  box-shadow: 0 0 0 3px rgba(0, 20, 137, 0.12);
 }
 
 .lfield.has-error .lfield-input {
-  border-color: #d21034;
+  border-color: var(--color-error);
 }
 
 .lfield.has-error .lfield-input:focus {
-  box-shadow: 0 0 0 3px rgba(210, 16, 52, 0.08);
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12);
 }
 
-/* Lien oublié, aligné sous le champ mot de passe */
+.lfield-box .lfield-input--eye {
+  padding-right: 52px;
+}
+
+/* Message d'erreur sous le champ (§9.2) — #EF4444 */
+.auth-error-text {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: var(--color-error);
+}
+
+/* Œil afficher/masquer — cible tactile 44px, icône grise,
+   survol bleu (§4.3) */
+.auth-eye {
+  position: absolute;
+  right: 5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: color 150ms ease;
+}
+
+.auth-eye:hover {
+  color: var(--color-accent-secondary);
+}
+
+/* Lien « Mot de passe oublié ? » : ghost gris -> bleu (§9.1) */
 .lfield-forgot {
   display: flex;
   justify-content: flex-end;
-  margin: -8px 0 24px;
+  margin: -6px 0 20px;
+  font-size: 14px;
 }
 
 .lfield-forgot a {
-  font-size: 12.5px;
-  color: #001489;
+  color: var(--color-text-secondary);
   text-decoration: none;
+  transition: color 150ms ease;
 }
 
 .lfield-forgot a:hover {
-  text-decoration: underline;
+  color: var(--color-accent-secondary);
 }
 
-/* ─── Bouton pilule à flèche ─── */
+/* ─── Bouton pilule CTA (§9.1 primaire : états exacts du DS) ── */
 .auth-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
   width: 100%;
-  margin-top: 6px;
-  padding: 15px 26px;
+  min-height: 48px;
+  margin-top: 8px;
+  padding: 12px 26px;
   border: none;
   border-radius: 999px;
-  background-color: #d21034;
-  color: #ffffff;
+  background-color: var(--color-accent);
+  color: var(--color-on-accent);
   font-family: inherit;
-  font-size: 15px;
-  font-weight: 700;
+  font-size: 16px;
+  font-weight: 600;
   cursor: pointer;
-  transition:
-    background-color 150ms ease,
-    transform 150ms ease;
+  transition: background-color 150ms ease;
 }
 
 .auth-btn:hover:not(:disabled) {
-  background-color: #b00d2c;
+  background-color: var(--color-accent-hover);
+}
+
+.auth-btn:active:not(:disabled) {
+  background-color: var(--color-accent-active);
 }
 
 .auth-btn:hover:not(:disabled) .auth-btn-arrow {
   transform: translateX(4px);
 }
 
-.auth-btn:active:not(:disabled) {
-  transform: scale(0.99);
-}
-
+/* Désactivé : gris #6B6459 à 50 % (§2.3) */
 .auth-btn:disabled {
-  opacity: 0.55;
+  background-color: var(--color-text-secondary);
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
@@ -525,128 +590,243 @@
   transition: transform 150ms ease;
 }
 
-/* ─── Responsive éditorial : voir bloc consolidé en fin de fichier ─── */
-
-@media (max-width: 480px) {
-  /* Anti-zoom iOS */
-  .lfield-input {
-    font-size: 16px;
-  }
+/* Variante lien (écrans profil existant / lien expiré) */
+a.auth-btn--link,
+span.auth-btn--link {
+  display: inline-flex;
+  width: auto;
+  min-width: 220px;
+  text-decoration: none;
 }
 
-/* ─── Panneau large (inscription) ─── */
-.auth-panel--wide {
-  max-width: 520px;
-}
-
-/* Sous-titre d'hospitalité sous le titre éditorial */
-.auth-subtitle-v2 {
-  margin: -20px 0 30px;
+/* ─── Messages : erreur #EF4444, succès #16A34A (§2.2) ─── */
+.auth-banner {
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  border-radius: var(--radius-card);
   font-size: 14px;
-  line-height: 1.55;
-  color: #6b6459;
+  line-height: 1.45;
 }
 
-/* Titre éditorial réduit pour les pages sobres */
-.auth-display--sm {
-  font-size: clamp(28px, 3vw, 36px);
+.auth-banner--error {
+  background-color: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #b91c1c;
+}
+
+.auth-banner--success {
+  background-color: rgba(22, 163, 74, 0.08);
+  border: 1px solid rgba(22, 163, 74, 0.3);
+  color: #15803d;
+}
+
+/* ─── Footer de card ─── */
+.auth-footer {
+  margin-top: 24px;
+  padding-top: 18px;
+  border-top: 0.5px solid var(--color-border-subtle);
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+.auth-footer a {
+  color: var(--color-accent-secondary);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.auth-footer a:hover {
+  text-decoration: underline;
+}
+
+/* ─── Force du mot de passe : erreur/attention/succès DS ─── */
+.auth-strength {
+  margin-top: 8px;
+}
+
+.auth-strength-bar {
+  display: flex;
+  gap: 4px;
+}
+
+.auth-strength-seg {
+  height: 4px;
+  flex: 1;
+  border-radius: 999px;
+  background-color: var(--color-border-subtle);
+  transition: background-color 200ms ease;
+}
+
+.auth-strength-seg.is-1 {
+  background-color: var(--color-error);
+}
+
+.auth-strength-seg.is-2 {
+  background-color: var(--color-warning);
+}
+
+.auth-strength-seg.is-3 {
+  background-color: var(--color-success);
+}
+
+.auth-strength-label {
+  margin-top: 5px;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.auth-criteria {
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 3px;
+}
+
+.auth-criteria li {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.auth-criteria li.is-ok {
+  color: var(--color-success);
+}
+
+/* ─── Cases à cocher : accent bleu (le rouge reste aux CTA) ── */
+.auth-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
   margin-bottom: 14px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--color-text-secondary);
+}
+
+.auth-check input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
+  flex-shrink: 0;
+  accent-color: var(--color-accent-secondary);
+  cursor: pointer;
+}
+
+.auth-check a {
+  color: var(--color-accent-secondary);
+  text-decoration: underline;
+}
+
+.auth-check.has-error {
+  color: var(--color-error);
+}
+
+/* Écran de succès */
+.auth-success-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  margin: 4px auto 16px;
+  border-radius: 50%;
+  background-color: rgba(22, 163, 74, 0.09);
+  color: var(--color-success);
+  font-size: 22px;
 }
 
 /* ─── Sections thématiques de l'inscription ───
-    Label petites majuscules + trait fin, sans numérotation */
+    Sur-titre bleu + trait décoratif fin */
 .lsection {
-  margin-bottom: 26px;
+  margin-bottom: 24px;
 }
 
 .lsection-title {
   display: flex;
   align-items: center;
   gap: 14px;
-  margin: 0 0 18px;
-  font-size: 11px;
+  margin: 0 0 16px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: #40311f;
+  color: var(--color-accent-secondary);
 }
 
 .lsection-title::after {
   content: "";
   flex: 1;
   height: 1px;
-  background-color: #e3dccd;
+  background-color: var(--color-border-subtle);
 }
 
+/* Paires côte à côte quand la structure le permet */
 .lrow-2 {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  column-gap: 24px;
+  column-gap: 16px;
 }
 
-@media (max-width: 560px) {
-  .lrow-2 {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* Lien-bouton pilule (écrans email existant / lien expiré) */
-.auth-btn--link {
-  text-decoration: none;
-}
-
-/* Bouton pilule dans un contexte de lien : largeur naturelle */
-span.auth-btn--link,
-a.auth-btn--link {
-  display: inline-flex;
-  width: auto;
-  min-width: 220px;
-}
-
-/* ─── Pages sobres (mot de passe oublié, réinitialisation) ─── */
+/* ─── Pages sobres (mot de passe oublié, réinitialisation) ── */
 .auth-min {
-  min-height: 100vh;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 48px 20px;
-  background-color: #f7f5f1;
+  min-height: 100vh;
+  padding: 32px 16px;
+  background-color: var(--color-bg-primary);
 }
 
 .auth-min .auth-panel {
   max-width: 420px;
 }
 
+@media (min-width: 640px) {
+  .auth-min {
+    padding: 48px 24px;
+  }
+
+  .auth-min .auth-panel {
+    padding: 38px 36px 34px;
+  }
+}
+
+/* Icône d'état dans un cercle discret — icônes bleues (§4.3) */
 .auth-icon-circle {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 54px;
-  height: 54px;
-  margin-bottom: 20px;
+  width: 56px;
+  height: 56px;
+  margin-bottom: 18px;
   border-radius: 50%;
-  background-color: rgba(210, 16, 52, 0.08);
-  color: #d21034;
-  font-size: 19px;
+  background-color: rgba(0, 20, 137, 0.07);
+  color: var(--color-accent-secondary);
+  font-size: 20px;
 }
 
 .auth-back-link {
   display: inline-block;
-  margin-top: 26px;
-  font-size: 13px;
-  color: #6b6459;
+  margin-top: 24px;
+  font-size: 14px;
+  color: var(--color-text-secondary);
   text-decoration: none;
+  transition: color 150ms ease;
 }
 
 .auth-back-link:hover {
-  color: #001489;
-  text-decoration: underline;
+  color: var(--color-accent-secondary);
 }
 
 /* Renvoi du lien avec délai anti-spam */
 .auth-resend {
-  margin: -16px 0 0;
-  font-size: 13.5px;
+  margin: -12px 0 0;
+  font-size: 14px;
+  color: var(--color-text-secondary);
 }
 
 .auth-resend-btn {
@@ -656,7 +836,7 @@ a.auth-btn--link {
   font-family: inherit;
   font-size: inherit;
   font-weight: 600;
-  color: #001489;
+  color: var(--color-accent-secondary);
   cursor: pointer;
 }
 
@@ -665,40 +845,27 @@ a.auth-btn--link {
 }
 
 .auth-resend-btn:disabled {
-  color: #b9ae9c;
+  color: var(--color-border-input);
   cursor: not-allowed;
 }
 
-/* ═══════════════════════════════════════════════════════
-   MOBILE CONSOLIDÉ — colonne unique sur tous les layouts
-   ═══════════════════════════════════════════════════════ */
-@media (max-width: 900px) {
-  .auth-page-v2 {
-    padding-top: 44px;
-  }
-}
-
+/* ─── Responsive (§6 : mobile first, zéro débordement) ─── */
 @media (max-width: 560px) {
-  /* Paires empilées quand la structure le demande */
   .lrow-2 {
     grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 480px) {
-  .auth-page-v2 {
-    padding: 32px 14px 40px;
+  .auth-panel {
+    padding: 26px 18px 24px;
+  }
+
+  .auth-panel--wide {
+    padding: 26px 18px 24px;
   }
 
   .auth-display {
     font-size: clamp(26px, 7vw, 30px);
-    margin-bottom: 22px;
-  }
-
-  /* Anti-zoom iOS */
-  .lfield-input {
-    font-size: 16px;
   }
 }
-
-/* ─── Responsive inscription : voir bloc consolidé en fin de fichier ─── */

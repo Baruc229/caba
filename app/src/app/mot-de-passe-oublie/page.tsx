@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { FaArrowLeft, FaArrowRight, FaEnvelopeOpenText, FaLock } from "react-icons/fa6";
 import Link from "next/link";
-import { FaArrowRight, FaEnvelopeOpenText, FaLock } from "react-icons/fa6";
 
 export default function MotDePasseOubliePage() {
   const [submitted, setSubmitted] = useState(false);
@@ -49,6 +49,9 @@ export default function MotDePasseOubliePage() {
   return (
     <div className="auth-min">
       <div className="auth-panel">
+        <Link href="/" className="auth-home" aria-label="Retour au site">
+          <FaArrowLeft aria-hidden="true" />
+        </Link>
         <p className="auth-eyebrow">Pas d&apos;inquiétude</p>
         <h1 className="auth-display auth-display--sm">Récupérez l&apos;accès</h1>
 

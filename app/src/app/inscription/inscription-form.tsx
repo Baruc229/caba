@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
-import { FaArrowRight, FaEye, FaEyeSlash } from "react-icons/fa6";
+import { FaArrowLeft, FaArrowRight, FaEye, FaEyeSlash } from "react-icons/fa6";
 import {
   CriteriaList,
   StrengthMeter,
@@ -138,8 +138,8 @@ export function InscriptionForm() {
     return (
       <div className="auth-page-v2">
         <div className="auth-panel auth-panel--wide">
-          <Link href="/" className="auth-brand">
-            Caba Résidence
+          <Link href="/" className="auth-home" aria-label="Retour au site">
+            <FaArrowLeft aria-hidden="true" />
           </Link>
           <p className="auth-eyebrow">Déjà parmi nous ?</p>
           <h1 className="auth-display">Profil existant</h1>
@@ -162,8 +162,8 @@ export function InscriptionForm() {
     <div className="auth-page-v2">
       {/* Page continue : identité -> contact -> sécurité, sans étapes */}
       <div className="auth-panel auth-panel--wide">
-        <Link href="/" className="auth-brand">
-          Caba Résidence
+        <Link href="/" className="auth-home" aria-label="Retour au site">
+          <FaArrowLeft aria-hidden="true" />
         </Link>
         <p className="auth-eyebrow">Bienvenue chez nous</p>
           <h1 className="auth-display">Créez votre profil</h1>
