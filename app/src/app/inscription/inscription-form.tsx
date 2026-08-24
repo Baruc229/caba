@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
-import { FaEye, FaEyeSlash, FaCircleCheck } from "react-icons/fa6";
+import { FaEye, FaEyeSlash } from "react-icons/fa6";
 import {
   CriteriaList,
   StrengthMeter,
@@ -12,7 +12,6 @@ import {
 } from "@/components/auth/password-strength";
 
 export function InscriptionForm() {
-  const router = useRouter();
   const searchParams = useSearchParams();
 
   // Pré-remplissage depuis le lien WhatsApp (prenom, nom, telephone)
@@ -95,19 +94,18 @@ export function InscriptionForm() {
     }
 
     // Connexion automatique puis redirection (client -> site public)
-    const login = await signIn("credentials", {
-      email: values.email,
-      password: values.password,
-      redirect: false,
-    });
-
-    if (login?.error) {
-      router.push("/connexion");
-      return;
+    try {
+      await signIn("credentials", {
+        email: values.email,
+        password: values.password,
+        redirectTo: "/",
+      });
+    } catch {
+      setStatus("idle");
+      setError(
+        "Compte créé, mais la connexion automatique a échoué. Connectez-vous manuellement."
+      );
     }
-
-    router.push("/");
-    router.refresh();
   }
 
   function fieldError(name: string) {
@@ -142,6 +140,9 @@ export function InscriptionForm() {
         Caba Résidence
       </Link>
       <h1 className="auth-title">Créer un compte</h1>
+      <p className="auth-subtitle" style={{ marginTop: -2 }}>
+        Réservez vos séjours et suivez vos demandes en quelques minutes.
+      </p>
 
       {error && (
         <p role="alert" className="auth-banner auth-banner--error">
@@ -150,34 +151,36 @@ export function InscriptionForm() {
       )}
 
       <form onSubmit={handleSubmit} noValidate>
-        <div className="auth-field">
-          <label htmlFor="ins-prenom" className="auth-label">
-            Prénom *
-          </label>
-          <input
-            id="ins-prenom"
-            name="prenom"
-            type="text"
-            autoComplete="given-name"
-            defaultValue={prefillPrenom}
-            className="auth-input"
-          />
-          {fieldError("prenom")}
-        </div>
+        <div className="auth-row-2">
+          <div className="auth-field">
+            <label htmlFor="ins-prenom" className="auth-label">
+              Prénom *
+            </label>
+            <input
+              id="ins-prenom"
+              name="prenom"
+              type="text"
+              autoComplete="given-name"
+              defaultValue={prefillPrenom}
+              className="auth-input"
+            />
+            {fieldError("prenom")}
+          </div>
 
-        <div className="auth-field">
-          <label htmlFor="ins-nom" className="auth-label">
-            Nom *
-          </label>
-          <input
-            id="ins-nom"
-            name="nom"
-            type="text"
-            autoComplete="family-name"
-            defaultValue={prefillNom}
-            className="auth-input"
-          />
-          {fieldError("nom")}
+          <div className="auth-field">
+            <label htmlFor="ins-nom" className="auth-label">
+              Nom *
+            </label>
+            <input
+              id="ins-nom"
+              name="nom"
+              type="text"
+              autoComplete="family-name"
+              defaultValue={prefillNom}
+              className="auth-input"
+            />
+            {fieldError("nom")}
+          </div>
         </div>
 
         <div className="auth-field">
@@ -267,14 +270,7 @@ export function InscriptionForm() {
         </label>
 
         <button type="submit" className="auth-submit" disabled={status === "loading"}>
-          {status === "loading" ? (
-            "Création…"
-          ) : (
-            <>
-              <FaCircleCheck aria-hidden="true" style={{ marginRight: 8 }} />
-              Créer mon compte
-            </>
-          )}
+          {status === "loading" ? "Création…" : "Créer mon compte"}
         </button>
       </form>
 

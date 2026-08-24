@@ -1,18 +1,21 @@
 ﻿"use client";
 
 import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { FaEye, FaEyeSlash, FaCircleInfo } from "react-icons/fa6";
 
 export function ConnexionForm({ staffExists }: { staffExists: boolean }) {
-  const router = useRouter();
   const searchParams = useSearchParams();
-  const nextUrl = searchParams.get("next");
+  const echec = searchParams.get("echec");
 
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState(
+    echec
+      ? "Identifiants incorrects. Vérifiez votre email et votre mot de passe — ou réinitialisez-le via « Mot de passe oublié ? »."
+      : ""
+  );
   const [status, setStatus] = useState<"idle" | "loading">("idle");
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
@@ -40,32 +43,15 @@ export function ConnexionForm({ staffExists }: { staffExists: boolean }) {
     if (!valid) return;
 
     setStatus("loading");
-    const result = await signIn("credentials", {
-      email,
-      password,
-      redirect: false,
-    });
-
-    if (result?.error) {
-      setError(
-        "Identifiants incorrects. Vérifiez votre email et votre mot de passe" +
-          " — ou réinitialisez-le via « Mot de passe oublié ? »."
-      );
+    try {
+      // Flux natuel NextAuth v5 : il redirige lui-même vers /redirection,
+      // qui envoie vers /admin (équipe) ou / (client).
+      // Identifiants invalides -> retour ici avec ?echec=1.
+      await signIn("credentials", { email, password, redirectTo: "/redirection" });
+    } catch {
+      setError("Une erreur est survenue. Réessayez dans un instant.");
       setStatus("idle");
-      return;
     }
-
-    // Redirection selon le rôle : staff -> back-office, client -> site
-    const sessionRes = await fetch("/api/auth/session");
-    const session = await sessionRes.json();
-    const role = session?.user?.role;
-
-    if (role && role !== "client") {
-      router.push(nextUrl && nextUrl.startsWith("/admin") ? nextUrl : "/admin");
-    } else {
-      router.push("/");
-    }
-    router.refresh();
   }
 
   return (
@@ -73,7 +59,10 @@ export function ConnexionForm({ staffExists }: { staffExists: boolean }) {
       <Link href="/" className="auth-brand">
         Caba Résidence
       </Link>
-      <p className="auth-subtitle">Connectez-vous à votre espace</p>
+      <h1 className="auth-title">Connexion</h1>
+      <p className="auth-subtitle" style={{ marginTop: -2 }}>
+        Connectez-vous à votre espace
+      </p>
 
       {!staffExists && (
         <div className="auth-banner auth-banner--success" style={{ display: "flex", gap: 8 }}>
