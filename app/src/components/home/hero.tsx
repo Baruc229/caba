@@ -12,6 +12,7 @@ import {
   FaStar,
   FaUserGroup,
 } from "react-icons/fa6";
+import { Select } from "@/components/ui/select";
 
 const TODAY = new Date().toISOString().slice(0, 10);
 
@@ -238,46 +239,58 @@ function GuestsField() {
 function AdvancedFilters({ options }: { options: FilterOptions | null }) {
   return (
     <div className="filters-panel" id="filtres-avances">
-      <div className="filters-group">
+      <div className="filters-group filters-group--wide">
         <label htmlFor="filter-type" className="search-label">
           Type de logement
         </label>
-        <select id="filter-type" name="type" className="filters-select" defaultValue="">
-          <option value="">Tous les types</option>
-          {(options?.types ?? []).map((t) => (
-            <option key={t.type} value={t.type}>
-              {PROPERTY_TYPE_LABELS[t.type] ?? t.type} ({t.count})
-            </option>
-          ))}
-        </select>
+        <Select
+          id="filter-type"
+          name="type"
+          ariaLabel="Type de logement"
+          placeholder="Tous les types"
+          defaultValue=""
+          options={[
+            { value: "", label: "Tous les types" },
+            ...(options?.types ?? []).map((t) => ({
+              value: t.type,
+              label: `${PROPERTY_TYPE_LABELS[t.type] ?? t.type} (${t.count})`,
+            })),
+          ]}
+        />
       </div>
 
       <div className="filters-group filters-group--small">
         <label htmlFor="filter-chambres" className="search-label">
           Chambres (min)
         </label>
-        <select id="filter-chambres" name="chambres" className="filters-select" defaultValue="">
-          <option value="">Peu importe</option>
-          {[1, 2, 3, 4].map((n) => (
-            <option key={n} value={n}>
-              {n}+
-            </option>
-          ))}
-        </select>
+        <Select
+          id="filter-chambres"
+          name="chambres"
+          ariaLabel="Nombre de chambres minimum"
+          placeholder="Peu importe"
+          defaultValue=""
+          options={[
+            { value: "", label: "Peu importe" },
+            ...[1, 2, 3, 4].map((n) => ({ value: String(n), label: `${n}+` })),
+          ]}
+        />
       </div>
 
       <div className="filters-group filters-group--small">
         <label htmlFor="filter-lits" className="search-label">
           Lits (min)
         </label>
-        <select id="filter-lits" name="lits" className="filters-select" defaultValue="">
-          <option value="">Peu importe</option>
-          {[1, 2, 3, 4].map((n) => (
-            <option key={n} value={n}>
-              {n}+
-            </option>
-          ))}
-        </select>
+        <Select
+          id="filter-lits"
+          name="lits"
+          ariaLabel="Nombre de lits minimum"
+          placeholder="Peu importe"
+          defaultValue=""
+          options={[
+            { value: "", label: "Peu importe" },
+            ...[1, 2, 3, 4].map((n) => ({ value: String(n), label: `${n}+` })),
+          ]}
+        />
       </div>
 
       <div className="filters-group filters-group--price">
@@ -410,19 +423,18 @@ export function Hero() {
               </label>
               <div className="search-value">
                 <FaClock aria-hidden="true" size={15} />
-                <select
+                <Select
                   id="type-reservation"
+                  variant="field"
+                  ariaLabel="Type de séjour"
                   name="typeReservation"
-                  className="search-input search-select"
+                  options={SEJOUR_TYPES.map((type) => ({
+                    value: type.value,
+                    label: type.label,
+                  }))}
                   value={sejourType}
-                  onChange={(event) => setSejourType(event.target.value)}
-                >
-                  {SEJOUR_TYPES.map((type) => (
-                    <option key={type.value} value={type.value}>
-                      {type.label}
-                    </option>
-                  ))}
-                </select>
+                  onChange={(nextValue) => setSejourType(nextValue)}
+                />
               </div>
             </div>
 
@@ -442,26 +454,30 @@ export function Hero() {
                   <label htmlFor="heure-arrivee" className="search-label">
                     Heure d&apos;arrivée
                   </label>
-                  <input
-                    id="heure-arrivee"
-                    name="heureArrivee"
-                    type="time"
-                    defaultValue="08:00"
-                    className="search-input"
-                  />
+                  <div className="search-value">
+                    <input
+                      id="heure-arrivee"
+                      name="heureArrivee"
+                      type="time"
+                      defaultValue="08:00"
+                      className="search-input"
+                    />
+                  </div>
                 </div>
                 <span aria-hidden="true" className="hours-sep">→</span>
                 <div className="search-field hours-field">
                   <label htmlFor="heure-depart" className="search-label">
                     Heure de départ
                   </label>
-                  <input
-                    id="heure-depart"
-                    name="heureDepart"
-                    type="time"
-                    defaultValue="18:00"
-                    className="search-input"
-                  />
+                  <div className="search-value">
+                    <input
+                      id="heure-depart"
+                      name="heureDepart"
+                      type="time"
+                      defaultValue="18:00"
+                      className="search-input"
+                    />
+                  </div>
                 </div>
               </div>
             )}

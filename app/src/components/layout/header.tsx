@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { FaBars, FaXmark } from "react-icons/fa6";
+import { Segmented } from "@/components/ui/segmented";
 import {
   CurrencySwitcher,
   useCurrency,
@@ -49,29 +50,15 @@ export function Header() {
   const closeDrawer = useCallback(() => setDrawerOpen(false), []);
 
   const langSwitch = (
-    <div className="flex items-center gap-1 text-sm" role="group" aria-label="Choix de la langue">
-      <button
-        type="button"
-        onClick={() => setLang("fr")}
-        aria-pressed={lang === "fr"}
-        className={`px-1 transition-colors ${
-          lang === "fr" ? "font-semibold text-text-primary" : "text-text-secondary hover:text-text-primary"
-        }`}
-      >
-        FR
-      </button>
-      <span className="text-border-subtle" aria-hidden="true">|</span>
-      <button
-        type="button"
-        onClick={() => setLang("en")}
-        aria-pressed={lang === "en"}
-        className={`px-1 transition-colors ${
-          lang === "en" ? "font-semibold text-text-primary" : "text-text-secondary hover:text-text-primary"
-        }`}
-      >
-        EN
-      </button>
-    </div>
+    <Segmented
+      ariaLabel="Choix de la langue"
+      options={[
+        { value: "fr", label: "FR" },
+        { value: "en", label: "EN" },
+      ]}
+      value={lang}
+      onChange={setLang}
+    />
   );
 
   return (

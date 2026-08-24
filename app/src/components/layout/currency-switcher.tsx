@@ -1,6 +1,7 @@
 "use client";
 
-import { Fragment, useSyncExternalStore } from "react";
+import { useSyncExternalStore } from "react";
+import { Segmented } from "@/components/ui/segmented";
 
 export const CURRENCIES = ["EUR", "FCFA"] as const;
 
@@ -54,32 +55,15 @@ export function CurrencySwitcher({
   className?: string;
 }) {
   return (
-    <div
-      className={`flex items-center gap-1 text-sm ${className}`}
-      role="group"
-      aria-label="Choix de la devise"
-    >
-      {CURRENCIES.map((item, index) => (
-        <Fragment key={item}>
-          {index > 0 && (
-            <span className="text-border-subtle" aria-hidden="true">
-              |
-            </span>
-          )}
-          <button
-            type="button"
-            onClick={() => onChange(item)}
-            aria-pressed={currency === item}
-            className={`px-1 transition-colors ${
-              currency === item
-                ? "font-semibold text-text-primary"
-                : "text-text-secondary hover:text-text-primary"
-            }`}
-          >
-            {item}
-          </button>
-        </Fragment>
-      ))}
-    </div>
+    <Segmented
+      ariaLabel="Choix de la devise"
+      className={className}
+      options={[
+        { value: "EUR", label: "EUR" },
+        { value: "FCFA", label: "FCFA" },
+      ]}
+      value={currency}
+      onChange={onChange}
+    />
   );
 }
