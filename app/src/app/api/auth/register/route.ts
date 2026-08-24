@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { email, password, nom, prenom, telephone } = body;
+    const { email, password, nom, prenom, telephone, cgvAcceptees, marketingOptIn } = body;
 
     if (!email || !password || !nom || !prenom) {
       return NextResponse.json(
@@ -14,20 +14,37 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (password.length < 8) {
+    if (
+      typeof password !== "string" ||
+      password.length < 8 ||
+      !/[A-Z]/.test(password) ||
+      !/\d/.test(password)
+    ) {
       return NextResponse.json(
-        { error: "Le mot de passe doit contenir au moins 8 caracteres" },
+        {
+          error:
+            "Le mot de passe doit contenir au moins 8 caracteres, une majuscule et un chiffre",
+        },
         { status: 400 }
       );
     }
 
+    if (!cgvAcceptees) {
+      return NextResponse.json(
+        { error: "Vous devez accepter les CGV et la politique de confidentialite" },
+        { status: 400 }
+      );
+    }
+
+    const normalizedEmail = String(email).toLowerCase().trim();
+
     const existingUser = await prisma.user.findUnique({
-      where: { email },
+      where: { email: normalizedEmail },
     });
 
     if (existingUser) {
       return NextResponse.json(
-        { error: "Un compte avec cet email existe deja" },
+        { error: "Un compte existe deja avec cet email" },
         { status: 409 }
       );
     }
@@ -36,12 +53,14 @@ export async function POST(request: NextRequest) {
 
     const user = await prisma.user.create({
       data: {
-        email,
+        email: normalizedEmail,
         password: hashedPassword,
         nom,
         prenom,
         telephone: telephone || null,
         role: "client",
+        cgvAccepteesAt: new Date(),
+        marketingOptIn: Boolean(marketingOptIn),
       },
     });
 

@@ -1,216 +1,150 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { signIn } from "next-auth/react";
+import { FaEye, FaEyeSlash, FaCircleInfo } from "react-icons/fa6";
 
-export function ConnexionForm({ bootstrap }: { bootstrap: boolean }) {
+export function ConnexionForm({ staffExists }: { staffExists: boolean }) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const nextUrl = searchParams.get("next") ?? "/admin";
+  const nextUrl = searchParams.get("next");
 
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
   const [status, setStatus] = useState<"idle" | "loading">("idle");
-  const [showBootstrap, setShowBootstrap] = useState(bootstrap);
-
-  async function afterAuth() {
-    const sessionRes = await fetch("/api/auth/session");
-    const session = await sessionRes.json();
-    const role = session?.user?.role;
-    if (!role || role === "client") {
-      router.push("/");
-      return;
-    }
-    router.push(nextUrl.startsWith("/admin") ? nextUrl : "/admin");
-    router.refresh();
-  }
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
 
   async function handleLogin(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
-    setStatus("loading");
+    setEmailError("");
+    setPasswordError("");
 
-    const form = new FormData(event.currentTarget);
+    const form = event.currentTarget;
+    const data = new FormData(form);
+    const email = String(data.get("email") ?? "").trim();
+    const password = String(data.get("password") ?? "");
+
+    let valid = true;
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setEmailError("Entrez une adresse email valide.");
+      valid = false;
+    }
+    if (!password) {
+      setPasswordError("Saisissez votre mot de passe.");
+      valid = false;
+    }
+    if (!valid) return;
+
+    setStatus("loading");
     const result = await signIn("credentials", {
-      email: form.get("email"),
-      password: form.get("password"),
+      email,
+      password,
       redirect: false,
     });
 
     if (result?.error) {
-      setError("Email ou mot de passe incorrect.");
+      setError(
+        "Identifiants incorrects. Vérifiez votre email et votre mot de passe" +
+          " — ou réinitialisez-le via « Mot de passe oublié ? »."
+      );
       setStatus("idle");
       return;
     }
 
-    await afterAuth();
-  }
+    // Redirection selon le rôle : staff -> back-office, client -> site
+    const sessionRes = await fetch("/api/auth/session");
+    const session = await sessionRes.json();
+    const role = session?.user?.role;
 
-  async function handleBootstrap(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setError("");
-    setSuccess("");
-    setStatus("loading");
-
-    const form = event.currentTarget;
-    const data = new FormData(form);
-    const payload = {
-      email: data.get("email"),
-      password: data.get("password"),
-      nom: data.get("nom"),
-      prenom: data.get("prenom"),
-      role: "administrateur",
-    };
-
-    const response = await fetch("/api/admin/users", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-
-    if (!response.ok) {
-      const body = await response.json();
-      setError(body.error ?? "Erreur lors de la creation du compte");
-      setStatus("idle");
-      return;
+    if (role && role !== "client") {
+      router.push(nextUrl && nextUrl.startsWith("/admin") ? nextUrl : "/admin");
+    } else {
+      router.push("/");
     }
-
-    setSuccess("Compte administrateur créé. Connexion en cours…");
-    form.reset();
-
-    const login = await signIn("credentials", {
-      email: payload.email,
-      password: payload.password,
-      redirect: false,
-    });
-
-    if (login?.error) {
-      setError("Compte créé mais connexion impossible. Connectez-vous manuellement.");
-      setShowBootstrap(false);
-      setStatus("idle");
-      return;
-    }
-
-    await afterAuth();
+    router.refresh();
   }
 
   return (
-    <div className="bo-auth-card">
-      <div className="bo-auth-brand">
-        <strong>Caba Résidence</strong>
-        <span>Back-office</span>
-      </div>
+    <div className="auth-card">
+      <Link href="/" className="auth-brand">
+        Caba Résidence
+      </Link>
+      <p className="auth-subtitle">Connectez-vous à votre espace</p>
 
-      {error && <p className="bo-form-error">{error}</p>}
-      {success && <p className="bo-form-success">{success}</p>}
+      {!staffExists && (
+        <div className="auth-banner auth-banner--success" style={{ display: "flex", gap: 8 }}>
+          <FaCircleInfo aria-hidden="true" style={{ flexShrink: 0, marginTop: 2 }} />
+          <span>
+            Aucun compte équipe n&apos;existe encore. Le compte administrateur principal doit
+            être créé via le script local (voir documentation du projet).
+          </span>
+        </div>
+      )}
 
-      <form onSubmit={handleLogin}>
-        <div className="bo-field">
-          <label htmlFor="login-email" className="bo-label">
+      {error && (
+        <p role="alert" className="auth-banner auth-banner--error">
+          {error}
+        </p>
+      )}
+
+      <form onSubmit={handleLogin} noValidate>
+        <div className={`auth-field${emailError ? " has-error" : ""}`}>
+          <label htmlFor="login-email" className="auth-label">
             Email
           </label>
           <input
             id="login-email"
             name="email"
             type="email"
-            required
             autoComplete="email"
-            className="bo-input"
+            className="auth-input"
+            onInput={() => setEmailError("")}
           />
+          {emailError && <p className="auth-error-text">{emailError}</p>}
         </div>
-        <div className="bo-field">
-          <label htmlFor="login-password" className="bo-label">
+
+        <div className={`auth-field${passwordError ? " has-error" : ""}`}>
+          <label htmlFor="login-password" className="auth-label">
             Mot de passe
           </label>
-          <input
-            id="login-password"
-            name="password"
-            type="password"
-            required
-            autoComplete="current-password"
-            className="bo-input"
-          />
+          <div className="auth-input-wrap">
+            <input
+              id="login-password"
+              name="password"
+              type={showPassword ? "text" : "password"}
+              autoComplete="current-password"
+              className="auth-input auth-input--with-eye"
+              onInput={() => setPasswordError("")}
+            />
+            <button
+              type="button"
+              className="auth-eye"
+              aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+              onClick={() => setShowPassword((value) => !value)}
+            >
+              {showPassword ? <FaEyeSlash aria-hidden="true" /> : <FaEye aria-hidden="true" />}
+            </button>
+          </div>
+          {passwordError && <p className="auth-error-text">{passwordError}</p>}
         </div>
-        <button type="submit" className="bo-btn bo-btn--primary" disabled={status === "loading"}>
+
+        <div className="auth-forgot">
+          <Link href="/mot-de-passe-oublie">Mot de passe oublié ?</Link>
+        </div>
+
+        <button type="submit" className="auth-submit" disabled={status === "loading"}>
           {status === "loading" ? "Connexion…" : "Se connecter"}
         </button>
       </form>
 
-      {bootstrap && showBootstrap && (
-        <>
-          <div className="bo-auth-divider">Premier accès</div>
-
-          <form onSubmit={handleBootstrap}>
-            <p className="bo-form-hint" style={{ marginBottom: 14 }}>
-              Aucun compte équipe n&apos;existe encore. Créez le compte administrateur
-              principal — il pourra ensuite ajouter d&apos;autres membres depuis
-              « Rôles &amp; Permissions ».
-            </p>
-            <div className="bo-form-grid">
-              <div className="bo-field">
-                <label htmlFor="boot-prenom" className="bo-label">
-                  Prénom
-                </label>
-                <input id="boot-prenom" name="prenom" type="text" required className="bo-input" />
-              </div>
-              <div className="bo-field">
-                <label htmlFor="boot-nom" className="bo-label">
-                  Nom
-                </label>
-                <input id="boot-nom" name="nom" type="text" required className="bo-input" />
-              </div>
-            </div>
-            <div className="bo-field">
-              <label htmlFor="boot-email" className="bo-label">
-                Email
-              </label>
-              <input
-                id="boot-email"
-                name="email"
-                type="email"
-                required
-                autoComplete="off"
-                defaultValue="schallom229@gmail.com"
-                className="bo-input"
-              />
-            </div>
-            <div className="bo-field">
-              <label htmlFor="boot-password" className="bo-label">
-                Mot de passe
-              </label>
-              <input
-                id="boot-password"
-                name="password"
-                type="password"
-                required
-                minLength={8}
-                autoComplete="new-password"
-                className="bo-input"
-              />
-              <p className="bo-form-hint">8 caractères minimum.</p>
-            </div>
-            <button
-              type="submit"
-              className="bo-btn bo-btn--primary"
-              disabled={status === "loading"}
-            >
-              {status === "loading" ? "Création…" : "Créer le compte administrateur"}
-            </button>
-          </form>
-        </>
-      )}
-
-      {!showBootstrap && bootstrap && (
-        <button
-          type="button"
-          className="bo-btn bo-btn--ghost"
-          style={{ width: "100%", marginTop: 12 }}
-          onClick={() => setShowBootstrap(true)}
-        >
-          Créer le premier compte administrateur
-        </button>
-      )}
+      <div className="auth-footer">
+        Pas encore de compte ?{" "}
+        <Link href="/inscription">S&apos;inscrire</Link>
+      </div>
     </div>
   );
 }

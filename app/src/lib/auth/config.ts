@@ -29,6 +29,9 @@ declare module "next-auth" {
   }
 }
 
+const MAX_TENTATIVES = 5;
+const VERROU_MINUTES = 15;
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
     Credentials({
@@ -42,11 +45,17 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           return null;
         }
 
+        const email = (credentials.email as string).toLowerCase().trim();
         const user = await prisma.user.findUnique({
-          where: { email: credentials.email as string },
+          where: { email },
         });
 
         if (!user || !user.actif) {
+          return null;
+        }
+
+        // Brute-force : compte temporairement verrouille
+        if (user.verrouilleJusqua && user.verrouilleJusqua > new Date()) {
           return null;
         }
 
@@ -56,12 +65,29 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         );
 
         if (!isPasswordValid) {
+          const tentatives = user.tentativesEchouees + 1;
+          await prisma.user.update({
+            where: { id: user.id },
+            data: {
+              tentativesEchouees: tentatives,
+              ...(tentatives >= MAX_TENTATIVES
+                ? {
+                    verrouilleJusqua: new Date(Date.now() + VERROU_MINUTES * 60 * 1000),
+                    tentativesEchouees: 0,
+                  }
+                : {}),
+            },
+          });
           return null;
         }
 
         await prisma.user.update({
           where: { id: user.id },
-          data: { lastLogin: new Date() },
+          data: {
+            lastLogin: new Date(),
+            tentativesEchouees: 0,
+            verrouilleJusqua: null,
+          },
         });
 
         return {
@@ -75,6 +101,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   ],
   session: {
     strategy: "jwt",
+    maxAge: Number(process.env.AUTH_SESSION_HEURES ?? 8) * 3600,
+    updateAge: 3600,
   },
   pages: {
     signIn: "/connexion",

@@ -211,6 +211,20 @@ model User {
   updatedAt        DateTime  @updatedAt
   lastLogin        DateTime?
 
+  // Sécurité : brute-force et réinitialisation
+  tentativesEchouees Int       @default(0)
+  verrouilleJusqua   DateTime?
+  resetTokenHash     String?
+  resetExpire        DateTime?
+
+  // Invitations comptes internes (étape 3)
+  invitationToken   String?   @unique
+  invitationExpire  DateTime?
+
+  // Inscription publique
+  cgvAccepteesAt    DateTime?
+  marketingOptIn    Boolean   @default(false)
+
   // Relations
   properties       Property[]
   bookings         Booking[]

@@ -50,6 +50,51 @@ export async function sendEmail(params: SendEmailParams): Promise<boolean> {
 
 // ─── Templates ─────────────────────────────────────
 
+export function templateResetPassword(params: { prenom: string; lien: string }) {
+  return `
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"></head>
+<body style="font-family: Arial, sans-serif; color: #1a1a1a; max-width: 600px; margin: 0 auto;">
+  <div style="background: #f7f5f1; padding: 30px; text-align: center;">
+    <h1 style="color: #001489; margin: 0;">Caba Résidence</h1>
+  </div>
+  <div style="padding: 30px;">
+    <h2>Mot de passe oublié</h2>
+    <p>Bonjour ${params.prenom},</p>
+    <p>Vous avez demandé la réinitialisation de votre mot de passe. Cliquez sur le bouton ci-dessous pour en choisir un nouveau. Ce lien est valable <strong>1 heure</strong> et ne peut être utilisé qu'une seule fois.</p>
+    <a href="${params.lien}" style="display: inline-block; background: #d21034; color: white; padding: 12px 24px; text-decoration: none; border-radius: 999px; font-weight: bold;">Choisir un nouveau mot de passe</a>
+    <p style="margin-top: 25px; color: #6b6459; font-size: 13px;">Si vous n'êtes pas à l'origine de cette demande, ignorez simplement cet email — votre mot de passe actuel reste inchangé.</p>
+  </div>
+</body>
+</html>`;
+}
+
+export function templateInvitationInterne(params: {
+  prenom: string;
+  role: string;
+  lien: string;
+}) {
+  return `
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"></head>
+<body style="font-family: Arial, sans-serif; color: #1a1a1a; max-width: 600px; margin: 0 auto;">
+  <div style="background: #f7f5f1; padding: 30px; text-align: center;">
+    <h1 style="color: #001489; margin: 0;">Caba Résidence</h1>
+  </div>
+  <div style="padding: 30px;">
+    <h2>Vous avez été invité(e)</h2>
+    <p>Bonjour ${params.prenom},</p>
+    <p>Un compte a été créé pour vous sur le back-office de Caba Résidence avec le rôle <strong>${params.role}</strong>.</p>
+    <p>Cliquez ci-dessous pour définir votre mot de passe et activer votre accès. Ce lien est valable <strong>72 heures</strong>.</p>
+    <a href="${params.lien}" style="display: inline-block; background: #d21034; color: white; padding: 12px 24px; text-decoration: none; border-radius: 999px; font-weight: bold;">Définir mon mot de passe</a>
+    <p style="margin-top: 25px; color: #6b6459; font-size: 13px;">Si vous ne devriez pas recevoir cet email, ignorez-le.</p>
+  </div>
+</body>
+</html>`;
+}
+
 export function templateBookingConfirmation(params: {
   prenom: string;
   numero: string;
