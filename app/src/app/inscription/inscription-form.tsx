@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { FaArrowLeft, FaArrowRight, FaEye, FaEyeSlash } from "react-icons/fa6";
@@ -11,14 +10,17 @@ import {
   scorePassword,
 } from "@/components/auth/password-strength";
 
-export function InscriptionForm() {
-  const searchParams = useSearchParams();
+interface InscriptionFormProps {
+  prefillPrenom: string;
+  prefillNom: string;
+  prefillTelephone: string;
+}
 
-  // Pré-remplissage depuis le lien WhatsApp (prenom, nom, telephone)
-  const prefillPrenom = searchParams.get("prenom") ?? "";
-  const prefillNom = searchParams.get("nom") ?? "";
-  const prefillTelephone = searchParams.get("telephone") ?? "";
-
+export function InscriptionForm({
+  prefillPrenom,
+  prefillNom,
+  prefillTelephone,
+}: InscriptionFormProps) {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [status, setStatus] = useState<"idle" | "loading">("idle");

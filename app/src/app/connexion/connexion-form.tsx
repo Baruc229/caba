@@ -1,16 +1,16 @@
 ﻿"use client";
 
 import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { FaArrowLeft, FaArrowRight, FaEye, FaEyeSlash, FaCircleInfo } from "react-icons/fa6";
 
-export function ConnexionForm() {
-  const searchParams = useSearchParams();
-  const echec = searchParams.get("echec");
-  const succes = searchParams.get("succes");
+interface ConnexionFormProps {
+  echec: boolean;
+  succes: boolean;
+}
 
+export function ConnexionForm({ echec, succes }: ConnexionFormProps) {
   // Contrôle différé après le premier rendu (page instantanée)
   const [staffManquant, setStaffManquant] = useState(false);
 
