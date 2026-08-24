@@ -4,13 +4,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
-import {
-  FaArrowRight,
-  FaEye,
-  FaEyeSlash,
-  FaCircleInfo,
-  FaStar,
-} from "react-icons/fa6";
+import { FaArrowRight, FaEye, FaEyeSlash, FaCircleInfo } from "react-icons/fa6";
 
 export function ConnexionForm() {
   const searchParams = useSearchParams();
@@ -78,31 +72,13 @@ export function ConnexionForm() {
   }
 
   return (
-    <div className="auth-split">
-      {/* Colonne gauche : identité visuelle */}
-      <aside className="auth-side">
-        <div className="auth-side-shape" aria-hidden="true" />
-        <Link href="/" className="auth-brand auth-brand--light">
+    <div className="auth-page-v2">
+      <div className="auth-panel">
+        <Link href="/" className="auth-brand">
           Caba Résidence
         </Link>
-        <div className="auth-proof">
-          <span className="auth-proof-stars" aria-label="Note moyenne 4,8 sur 5">
-            <FaStar aria-hidden="true" />
-            <FaStar aria-hidden="true" />
-            <FaStar aria-hidden="true" />
-            <FaStar aria-hidden="true" />
-            <FaStar aria-hidden="true" />
-          </span>
-          <p className="auth-proof-text">
-            <strong>4,8/5</strong> — Plus de 120 séjours notés
-          </p>
-        </div>
-      </aside>
 
-      {/* Colonne droite : formulaire */}
-      <main className="auth-main">
-        <div className="auth-panel">
-          <p className="auth-eyebrow">Content de vous revoir</p>
+        <p className="auth-eyebrow">Content de vous revoir</p>
           <h1 className="auth-display">Connexion</h1>
 
           {staffManquant && (
@@ -182,8 +158,7 @@ export function ConnexionForm() {
           <div className="auth-footer">
             Pas encore de profil chez nous ? <Link href="/inscription">S&apos;inscrire</Link>
           </div>
-        </div>
-      </main>
+      </div>
     </div>
   );
 }

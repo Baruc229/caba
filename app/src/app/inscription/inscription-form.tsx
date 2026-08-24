@@ -11,20 +11,6 @@ import {
   scorePassword,
 } from "@/components/auth/password-strength";
 
-function QuoteAside() {
-  return (
-    <aside className="auth-side auth-side--quote">
-      <Link href="/" className="auth-brand auth-brand--light">
-        Caba Résidence
-      </Link>
-      <blockquote className="auth-quote">
-        « Ici, vous n&apos;êtes pas un numéro de réservation — vous êtes notre hôte. »
-      </blockquote>
-      <p className="auth-side-sign">L&apos;équipe Caba Résidence</p>
-    </aside>
-  );
-}
-
 export function InscriptionForm() {
   const searchParams = useSearchParams();
 
@@ -150,36 +136,36 @@ export function InscriptionForm() {
 
   if (emailExists) {
     return (
-      <div className="auth-split auth-split--ins">
-        <QuoteAside />
-        <main className="auth-main">
-          <div className="auth-panel auth-panel--wide">
-            <p className="auth-eyebrow">Déjà parmi nous ?</p>
-            <h1 className="auth-display">Profil existant</h1>
-            <p role="alert" className="auth-banner auth-banner--error">
-              Un profil existe déjà avec cet email.
-            </p>
-            <p className="auth-subtitle-v2">
-              Connectez-vous directement — ou utilisez « Mot de passe oublié ? » si besoin.
-            </p>
-            <Link href="/connexion" className="auth-btn auth-btn--link">
-              Se connecter
-              <FaArrowRight className="auth-btn-arrow" aria-hidden="true" />
-            </Link>
-          </div>
-        </main>
+      <div className="auth-page-v2">
+        <div className="auth-panel auth-panel--wide">
+          <Link href="/" className="auth-brand">
+            Caba Résidence
+          </Link>
+          <p className="auth-eyebrow">Déjà parmi nous ?</p>
+          <h1 className="auth-display">Profil existant</h1>
+          <p role="alert" className="auth-banner auth-banner--error">
+            Un profil existe déjà avec cet email.
+          </p>
+          <p className="auth-subtitle-v2">
+            Connectez-vous directement — ou utilisez « Mot de passe oublié ? » si besoin.
+          </p>
+          <Link href="/connexion" className="auth-btn auth-btn--link">
+            Se connecter
+            <FaArrowRight className="auth-btn-arrow" aria-hidden="true" />
+          </Link>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="auth-split auth-split--ins">
-      <QuoteAside />
-
+    <div className="auth-page-v2">
       {/* Page continue : identité -> contact -> sécurité, sans étapes */}
-      <main className="auth-main">
-        <div className="auth-panel auth-panel--wide">
-          <p className="auth-eyebrow">Bienvenue chez nous</p>
+      <div className="auth-panel auth-panel--wide">
+        <Link href="/" className="auth-brand">
+          Caba Résidence
+        </Link>
+        <p className="auth-eyebrow">Bienvenue chez nous</p>
           <h1 className="auth-display">Créez votre profil</h1>
           <p className="auth-subtitle-v2">
             Quelques informations, pour vous accueillir comme il se doit.
@@ -355,8 +341,7 @@ export function InscriptionForm() {
           <div className="auth-footer">
             Déjà un profil chez nous ? <Link href="/connexion">Se connecter</Link>
           </div>
-        </div>
-      </main>
+      </div>
     </div>
   );
 }
