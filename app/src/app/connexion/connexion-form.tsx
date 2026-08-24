@@ -4,11 +4,18 @@ import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
-import { FaEye, FaEyeSlash, FaCircleInfo } from "react-icons/fa6";
+import {
+  FaArrowRight,
+  FaEye,
+  FaEyeSlash,
+  FaCircleInfo,
+  FaStar,
+} from "react-icons/fa6";
 
 export function ConnexionForm({ staffExists }: { staffExists: boolean }) {
   const searchParams = useSearchParams();
   const echec = searchParams.get("echec");
+  const succes = searchParams.get("succes");
 
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState(
@@ -55,85 +62,112 @@ export function ConnexionForm({ staffExists }: { staffExists: boolean }) {
   }
 
   return (
-    <div className="auth-card">
-      <Link href="/" className="auth-brand">
-        Caba Résidence
-      </Link>
-      <h1 className="auth-title">Connexion</h1>
-      <p className="auth-subtitle" style={{ marginTop: -2 }}>
-        Connectez-vous à votre espace
-      </p>
-
-      {!staffExists && (
-        <div className="auth-banner auth-banner--success" style={{ display: "flex", gap: 8 }}>
-          <FaCircleInfo aria-hidden="true" style={{ flexShrink: 0, marginTop: 2 }} />
-          <span>
-            Aucun compte équipe n&apos;existe encore. Le compte administrateur principal doit
-            être créé via le script local (voir documentation du projet).
+    <div className="auth-split">
+      {/* Colonne gauche : identité visuelle */}
+      <aside className="auth-side">
+        <div className="auth-side-shape" aria-hidden="true" />
+        <Link href="/" className="auth-brand auth-brand--light">
+          Caba Résidence
+        </Link>
+        <div className="auth-proof">
+          <span className="auth-proof-stars" aria-label="Note moyenne 4,8 sur 5">
+            <FaStar aria-hidden="true" />
+            <FaStar aria-hidden="true" />
+            <FaStar aria-hidden="true" />
+            <FaStar aria-hidden="true" />
+            <FaStar aria-hidden="true" />
           </span>
+          <p className="auth-proof-text">
+            <strong>4,8/5</strong> — Plus de 120 séjours notés
+          </p>
         </div>
-      )}
+      </aside>
 
-      {error && (
-        <p role="alert" className="auth-banner auth-banner--error">
-          {error}
-        </p>
-      )}
+      {/* Colonne droite : formulaire */}
+      <main className="auth-main">
+        <div className="auth-panel">
+          <p className="auth-eyebrow">Content de vous revoir</p>
+          <h1 className="auth-display">Connexion</h1>
 
-      <form onSubmit={handleLogin} noValidate>
-        <div className={`auth-field${emailError ? " has-error" : ""}`}>
-          <label htmlFor="login-email" className="auth-label">
-            Email
-          </label>
-          <input
-            id="login-email"
-            name="email"
-            type="email"
-            autoComplete="email"
-            className="auth-input"
-            onInput={() => setEmailError("")}
-          />
-          {emailError && <p className="auth-error-text">{emailError}</p>}
-        </div>
+          {!staffExists && (
+            <div className="auth-banner auth-banner--success" style={{ display: "flex", gap: 8 }}>
+              <FaCircleInfo aria-hidden="true" style={{ flexShrink: 0, marginTop: 2 }} />
+              <span>
+                Aucun compte équipe n&apos;existe encore. Le compte administrateur principal
+                doit être créé via le script local (voir documentation du projet).
+              </span>
+            </div>
+          )}
 
-        <div className={`auth-field${passwordError ? " has-error" : ""}`}>
-          <label htmlFor="login-password" className="auth-label">
-            Mot de passe
-          </label>
-          <div className="auth-input-wrap">
-            <input
-              id="login-password"
-              name="password"
-              type={showPassword ? "text" : "password"}
-              autoComplete="current-password"
-              className="auth-input auth-input--with-eye"
-              onInput={() => setPasswordError("")}
-            />
-            <button
-              type="button"
-              className="auth-eye"
-              aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
-              onClick={() => setShowPassword((value) => !value)}
-            >
-              {showPassword ? <FaEyeSlash aria-hidden="true" /> : <FaEye aria-hidden="true" />}
+          {succes && (
+            <p role="status" className="auth-banner auth-banner--success">
+              Votre mot de passe a bien été modifié. Connectez-vous avec vos nouveaux
+              identifiants.
+            </p>
+          )}
+
+          {error && (
+            <p role="alert" className="auth-banner auth-banner--error">
+              {error}
+            </p>
+          )}
+
+          <form onSubmit={handleLogin} noValidate>
+            <div className={`lfield${emailError ? " has-error" : ""}`}>
+              <label htmlFor="login-email" className="lfield-label">
+                Email
+              </label>
+              <input
+                id="login-email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                className="lfield-input"
+                onInput={() => setEmailError("")}
+              />
+              {emailError && <p className="auth-error-text">{emailError}</p>}
+            </div>
+
+            <div className={`lfield${passwordError ? " has-error" : ""}`}>
+              <label htmlFor="login-password" className="lfield-label">
+                Mot de passe
+              </label>
+              <div className="lfield-box">
+                <input
+                  id="login-password"
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  autoComplete="current-password"
+                  className="lfield-input lfield-input--eye"
+                  onInput={() => setPasswordError("")}
+                />
+                <button
+                  type="button"
+                  className="auth-eye"
+                  aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+                  onClick={() => setShowPassword((value) => !value)}
+                >
+                  {showPassword ? <FaEyeSlash aria-hidden="true" /> : <FaEye aria-hidden="true" />}
+                </button>
+              </div>
+              {passwordError && <p className="auth-error-text">{passwordError}</p>}
+            </div>
+
+            <div className="lfield-forgot">
+              <Link href="/mot-de-passe-oublie">Mot de passe oublié ?</Link>
+            </div>
+
+            <button type="submit" className="auth-btn" disabled={status === "loading"}>
+              {status === "loading" ? "Connexion…" : "Continuer"}
+              {status !== "loading" && <FaArrowRight className="auth-btn-arrow" aria-hidden="true" />}
             </button>
+          </form>
+
+          <div className="auth-footer">
+            Pas encore de profil chez nous ? <Link href="/inscription">S&apos;inscrire</Link>
           </div>
-          {passwordError && <p className="auth-error-text">{passwordError}</p>}
         </div>
-
-        <div className="auth-forgot">
-          <Link href="/mot-de-passe-oublie">Mot de passe oublié ?</Link>
-        </div>
-
-        <button type="submit" className="auth-submit" disabled={status === "loading"}>
-          {status === "loading" ? "Connexion…" : "Se connecter"}
-        </button>
-      </form>
-
-      <div className="auth-footer">
-        Pas encore de compte ?{" "}
-        <Link href="/inscription">S&apos;inscrire</Link>
-      </div>
+      </main>
     </div>
   );
 }

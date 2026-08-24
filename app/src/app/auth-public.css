@@ -214,7 +214,7 @@
   margin-top: 26px;
   padding-top: 20px;
   border-top: 1px solid #eae6de;
-  text-align: center;
+  text-align: left;
   font-size: 13.5px;
   color: #6b6459;
 }
@@ -348,8 +348,458 @@
 
 @media (prefers-reduced-motion: reduce) {
   .auth-submit,
+  .auth-btn,
+  .auth-btn-arrow,
   .auth-strength-seg,
-  .auth-input {
+  .auth-input,
+  .lfield-input {
     transition: none;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   V2 — LAYOUT ÉDITORIAL (direction hospitalité)
+   Titres display italique condensé MAJ, champs en ligne
+   (trait bas), boutons pilule à flèche, alignement gauche.
+   ═══════════════════════════════════════════════════════ */
+
+/* ─── Split asymétrique 55/45 ─── */
+.auth-split {
+  display: grid;
+  grid-template-columns: 55fr 45fr;
+  min-height: 100vh;
+  background-color: #f7f5f1;
+}
+
+/* Colonne gauche : identité visuelle */
+.auth-side {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 44px 48px;
+}
+
+/* Forme diagonale terre/brun (écho hero1.webp) */
+.auth-side-shape {
+  position: absolute;
+  top: -12%;
+  right: -14%;
+  width: 78%;
+  height: 124%;
+  background: linear-gradient(160deg, #a06a3c 0%, #6f4222 48%, #402613 100%);
+  clip-path: polygon(38% 0, 100% 0, 100% 100%, 0 100%);
+}
+
+.auth-brand--light {
+  position: relative;
+  z-index: 1;
+  margin-bottom: 0;
+  color: #fdf8f1;
+}
+
+/* Preuve sociale (bas de colonne) */
+.auth-proof {
+  position: relative;
+  z-index: 1;
+}
+
+.auth-proof-stars {
+  display: inline-flex;
+  gap: 3px;
+  font-size: 13px;
+  color: #e8a33d;
+}
+
+.auth-proof-text {
+  margin: 8px 0 0;
+  font-size: 13px;
+  color: #5a4632;
+}
+
+.auth-proof-text strong {
+  color: #40311f;
+  font-weight: 700;
+}
+
+/* Colonne droite : panneau formulaire */
+.auth-main {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 56px;
+}
+
+.auth-panel {
+  width: 100%;
+  max-width: 420px;
+}
+
+/* ─── Accroche + titre éditorial ─── */
+.auth-eyebrow {
+  margin: 0 0 10px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #d21034;
+}
+
+.auth-display {
+  margin: 0 0 36px;
+  font-family: var(--font-display);
+  font-style: italic;
+  text-transform: uppercase;
+  font-size: clamp(32px, 3.4vw, 42px);
+  letter-spacing: 0.01em;
+  line-height: 1.05;
+  color: #1a1a1a;
+}
+
+/* ─── Champs en ligne (trait bas) ─── */
+.lfield {
+  margin-bottom: 24px;
+}
+
+.lfield-label {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #6b6459;
+}
+
+.lfield-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.lfield-input {
+  width: 100%;
+  padding: 10px 2px;
+  border: none;
+  border-bottom: 1.5px solid #d9d2c5;
+  border-radius: 0;
+  background-color: transparent;
+  font-family: inherit;
+  font-size: 15.5px;
+  color: #1a1a1a;
+  outline: none;
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.lfield-box .lfield-input--eye {
+  padding-right: 38px;
+}
+
+.lfield-input:hover {
+  border-bottom-color: #bdb2a0;
+}
+
+/* Le trait s'épaissit et passe bleu au focus */
+.lfield-input:focus {
+  border-bottom-color: #001489;
+  box-shadow: 0 1.5px 0 #001489;
+}
+
+.lfield.has-error .lfield-input {
+  border-bottom-color: #d21034;
+  box-shadow: 0 1.5px 0 #d21034;
+}
+
+/* Lien oublié, aligné sous le champ mot de passe */
+.lfield-forgot {
+  display: flex;
+  justify-content: flex-end;
+  margin: -10px 0 26px;
+}
+
+.lfield-forgot a {
+  font-size: 12.5px;
+  color: #001489;
+  text-decoration: none;
+}
+
+.lfield-forgot a:hover {
+  text-decoration: underline;
+}
+
+/* ─── Bouton pilule à flèche ─── */
+.auth-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  margin-top: 6px;
+  padding: 15px 26px;
+  border: none;
+  border-radius: 999px;
+  background-color: #d21034;
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background-color 150ms ease,
+    transform 150ms ease;
+}
+
+.auth-btn:hover:not(:disabled) {
+  background-color: #b00d2c;
+}
+
+.auth-btn:hover:not(:disabled) .auth-btn-arrow {
+  transform: translateX(4px);
+}
+
+.auth-btn:active:not(:disabled) {
+  transform: scale(0.99);
+}
+
+.auth-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.auth-btn-arrow {
+  transition: transform 150ms ease;
+}
+
+/* ─── Responsive éditorial ─── */
+@media (max-width: 900px) {
+  /* La forme devient un bandeau haut réduit */
+  .auth-split {
+    grid-template-columns: 1fr;
+  }
+
+  .auth-side {
+    min-height: 150px;
+    padding: 24px 20px 34px;
+  }
+
+  .auth-side-shape {
+    top: 0;
+    right: -5%;
+    width: 110%;
+    height: 100%;
+    clip-path: polygon(0 0, 100% 0, 100% 62%, 0 100%);
+  }
+
+  .auth-proof {
+    display: none;
+  }
+
+  .auth-main {
+    align-items: flex-start;
+    padding: 36px 20px 48px;
+  }
+
+  .auth-display {
+    font-size: clamp(26px, 7vw, 32px);
+    margin-bottom: 28px;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Anti-zoom iOS */
+  .lfield-input {
+    font-size: 16px;
+  }
+}
+
+/* ─── Inscription : split 40/60 + citation ─── */
+.auth-split--ins {
+  grid-template-columns: 40fr 60fr;
+}
+
+.auth-side--quote {
+  justify-content: space-between;
+  gap: 40px;
+  padding: 44px 44px 40px;
+  background: linear-gradient(165deg, #8a5630 0%, #6f4222 45%, #3a2110 100%);
+}
+
+.auth-quote {
+  margin: 0;
+  max-width: 340px;
+  font-family:
+    Georgia,
+    "Times New Roman",
+    serif;
+  font-style: italic;
+  font-size: clamp(20px, 1.7vw, 25px);
+  line-height: 1.4;
+  color: #fdf4e7;
+}
+
+.auth-side-sign {
+  margin: 0;
+  font-size: 11.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(253, 244, 231, 0.75);
+}
+
+.auth-panel--wide {
+  max-width: 520px;
+}
+
+/* Sous-titre d'hospitalité sous le titre éditorial */
+.auth-subtitle-v2 {
+  margin: -20px 0 30px;
+  font-size: 14px;
+  line-height: 1.55;
+  color: #6b6459;
+}
+
+/* Titre éditorial réduit pour les pages sobres */
+.auth-display--sm {
+  font-size: clamp(28px, 3vw, 36px);
+  margin-bottom: 14px;
+}
+
+/* ─── Sections thématiques de l'inscription ───
+    Label petites majuscules + trait fin, sans numérotation */
+.lsection {
+  margin-bottom: 26px;
+}
+
+.lsection-title {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 0 0 18px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #40311f;
+}
+
+.lsection-title::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background-color: #e3dccd;
+}
+
+.lrow-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 24px;
+}
+
+@media (max-width: 560px) {
+  .lrow-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Lien-bouton pilule (écrans email existant / lien expiré) */
+.auth-btn--link {
+  text-decoration: none;
+}
+
+/* Bouton pilule dans un contexte de lien : largeur naturelle */
+span.auth-btn--link,
+a.auth-btn--link {
+  display: inline-flex;
+  width: auto;
+  min-width: 220px;
+}
+
+/* ─── Pages sobres (mot de passe oublié, réinitialisation) ─── */
+.auth-min {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 20px;
+  background-color: #f7f5f1;
+}
+
+.auth-min .auth-panel {
+  max-width: 420px;
+}
+
+.auth-icon-circle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 54px;
+  height: 54px;
+  margin-bottom: 20px;
+  border-radius: 50%;
+  background-color: rgba(210, 16, 52, 0.08);
+  color: #d21034;
+  font-size: 19px;
+}
+
+.auth-back-link {
+  display: inline-block;
+  margin-top: 26px;
+  font-size: 13px;
+  color: #6b6459;
+  text-decoration: none;
+}
+
+.auth-back-link:hover {
+  color: #001489;
+  text-decoration: underline;
+}
+
+/* Renvoi du lien avec délai anti-spam */
+.auth-resend {
+  margin: -16px 0 0;
+  font-size: 13.5px;
+}
+
+.auth-resend-btn {
+  padding: 0;
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: 600;
+  color: #001489;
+  cursor: pointer;
+}
+
+.auth-resend-btn:hover:not(:disabled) {
+  text-decoration: underline;
+}
+
+.auth-resend-btn:disabled {
+  color: #b9ae9c;
+  cursor: not-allowed;
+}
+
+/* ─── Responsive inscription ─── */
+@media (max-width: 900px) {
+  /* La colonne citation devient un bandeau haut compact */
+  .auth-split--ins {
+    grid-template-columns: 1fr;
+  }
+
+  .auth-side--quote {
+    gap: 18px;
+    padding: 24px 20px 30px;
+  }
+
+  .auth-quote {
+    font-size: 17px;
+    line-height: 1.35;
+  }
+
+  .auth-main {
+    padding-top: 34px;
   }
 }

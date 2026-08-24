@@ -8,10 +8,8 @@ export const metadata = {
 
 export default function InscriptionPage() {
   return (
-    <div className="auth-page">
-      <Suspense fallback={<p className="auth-subtitle">Chargement…</p>}>
-        <InscriptionForm />
-      </Suspense>
-    </div>
+    <Suspense>
+      <InscriptionForm />
+    </Suspense>
   );
 }

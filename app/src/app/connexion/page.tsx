@@ -17,10 +17,8 @@ export default async function ConnexionPage() {
   });
 
   return (
-    <div className="auth-page">
-      <Suspense>
-        <ConnexionForm staffExists={staffCount > 0} />
-      </Suspense>
-    </div>
+    <Suspense>
+      <ConnexionForm staffExists={staffCount > 0} />
+    </Suspense>
   );
 }
