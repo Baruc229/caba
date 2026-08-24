@@ -1,107 +1,85 @@
 import { NextRequest, NextResponse } from "next/server";
 import { searchAvailableProperties } from "@/lib/services/availability";
-import { calculatePrice } from "@/lib/services/pricing";
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
 
-    const startDateStr = searchParams.get("startDate");
-    const endDateStr = searchParams.get("endDate");
-    const guestsStr = searchParams.get("guests");
-    const propertyType = searchParams.get("type") || undefined;
-    const minPriceStr = searchParams.get("minPrice");
-    const maxPriceStr = searchParams.get("maxPrice");
-    const bedroomsStr = searchParams.get("bedrooms");
-    const bedsStr = searchParams.get("beds");
-    const pageStr = searchParams.get("page");
-    const limitStr = searchParams.get("limit");
+    const arrivee = searchParams.get("arrivee");
+    const depart = searchParams.get("depart");
+    const heureArrivee = searchParams.get("heureArrivee") || undefined;
+    const heureDepart = searchParams.get("heureDepart") || undefined;
+    const typeReservation = searchParams.get("typeReservation") || "nuee";
+    const adults = parseInt(searchParams.get("adultes") ?? "", 10);
+    const children = parseInt(searchParams.get("enfants") ?? "0", 10) || 0;
+    const babies = parseInt(searchParams.get("bebes") ?? "0", 10) || 0;
+    const type = searchParams.get("type") || undefined;
+    const chambresMin = parseInt(searchParams.get("chambres") ?? "", 10) || undefined;
+    const litsMin = parseInt(searchParams.get("lits") ?? "", 10) || undefined;
+    const equipements = searchParams.get("equipements")?.split(",").map((s) => s.trim()).filter(Boolean);
+    const prixMin = parseFloat(searchParams.get("prixMin") ?? "") || undefined;
+    const prixMax = parseFloat(searchParams.get("prixMax") ?? "") || undefined;
+    const triParam = searchParams.get("tri");
+    const tri =
+      triParam === "prix_croissant" || triParam === "prix_decroissant" || triParam === "note"
+        ? triParam
+        : "pertinence";
+    const page = parseInt(searchParams.get("page") ?? "1", 10) || 1;
+    const limit = parseInt(searchParams.get("limit") ?? "20", 10) || 20;
 
-    if (!startDateStr || !endDateStr || !guestsStr) {
+    if (!arrivee || !depart) {
       return NextResponse.json(
-        { error: "Les dates et le nombre de voyageurs sont obligatoires" },
+        { error: "Les dates d'arrivee et de depart sont obligatoires" },
         { status: 400 }
       );
     }
 
-    const startDate = new Date(startDateStr);
-    const endDate = new Date(endDateStr);
-    const guests = parseInt(guestsStr, 10);
-
-    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(arrivee) || !/^\d{4}-\d{2}-\d{2}$/.test(depart)) {
       return NextResponse.json(
-        { error: "Format de date invalide" },
+        { error: "Format de date invalide (attendu: YYYY-MM-DD)" },
         { status: 400 }
       );
     }
 
-    if (endDate <= startDate) {
-      return NextResponse.json(
-        { error: "La date de depart doit etre posterieure a la date d'arrivee" },
-        { status: 400 }
-      );
+    if (isNaN(adults) || adults < 1) {
+      return NextResponse.json({ error: "Le nombre d'adultes doit etre au moins 1" }, { status: 400 });
     }
 
-    if (isNaN(guests) || guests < 1) {
-      return NextResponse.json(
-        { error: "Le nombre de voyageurs doit etre au moins 1" },
-        { status: 400 }
-      );
+    if (
+      ["heure", "plusieurs_heures", "demi_journee", "journee", "vingt_quatre_heures"].includes(typeReservation)
+    ) {
+      if (!heureArrivee || !heureDepart) {
+        return NextResponse.json(
+          { error: "Les heures d'arrivee et de depart sont obligatoires pour ce type de reservation" },
+          { status: 400 }
+        );
+      }
+      if (!/^\d{2}:\d{2}$/.test(heureArrivee) || !/^\d{2}:\d{2}$/.test(heureDepart)) {
+        return NextResponse.json({ error: "Format d'heure invalide (attendu: HH:mm)" }, { status: 400 });
+      }
     }
 
     const result = await searchAvailableProperties({
-      startDate,
-      endDate,
-      guests,
-      propertyType: propertyType || undefined,
-      minPrice: minPriceStr ? parseFloat(minPriceStr) : undefined,
-      maxPrice: maxPriceStr ? parseFloat(maxPriceStr) : undefined,
-      bedrooms: bedroomsStr ? parseInt(bedroomsStr, 10) : undefined,
-      beds: bedsStr ? parseInt(bedsStr, 10) : undefined,
-      page: pageStr ? parseInt(pageStr, 10) : 1,
-      limit: limitStr ? parseInt(limitStr, 10) : 20,
+      arrivee,
+      depart,
+      heureArrivee,
+      heureDepart,
+      typeReservation,
+      adults,
+      children,
+      babies,
+      type,
+      chambresMin,
+      litsMin,
+      equipements,
+      prixMin,
+      prixMax,
+      tri,
+      page,
+      limit,
     });
 
-    const propertiesWithPrice = await Promise.all(
-      result.properties.map(async (property) => {
-        const price = await calculatePrice({
-          propertyId: property.id,
-          startDate,
-          endDate,
-          typeReservation: "nuee",
-          adults: guests,
-          children: 0,
-          babies: 0,
-        });
-
-        const avgRating =
-          property.avis.length > 0
-            ? property.avis.reduce((sum, a) => sum + a.note, 0) / property.avis.length
-            : null;
-
-        return {
-          id: property.id,
-          nom: property.nom,
-          type: property.type,
-          capaciteMaximale: property.capaciteMaximale,
-          nombreChambres: property.nombreChambres,
-          nombreLits: property.nombreLits,
-          photo: property.photos[0]?.url || null,
-          note: avgRating ? Math.round(avgRating * 10) / 10 : null,
-          nombreAvis: property.avis.length,
-          prix: price.total,
-          devise: price.currency,
-          breakdown: price.breakdown,
-        };
-      })
-    );
-
-    return NextResponse.json({
-      properties: propertiesWithPrice,
-      total: result.total,
-      page: result.page,
-      totalPages: result.totalPages,
-    });
+    return NextResponse.json(result);
   } catch (error) {
     console.error("Erreur lors de la recherche:", error);
     return NextResponse.json(

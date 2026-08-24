@@ -264,6 +264,8 @@ model Property {
   contact           PropertyContact?
   syncsIcal         SynchronisationICal[]
   favoris           Favorite[]
+
+  @@index([statut, type])
 }
 
 model PropertyPhoto {
@@ -298,6 +300,8 @@ model Tarif {
 
   // Relations
   property      Property   @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@index([propertyId, actif, dateDebut, dateFin])
 }
 
 model Promotion {
@@ -316,6 +320,8 @@ model Promotion {
 
   // Relations
   property            Property     @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@index([propertyId, actif, dateDebut, dateFin])
 }
 
 model Disponibilite {
@@ -333,6 +339,8 @@ model Disponibilite {
   // Relations
   property      Property           @relation(fields: [propertyId], references: [id], onDelete: Cascade)
   reservation   Booking?           @relation(fields: [reservationId], references: [id])
+
+  @@index([propertyId, date, statut])
 }
 
 model Booking {
@@ -341,8 +349,8 @@ model Booking {
   statut                BookingStatus @default(demande_en_attente)
   propertyId            String
   clientId              String
-  dateArrivee           DateTime      @db.Date
-  dateDepart            DateTime      @db.Date
+  dateArrivee           DateTime
+  dateDepart            DateTime
   heureArrivee          String?       // HH:mm
   heureDepart           String?       // HH:mm
   typeReservation       BookingType
@@ -371,6 +379,8 @@ model Booking {
   messages              Message[]
   disponibilites        Disponibilite[]
   reviews               Review[]
+
+  @@index([propertyId, statut, dateArrivee, dateDepart])
 }
 
 model Paiement {
@@ -410,6 +420,8 @@ model Review {
   property      Property     @relation(fields: [propertyId], references: [id], onDelete: Cascade)
   client        User         @relation(fields: [clientId], references: [id])
   reservation   Booking?     @relation(fields: [reservationId], references: [id])
+
+  @@index([propertyId, statut, note])
 }
 
 model Caracteristique {

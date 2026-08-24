@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { checkAvailability } from "./availability";
+import { checkAvailability, clearAvailabilityCache } from "./availability";
 import { calculatePrice } from "./pricing";
 import type { BookingType, BookingSource, BookingStatus } from "@/generated/prisma/client";
 
@@ -58,8 +58,14 @@ export async function createBooking(params: CreateBookingParams): Promise<Bookin
 
   const availability = await checkAvailability({
     propertyId,
-    dates: { startDate, endDate, startTime, endTime },
-    guests: totalGuests,
+    startDate,
+    endDate,
+    startTime,
+    endTime,
+    typeReservation,
+    adults,
+    children,
+    babies,
   });
 
   if (!availability.available) {
@@ -123,6 +129,8 @@ export async function createBooking(params: CreateBookingParams): Promise<Bookin
     return newBooking;
   });
 
+  clearAvailabilityCache();
+
   return {
     success: true,
     booking: {
@@ -163,6 +171,8 @@ export async function confirmBooking(bookingId: string): Promise<BookingResult> 
 
     return result;
   });
+
+  clearAvailabilityCache();
 
   return {
     success: true,
@@ -209,6 +219,8 @@ export async function cancelBooking(bookingId: string, motif?: string): Promise<
     return result;
   });
 
+  clearAvailabilityCache();
+
   return {
     success: true,
     booking: {
@@ -254,13 +266,15 @@ export async function modifyBooking(
 
   const availability = await checkAvailability({
     propertyId: booking.propertyId,
-    dates: {
-      startDate: newStartDate,
-      endDate: newEndDate,
-      startTime: updates.startTime || booking.heureArrivee || undefined,
-      endTime: updates.endTime || booking.heureDepart || undefined,
-    },
-    guests: newTotalGuests,
+    startDate: newStartDate,
+    endDate: newEndDate,
+    startTime: updates.startTime || booking.heureArrivee || undefined,
+    endTime: updates.endTime || booking.heureDepart || undefined,
+    typeReservation: booking.typeReservation,
+    adults: newAdults,
+    children: newChildren,
+    babies: newBabies,
+    excludeBookingId: bookingId,
   });
 
   if (!availability.available) {
@@ -326,6 +340,8 @@ export async function modifyBooking(
 
     return result;
   });
+
+  clearAvailabilityCache();
 
   return {
     success: true,

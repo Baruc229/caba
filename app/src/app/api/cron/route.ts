@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sendArrivalReminders, sendDepartureReminders } from "@/lib/services/notifications";
 import { syncAllICalSources } from "@/lib/services/ical";
+import { expireStaleLocks } from "@/lib/services/availability";
 
 // GET /api/cron — Endpoints pour les jobs periodiques
 // Accessible via GET avec un secret pour securiser
@@ -33,10 +34,16 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ job: "ical-sync", ...result });
     }
 
+    case "expire-locks": {
+      const expired = await expireStaleLocks();
+      return NextResponse.json({ job: "expire-locks", verrousExpires: expired });
+    }
+
     case "all": {
-      const [remindersResult, icalResult] = await Promise.all([
+      const [remindersResult, icalResult, locksExpired] = await Promise.all([
         Promise.all([sendArrivalReminders(), sendDepartureReminders()]),
         syncAllICalSources(),
+        expireStaleLocks(),
       ]);
       return NextResponse.json({
         job: "all",
@@ -45,12 +52,13 @@ export async function GET(request: NextRequest) {
           departuresSent: remindersResult[1],
         },
         ical: icalResult,
+        verrousExpires: locksExpired,
       });
     }
 
     default:
       return NextResponse.json({
-        error: "Job inconnu. Utilisez: reminders, ical-sync, all",
+        error: "Job inconnu. Utilisez: reminders, ical-sync, expire-locks, all",
       }, { status: 400 });
   }
 }

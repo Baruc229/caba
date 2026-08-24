@@ -578,4 +578,357 @@
     font-size: 11px;
     color: #a29a8c;
   }
+
+  /* ─── Type de séjour (select) ─── */
+  .search-select {
+    appearance: none;
+    cursor: pointer;
+    padding-right: 4px;
+  }
+
+  /* ─── Rangée d'horaires conditionnelle ─── */
+  .hours-row {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-top: 2px;
+  }
+
+  .hours-field {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    border: 1px solid var(--color-border-subtle);
+    border-radius: 10px;
+    padding: 8px 14px 9px;
+    max-width: 220px;
+  }
+
+  .hours-sep {
+    font-size: 13px;
+    font-weight: 600;
+    color: #a29a8c;
+  }
+
+  @media (max-width: 1023.98px) {
+    .hours-row {
+      flex-wrap: wrap;
+    }
+
+    .hours-field {
+      max-width: none;
+      flex: 1 1 160px;
+    }
+  }
+
+  /* ─── Filtres avancés ─── */
+  .filters-toggle {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 2px 2px 7px;
+    border-bottom: 2px solid transparent;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-accent-secondary);
+    cursor: pointer;
+    transition:
+      color 200ms ease,
+      border-color 200ms ease;
+  }
+
+  .filters-toggle:hover,
+  .filters-toggle.is-open {
+    border-color: var(--color-accent-secondary);
+  }
+
+  .filters-panel {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--color-border-subtle);
+  }
+
+  .filters-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+  }
+
+  .filters-group--small {
+    max-width: 150px;
+  }
+
+  .filters-group--price {
+    justify-content: flex-end;
+  }
+
+  .filters-group--full {
+    grid-column: 1 / -1;
+    border: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .filters-select,
+  .filters-input {
+    width: 100%;
+    border: 1px solid var(--color-border-subtle);
+    border-radius: 8px;
+    background-color: var(--color-bg-card);
+    padding: 7px 10px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text-primary);
+    outline: none;
+  }
+
+  .filters-select:focus,
+  .filters-input:focus {
+    border-color: var(--color-accent-secondary);
+  }
+
+  .filters-price-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .filters-price-sep {
+    color: #a29a8c;
+  }
+
+  .chip-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 4px;
+  }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid var(--color-border-subtle);
+    border-radius: 999px;
+    padding: 5px 14px;
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    user-select: none;
+    transition:
+      background-color 150ms ease,
+      border-color 150ms ease,
+      color 150ms ease;
+  }
+
+  .chip:hover {
+    border-color: var(--color-accent-secondary);
+    color: var(--color-text-primary);
+  }
+
+  .chip:has(input:checked) {
+    background-color: var(--color-accent-secondary);
+    border-color: var(--color-accent-secondary);
+    color: #ffffff;
+  }
+
+  .chip input:focus-visible + span {
+    outline: 2px solid var(--color-accent-secondary);
+    outline-offset: 2px;
+    border-radius: 999px;
+  }
+
+  @media (max-width: 1023.98px) {
+    .filters-panel {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 480px) {
+    .filters-panel {
+      grid-template-columns: 1fr;
+    }
+
+    .filters-group--small {
+      max-width: none;
+    }
+  }
+
+  /* ─── Calendrier de disponibilité ─── */
+  .calendar {
+    width: 100%;
+    max-width: 420px;
+    background-color: var(--color-bg-card);
+    border: 1px solid var(--color-border-subtle);
+    border-radius: 16px;
+    padding: 18px;
+  }
+
+  .calendar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+
+  .calendar-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    text-transform: capitalize;
+  }
+
+  .calendar-nav {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--color-border-subtle);
+    border-radius: 8px;
+    color: var(--color-text-primary);
+    cursor: pointer;
+    transition:
+      background-color 150ms ease,
+      border-color 150ms ease;
+  }
+
+  .calendar-nav:hover:not(:disabled) {
+    border-color: var(--color-accent-secondary);
+    background-color: rgba(0, 20, 137, 0.05);
+  }
+
+  .calendar-nav:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+
+  .calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 3px;
+  }
+
+  .calendar-weekday {
+    text-align: center;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #a29a8c;
+    padding-block: 4px;
+  }
+
+  .cal-day {
+    position: relative;
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: default;
+  }
+
+  .cal-day.is-empty {
+    visibility: hidden;
+  }
+
+  .cal-day--disponible {
+    background-color: rgba(34, 154, 22, 0.12);
+    color: #1d6b13;
+    cursor: pointer;
+  }
+
+  .cal-day--disponible:hover {
+    background-color: rgba(34, 154, 22, 0.24);
+  }
+
+  .cal-day--reserve {
+    background-color: rgba(200, 30, 30, 0.12);
+    color: #961b1b;
+    text-decoration: line-through;
+  }
+
+  .cal-day--bloque {
+    background-color: rgba(31, 26, 20, 0.08);
+    color: #857c6c;
+  }
+
+  .cal-day--maintenance {
+    background-color: rgba(0, 60, 160, 0.12);
+    color: #003ca0;
+  }
+
+  .cal-day--en_attente {
+    background-color: rgba(230, 140, 0, 0.16);
+    color: #9c5f00;
+  }
+
+  .cal-day--autre-mois {
+    opacity: 0.3;
+  }
+
+  .cal-day--aujourdhui::after {
+    content: "";
+    position: absolute;
+    bottom: 4px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background-color: var(--color-accent);
+  }
+
+  .calendar-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 14px;
+    margin-top: 14px;
+  }
+
+  .legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+  }
+
+  .legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+
+  .legend-dot--disponible {
+    background-color: rgba(34, 154, 22, 0.55);
+  }
+
+  .legend-dot--reserve {
+    background-color: rgba(200, 30, 30, 0.55);
+  }
+
+  .legend-dot--bloque {
+    background-color: rgba(31, 26, 20, 0.25);
+  }
+
+  .legend-dot--en_attente {
+    background-color: rgba(230, 140, 0, 0.6);
+  }
+
+  .legend-dot--maintenance {
+    background-color: rgba(0, 60, 160, 0.55);
+  }
 }

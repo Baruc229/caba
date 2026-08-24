@@ -4,9 +4,11 @@ import { useEffect, useRef, useState } from "react";
 import {
   FaCalendarDays,
   FaChevronDown,
-  FaLocationDot,
+  FaChevronUp,
+  FaClock,
   FaMinus,
   FaPlus,
+  FaSliders,
   FaStar,
   FaUserGroup,
 } from "react-icons/fa6";
@@ -31,6 +33,32 @@ const TABS = [
 ] as const;
 
 type TabId = (typeof TABS)[number]["id"];
+
+const SEJOUR_TYPES = [
+  { value: "nuee", label: "Nuitée(s)" },
+  { value: "journee", label: "Journée" },
+  { value: "vingt_quatre_heures", label: "24 heures" },
+  { value: "demi_journee", label: "Demi-journée" },
+  { value: "plusieurs_heures", label: "Quelques heures" },
+] as const;
+
+const HOURLY_TYPES = new Set(["journee", "vingt_quatre_heures", "demi_journee", "plusieurs_heures"]);
+
+const PROPERTY_TYPE_LABELS: Record<string, string> = {
+  chambre: "Chambre",
+  chambre_avec_salon: "Chambre avec salon",
+  studio: "Studio",
+  appartement_meuble: "Appartement meublé",
+  suite: "Suite",
+  villa: "Villa",
+  duplex: "Duplex",
+  maison_entiere: "Maison entière",
+};
+
+interface FilterOptions {
+  types: Array<{ type: string; count: number }>;
+  equipements: Array<{ id: string; nom: string; icone: string | null; categorie: string }>;
+}
 
 const AVATARS = [
   { initials: "AK", background: "var(--color-accent-secondary)" },
@@ -139,9 +167,11 @@ function GuestsField() {
 
   const summary = [
     `${counts.adultes} ${counts.adultes > 1 ? "adultes" : "adulte"}`,
-    `${counts.enfants} ${counts.enfants > 1 ? "enfants" : "enfant"}`,
-    `${counts.bebes} ${counts.bebes > 1 ? "bébés" : "bébé"}`,
-  ].join(" · ");
+    counts.enfants > 0 ? `${counts.enfants} ${counts.enfants > 1 ? "enfants" : "enfant"}` : null,
+    counts.bebes > 0 ? `${counts.bebes} ${counts.bebes > 1 ? "bébés" : "bébé"}` : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
 
   return (
     <div className="search-field guests" ref={wrapRef}>
@@ -205,8 +235,109 @@ function GuestsField() {
   );
 }
 
+function AdvancedFilters({ options }: { options: FilterOptions | null }) {
+  return (
+    <div className="filters-panel" id="filtres-avances">
+      <div className="filters-group">
+        <label htmlFor="filter-type" className="search-label">
+          Type de logement
+        </label>
+        <select id="filter-type" name="type" className="filters-select" defaultValue="">
+          <option value="">Tous les types</option>
+          {(options?.types ?? []).map((t) => (
+            <option key={t.type} value={t.type}>
+              {PROPERTY_TYPE_LABELS[t.type] ?? t.type} ({t.count})
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className="filters-group filters-group--small">
+        <label htmlFor="filter-chambres" className="search-label">
+          Chambres (min)
+        </label>
+        <select id="filter-chambres" name="chambres" className="filters-select" defaultValue="">
+          <option value="">Peu importe</option>
+          {[1, 2, 3, 4].map((n) => (
+            <option key={n} value={n}>
+              {n}+
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className="filters-group filters-group--small">
+        <label htmlFor="filter-lits" className="search-label">
+          Lits (min)
+        </label>
+        <select id="filter-lits" name="lits" className="filters-select" defaultValue="">
+          <option value="">Peu importe</option>
+          {[1, 2, 3, 4].map((n) => (
+            <option key={n} value={n}>
+              {n}+
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className="filters-group filters-group--price">
+        <span className="search-label">Prix par séjour (€)</span>
+        <div className="filters-price-row">
+          <input
+            name="prixMin"
+            type="number"
+            min={0}
+            placeholder="Min"
+            aria-label="Prix minimum"
+            className="filters-input"
+          />
+          <span aria-hidden="true" className="filters-price-sep">—</span>
+          <input
+            name="prixMax"
+            type="number"
+            min={0}
+            placeholder="Max"
+            aria-label="Prix maximum"
+            className="filters-input"
+          />
+        </div>
+      </div>
+
+      <fieldset className="filters-group filters-group--full">
+        <legend className="search-label">Équipements</legend>
+        <div className="chip-list">
+          {(options?.equipements ?? []).map((equipement) => (
+            <label key={equipement.id} className="chip">
+              <input type="checkbox" name="equipements" value={equipement.nom} className="sr-only" />
+              <span>{equipement.nom}</span>
+            </label>
+          ))}
+        </div>
+      </fieldset>
+    </div>
+  );
+}
+
 export function Hero() {
   const [activeTab, setActiveTab] = useState<TabId>("logements");
+  const [sejourType, setSejourType] = useState<string>("nuee");
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [filterOptions, setFilterOptions] = useState<FilterOptions | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/search/filters")
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data) => {
+        if (!cancelled && data) setFilterOptions(data);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const hourly = HOURLY_TYPES.has(sejourType);
 
   return (
     <section
@@ -249,6 +380,22 @@ export function Hero() {
                 {tab.label}
               </button>
             ))}
+
+            <button
+              type="button"
+              className={`filters-toggle${filtersOpen ? " is-open" : ""}`}
+              aria-expanded={filtersOpen}
+              aria-controls="filtres-avances"
+              onClick={() => setFiltersOpen((value) => !value)}
+            >
+              <FaSliders aria-hidden="true" size={13} />
+              Filtres avancés
+              {filtersOpen ? (
+                <FaChevronUp aria-hidden="true" size={10} />
+              ) : (
+                <FaChevronDown aria-hidden="true" size={10} />
+              )}
+            </button>
           </div>
 
           <div
@@ -258,19 +405,24 @@ export function Hero() {
             className="search-fields"
           >
             <div className="search-field">
-              <label htmlFor="destination" className="search-label">
-                Destination
+              <label htmlFor="type-reservation" className="search-label">
+                Type de séjour
               </label>
               <div className="search-value">
-                <FaLocationDot aria-hidden="true" size={15} />
-                <input
-                  id="destination"
-                  name="destination"
-                  type="text"
-                  placeholder="Cotonou, Bénin"
-                  autoComplete="off"
-                  className="search-input"
-                />
+                <FaClock aria-hidden="true" size={15} />
+                <select
+                  id="type-reservation"
+                  name="typeReservation"
+                  className="search-input search-select"
+                  value={sejourType}
+                  onChange={(event) => setSejourType(event.target.value)}
+                >
+                  {SEJOUR_TYPES.map((type) => (
+                    <option key={type.value} value={type.value}>
+                      {type.label}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
 
@@ -283,7 +435,39 @@ export function Hero() {
             <button type="submit" className="btn-pill btn-primary w-full lg:w-auto lg:px-10">
               Rechercher
             </button>
+
+            {hourly && (
+              <div className="hours-row">
+                <div className="search-field hours-field">
+                  <label htmlFor="heure-arrivee" className="search-label">
+                    Heure d&apos;arrivée
+                  </label>
+                  <input
+                    id="heure-arrivee"
+                    name="heureArrivee"
+                    type="time"
+                    defaultValue="08:00"
+                    className="search-input"
+                  />
+                </div>
+                <span aria-hidden="true" className="hours-sep">→</span>
+                <div className="search-field hours-field">
+                  <label htmlFor="heure-depart" className="search-label">
+                    Heure de départ
+                  </label>
+                  <input
+                    id="heure-depart"
+                    name="heureDepart"
+                    type="time"
+                    defaultValue="18:00"
+                    className="search-input"
+                  />
+                </div>
+              </div>
+            )}
           </div>
+
+          {filtersOpen && <AdvancedFilters options={filterOptions} />}
         </form>
       </div>
     </section>
