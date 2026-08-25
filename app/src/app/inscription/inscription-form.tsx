@@ -121,7 +121,7 @@ export function InscriptionForm({
       await signIn("credentials", {
         email: values.email,
         password: values.password,
-        redirectTo: "/",
+        callbackUrl: "/",
       });
     } catch {
       setStatus("idle");

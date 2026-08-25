@@ -74,7 +74,7 @@ export function ConnexionForm({ echec, succes }: ConnexionFormProps) {
       // Flux natuel NextAuth v5 : il redirige lui-même vers /redirection,
       // qui envoie vers /admin (équipe) ou / (client).
       // Identifiants invalides -> retour ici avec ?echec=1.
-      await signIn("credentials", { email, password, redirectTo: "/redirection" });
+      await signIn("credentials", { email, password, callbackUrl: "/redirection" });
     } catch {
       setError("Une erreur est survenue. Réessayez dans un instant.");
       setStatus("idle");
