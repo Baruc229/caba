@@ -348,41 +348,48 @@
    • aucun texte < 12px, cibles tactiles >= 44px.
    ═══════════════════════════════════════════════════════ */
 
-/* ─── Gabarit : colonne unique, contenu aligné à gauche ─── */
-.auth-page-v2 {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
+/* ─── Gabarit : panneau pleine largeur de la zone de contenu,
+       formulaire en colonne unique aligné à gauche ─── */
+.auth-page-v2,
+.auth-min {
+  width: 100%;
+  max-width: var(--container-max);
+  margin-inline: auto;
   padding: 32px 16px;
-  background-color: var(--color-bg-primary);
 }
 
-/* Card du formulaire (§9.3) : fond blanc, bordure décorative
-   subtile ET ombre bicouche obligatoire */
+@media (min-width: 640px) {
+  .auth-page-v2,
+  .auth-min {
+    padding: 48px 24px;
+  }
+}
+
+/* Panneau (§9.3) : fond blanc, bordure décorative subtile ET
+   ombre bicouche obligatoire — il occupe toute la largeur du
+   gabarit, ce n'est plus une card flottante centrée */
 .auth-panel {
-  width: 100%;
-  max-width: 460px;
-  padding: 28px 22px;
   background-color: var(--color-bg-card);
   border: 0.5px solid var(--color-border-subtle);
   border-radius: var(--radius-card-lg);
   box-shadow: var(--shadow-card);
-}
-
-.auth-panel--wide {
-  max-width: 560px;
+  padding: 28px 22px;
 }
 
 @media (min-width: 640px) {
-  .auth-page-v2 {
-    padding: 48px 24px;
-  }
-
   .auth-panel {
-    padding: 42px 42px 38px;
+    padding: 56px 64px;
   }
+}
+
+.auth-panel--wide {
+  /* transition : sera supprimé au passage d'inscription */
+  max-width: 560px;
+}
+
+/* Colonne de lecture unique à l'intérieur du panneau */
+.auth-form-col {
+  max-width: 520px;
 }
 
 /* Retour site : icône seule — pas de nom de marque répété */
@@ -406,15 +413,16 @@
   background-color: rgba(0, 20, 137, 0.06);
 }
 
-/* ─── Sur-titre bleu Panama (§2.2 : les sur-titres sont bleus,
-       le rouge reste réservé aux CTA) ─── */
+/* ─── Accroche rouge Panama — exception produit validée
+       (le DS réserve le rouge aux CTA ; direction retenue :
+       l'accroche rouge porte la voix de marque) ─── */
 .auth-eyebrow {
   margin: 0 0 10px;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--color-accent-secondary);
+  color: #d21034;
 }
 
 /* ─── Titre éditorial (§3 : Anton italique MAJUSCULES) ─── */
@@ -423,7 +431,7 @@
   font-family: var(--font-display);
   font-style: italic;
   text-transform: uppercase;
-  font-size: clamp(30px, 4vw, 44px);
+  font-size: clamp(32px, 3.2vw, 40px);
   letter-spacing: 0.01em;
   line-height: 1.05;
   color: var(--color-text-primary);
@@ -441,17 +449,21 @@
   color: var(--color-text-secondary);
 }
 
-/* ─── Champs de formulaire (§9.2, règle pour règle) ─── */
+/* ─── Champs de formulaire — boîte fermée (direction retenue) :
+       fond légèrement distinct du panneau, bordure douce,
+       radius 10px, labels petites majuscules discrètes ─── */
 .lfield {
   margin-bottom: 18px;
 }
 
 .lfield-label {
   display: block;
-  margin-bottom: 8px;
-  font-size: 13px;
+  margin-bottom: 7px;
+  font-size: 12px;
   font-weight: 600;
-  color: var(--color-text-primary);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
 }
 
 .lfield-box {
@@ -462,17 +474,18 @@
 
 .lfield-input {
   width: 100%;
-  padding: 13px 16px;
-  background-color: var(--color-bg-card);
-  border: 1px solid var(--color-border-input); /* #8A8175 — WCAG 1.4.11 */
-  border-radius: var(--radius-card);
+  padding: 14px 16px;
+  background-color: var(--color-bg-primary);
+  border: 1px solid #e5e0d8;
+  border-radius: 10px;
   font-family: inherit;
   font-size: 16px;
   color: var(--color-text-primary);
   outline: none;
   transition:
     border-color 150ms ease,
-    box-shadow 150ms ease;
+    box-shadow 150ms ease,
+    background-color 150ms ease;
 }
 
 /* Placeholder descriptif, #6B6459 pleine opacité (§9.2) */
@@ -770,30 +783,9 @@ span.auth-btn--link {
   column-gap: 16px;
 }
 
-/* ─── Pages sobres (mot de passe oublié, réinitialisation) ── */
-.auth-min {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  padding: 32px 16px;
-  background-color: var(--color-bg-primary);
-}
-
-.auth-min .auth-panel {
-  max-width: 420px;
-}
-
-@media (min-width: 640px) {
-  .auth-min {
-    padding: 48px 24px;
-  }
-
-  .auth-min .auth-panel {
-    padding: 38px 36px 34px;
-  }
-}
+/* Pages sobres (mot de passe oublié, réinitialisation) : elles
+   partagent le gabarit pleine largeur défini plus haut (.auth-min)
+   et le même panneau — seule leur densité de contenu change */
 
 /* Icône d'état dans un cercle discret — icônes bleues (§4.3) */
 .auth-icon-circle {
@@ -849,6 +841,60 @@ span.auth-btn--link {
   cursor: not-allowed;
 }
 
+/* ─── Chiffres clés (Connexion) : occupe la largeur restante du
+       panneau, séparé du formulaire par un trait fin horizontal.
+       3 colonnes desktop → 2 colonnes ≤640px → empilé ≤400px,
+       jamais tronqué (§6) ─── */
+.auth-stats {
+  display: flex;
+  align-items: stretch;
+  gap: 24px;
+  margin-top: 36px;
+  padding-top: 26px;
+  border-top: 0.5px solid var(--color-border-subtle);
+}
+
+.auth-stat {
+  flex: 1;
+  min-width: 0;
+}
+
+.auth-stat strong {
+  display: block;
+  font-family: var(--font-display);
+  font-style: italic;
+  text-transform: uppercase;
+  font-size: clamp(22px, 2.4vw, 30px);
+  line-height: 1;
+  color: var(--color-text-primary);
+}
+
+.auth-stat span {
+  display: block;
+  margin-top: 8px;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+@media (max-width: 640px) {
+  .auth-stats {
+    margin-top: 28px;
+    padding-top: 22px;
+    flex-wrap: wrap;
+    gap: 18px 24px;
+  }
+
+  .auth-stat {
+    flex: 1 1 38%;
+  }
+}
+
+@media (max-width: 400px) {
+  .auth-stat {
+    flex-basis: 100%;
+  }
+}
+
 /* ─── Responsive (§6 : mobile first, zéro débordement) ─── */
 @media (max-width: 560px) {
   .lrow-2 {
@@ -858,11 +904,11 @@ span.auth-btn--link {
 
 @media (max-width: 480px) {
   .auth-panel {
-    padding: 26px 18px 24px;
+    padding: 28px 22px;
   }
 
   .auth-panel--wide {
-    padding: 26px 18px 24px;
+    padding: 28px 22px;
   }
 
   .auth-display {

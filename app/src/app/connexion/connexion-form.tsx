@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
-import { FaArrowLeft, FaArrowRight, FaEye, FaEyeSlash, FaCircleInfo } from "react-icons/fa6";
+import { FaArrowRight, FaEye, FaEyeSlash, FaCircleInfo } from "react-icons/fa6";
 
 interface ConnexionFormProps {
   echec: boolean;
@@ -74,11 +74,8 @@ export function ConnexionForm({ echec, succes }: ConnexionFormProps) {
   return (
     <div className="auth-page-v2">
       <div className="auth-panel">
-        <Link href="/" className="auth-home" aria-label="Retour au site">
-          <FaArrowLeft aria-hidden="true" />
-        </Link>
-
-        <p className="auth-eyebrow">Content de vous revoir</p>
+        <div className="auth-form-col">
+          <p className="auth-eyebrow">Content de vous revoir</p>
           <h1 className="auth-display">Connexion</h1>
 
           {staffManquant && (
@@ -158,6 +155,22 @@ export function ConnexionForm({ echec, succes }: ConnexionFormProps) {
           <div className="auth-footer">
             Pas encore de profil chez nous ? <Link href="/inscription">S&apos;inscrire</Link>
           </div>
+        </div>
+
+        <div className="auth-stats">
+          <div className="auth-stat">
+            <strong>4.8/5</strong>
+            <span>Note moyenne des séjours</span>
+          </div>
+          <div className="auth-stat">
+            <strong>240+</strong>
+            <span>Séjours accueillis</span>
+          </div>
+          <div className="auth-stat">
+            <strong>7</strong>
+            <span>Types de logements</span>
+          </div>
+        </div>
       </div>
     </div>
   );
