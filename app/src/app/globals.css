@@ -337,15 +337,22 @@
 
   .search-fields {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr)) auto;
+    grid-template-columns: repeat(6, minmax(0, 1fr)) auto;
     gap: 14px;
     align-items: end;
+  }
+
+  .search-field--range {
+    grid-column: span 2;
   }
 
   /* Mobile : un champ par ligne */
   @media (max-width: 1023.98px) {
     .search-fields {
       grid-template-columns: 1fr;
+    }
+    .search-field--range {
+      grid-column: span 1;
     }
   }
 
@@ -646,11 +653,9 @@
   .dc-dropdown {
     position: absolute;
     top: calc(100% + 8px);
-    left: 50%;
-    transform: translateX(-50%);
+    left: 0;
     z-index: 50;
-    width: max-content;
-    max-width: calc(100vw - 32px);
+    min-width: 520px;
     background-color: var(--color-bg-card);
     border: 1px solid var(--color-border-subtle);
     border-radius: 16px;
@@ -659,6 +664,11 @@
       0 6px 16px -6px rgba(31, 26, 20, 0.12);
     padding: 16px;
     animation: pop-in 200ms ease both;
+  }
+
+  .dc-dropdown--up {
+    top: auto;
+    bottom: calc(100% + 8px);
   }
 
   .dc-panel-nav {
@@ -889,11 +899,15 @@
 
   @media (max-width: 640px) {
     .dc-dropdown {
-      left: 0;
-      right: 0;
-      transform: none;
-      max-width: none;
+      position: fixed;
+      inset: 16px;
+      min-width: 0;
       width: auto;
+      overflow-y: auto;
+    }
+
+    .dc-dropdown--up {
+      inset: 16px;
     }
 
     .dc-calendars {

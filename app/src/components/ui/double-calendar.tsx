@@ -30,7 +30,7 @@ function todayISO(): string {
 
 function leadingBlanks(year: number, month: number): number {
   const jsDay = new Date(Date.UTC(year, month - 1, 1)).getUTCDay();
-  return (jsDay + 6) % 7; // lundi=0
+  return (jsDay + 6) % 7;
 }
 
 function daysInMonth(year: number, month: number): number {
@@ -38,9 +38,7 @@ function daysInMonth(year: number, month: number): number {
 }
 
 function toISO(year: number, month: number, day: number): string {
-  const mm = String(month).padStart(2, "0");
-  const dd = String(day).padStart(2, "0");
-  return `${year}-${mm}-${dd}`;
+  return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
 }
 
 function parseISO(iso: string): { year: number; month: number; day: number } | null {
@@ -61,7 +59,6 @@ function MonthCalendar({
   panel,
   onSelect,
   onHover,
-  onHoverClear,
 }: {
   year: number;
   month: number;
@@ -73,15 +70,11 @@ function MonthCalendar({
   panel: "arrival" | "departure";
   onSelect: (iso: string) => void;
   onHover: (iso: string) => void;
-  onHoverClear: () => void;
 }) {
   const blanks = leadingBlanks(year, month);
   const total = daysInMonth(year, month);
   const today = todayISO();
   const isActive = activePanel === panel;
-
-  const prevMonth = month === 1 ? 12 : month - 1;
-  const prevYear = month === 1 ? year - 1 : year;
 
   return (
     <div className={`dc-month${isActive ? " dc-month--active" : ""}`}>
@@ -99,11 +92,7 @@ function MonthCalendar({
         ))}
 
         {Array.from({ length: blanks }).map((_, i) => (
-          <span
-            key={`b-${prevYear}-${prevMonth}-${blanks - i}`}
-            className="dc-day dc-day--empty"
-            aria-hidden="true"
-          />
+          <span key={`b${i}`} className="dc-day dc-day--empty" aria-hidden="true" />
         ))}
 
         {Array.from({ length: total }, (_, i) => {
@@ -112,16 +101,16 @@ function MonthCalendar({
           const isToday = iso === today;
           const isPast = iso < minDate;
           const isArrival = iso === arrivalISO;
-          const isDeparture = departureISO && iso === departureISO;
+          const isDeparture = departureISO !== "" && iso === departureISO;
           const inRange =
-            arrivalISO &&
-            departureISO &&
+            arrivalISO !== "" &&
+            departureISO !== "" &&
             iso > arrivalISO &&
             iso < departureISO;
           const isHoverRange =
-            !departureISO &&
-            arrivalISO &&
-            hoverDate &&
+            departureISO === "" &&
+            arrivalISO !== "" &&
+            hoverDate !== "" &&
             iso > arrivalISO &&
             iso <= hoverDate;
 
@@ -145,7 +134,6 @@ function MonthCalendar({
               onMouseEnter={() => {
                 if (!isPast) onHover(iso);
               }}
-              onMouseLeave={onHoverClear}
             >
               {day}
             </button>
@@ -164,6 +152,7 @@ function DoubleCalendar({
   onSelectArrival,
   onSelectDeparture,
   onReset,
+  onComplete,
 }: {
   arrivalISO: string;
   departureISO: string;
@@ -171,16 +160,16 @@ function DoubleCalendar({
   onSelectArrival: (iso: string) => void;
   onSelectDeparture: (iso: string) => void;
   onReset: () => void;
+  onComplete: () => void;
 }) {
   const now = new Date();
   const [leftYear, setLeftYear] = useState(now.getFullYear());
   const [leftMonth, setLeftMonth] = useState(now.getMonth() + 1);
   const [activePanel, setActivePanel] = useState<"arrival" | "departure">(
-    departureISO ? "arrival" : "departure"
+    departureISO !== "" ? "arrival" : "departure"
   );
   const [hoverDate, setHoverDate] = useState("");
 
-  // Le mois de droite = mois suivant
   const rightMonth = leftMonth === 12 ? 1 : leftMonth + 1;
   const rightYear = leftMonth === 12 ? leftYear + 1 : leftYear;
 
@@ -213,15 +202,16 @@ function DoubleCalendar({
       setActivePanel("departure");
       setHoverDate("");
     } else {
-      if (arrivalISO && iso <= arrivalISO) {
+      if (arrivalISO !== "" && iso <= arrivalISO) {
         onReset();
         onSelectArrival(iso);
         setActivePanel("departure");
       } else {
         onSelectDeparture(iso);
         setActivePanel("arrival");
+        setHoverDate("");
+        onComplete();
       }
-      setHoverDate("");
     }
   };
 
@@ -267,7 +257,6 @@ function DoubleCalendar({
           panel="arrival"
           onSelect={handleSelect}
           onHover={setHoverDate}
-          onHoverClear={() => setHoverDate("")}
         />
 
         <div className="dc-divider" aria-hidden="true" />
@@ -283,7 +272,6 @@ function DoubleCalendar({
           panel="departure"
           onSelect={handleSelect}
           onHover={setHoverDate}
-          onHoverClear={() => setHoverDate("")}
         />
       </div>
 
@@ -293,7 +281,7 @@ function DoubleCalendar({
             ? "Choisissez votre date d'arrivée"
             : "Choisissez votre date de départ"}
         </span>
-        {(arrivalISO || departureISO) && (
+        {(arrivalISO !== "" || departureISO !== "") && (
           <button type="button" className="dc-reset-btn" onClick={onReset}>
             Effacer
           </button>
@@ -303,11 +291,12 @@ function DoubleCalendar({
   );
 }
 
-/* ─── Composant intégré au hero (champ + dropdown + hidden inputs) ─── */
+/* ─── Composant intégré au hero ─── */
 export function DateRangeField({ min }: { min?: string }) {
   const [open, setOpen] = useState(false);
   const [arrivalISO, setArrivalISO] = useState("");
   const [departureISO, setDepartureISO] = useState("");
+  const [dropUp, setDropUp] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
 
   const minDate = min ?? todayISO();
@@ -328,20 +317,30 @@ export function DateRangeField({ min }: { min?: string }) {
     };
   }, [open]);
 
+  const toggle = () => {
+    if (!open && wrapRef.current) {
+      const rect = wrapRef.current.getBoundingClientRect();
+      setDropUp(window.innerHeight - rect.bottom < 420 && rect.top > 420);
+    }
+    setOpen((v) => !v);
+  };
+
   const formatDisplay = (iso: string): string => {
     const p = parseISO(iso);
     if (!p) return "";
-    return `${p.day} ${MONTH_NAMES[p.month - 1].slice(0, 3)}. ${p.year}`;
+    const monthShort = MONTH_NAMES[p.month - 1].slice(0, 3);
+    return `${p.day} ${monthShort}. ${p.year}`;
   };
 
-  const arrivalDisplay = arrivalISO ? formatDisplay(arrivalISO) : "";
-  const departureDisplay = departureISO ? formatDisplay(departureISO) : "";
+  const arrivalDisplay = arrivalISO !== "" ? formatDisplay(arrivalISO) : "";
+  const departureDisplay = departureISO !== "" ? formatDisplay(departureISO) : "";
 
-  const summary = arrivalISO
-    ? departureISO
-      ? `${arrivalDisplay} — ${departureDisplay}`
-      : `${arrivalDisplay} — ?`
-    : "";
+  const summary =
+    arrivalISO !== ""
+      ? departureISO !== ""
+        ? `${arrivalDisplay} — ${departureDisplay}`
+        : `${arrivalDisplay} — ?`
+      : "";
 
   return (
     <div className="search-field search-field--range" ref={wrapRef}>
@@ -351,16 +350,20 @@ export function DateRangeField({ min }: { min?: string }) {
         className="range-trigger"
         aria-haspopup="dialog"
         aria-expanded={open}
-        onClick={() => setOpen((v) => !v)}
+        onClick={toggle}
       >
         <FaCalendarDays aria-hidden="true" size={15} />
-        <span className={`range-value${summary ? "" : " range-value--placeholder"}`}>
-          {summary || "Sélectionnez vos dates"}
+        <span className={`range-value${summary !== "" ? "" : " range-value--placeholder"}`}>
+          {summary !== "" ? summary : "Sélectionnez vos dates"}
         </span>
       </button>
 
       {open && (
-        <div className="dc-dropdown" role="dialog" aria-label="Choix des dates">
+        <div
+          className={`dc-dropdown${dropUp ? " dc-dropdown--up" : ""}`}
+          role="dialog"
+          aria-label="Choix des dates"
+        >
           <DoubleCalendar
             arrivalISO={arrivalISO}
             departureISO={departureISO}
@@ -371,6 +374,7 @@ export function DateRangeField({ min }: { min?: string }) {
               setArrivalISO("");
               setDepartureISO("");
             }}
+            onComplete={() => setOpen(false)}
           />
         </div>
       )}
