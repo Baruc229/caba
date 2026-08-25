@@ -6,7 +6,6 @@ import {
   beninDayStart,
   beninDateString,
   beninTimeString,
-  hoursBetween,
   minutesFromHHmm,
   nightsBetween,
   overlaps,
@@ -95,7 +94,7 @@ function parseSejourRules(regles: { typeRegle: string; valeur: string | null }[]
 }
 
 function isHourlyType(typeReservation?: string): boolean {
-  return ["heure", "plusieurs_heures", "demi_journee", "journee", "vingt_quatre_heures"].includes(
+  return ["heure", "plusieurs_heures", "vingt_quatre_heures"].includes(
     typeReservation ?? ""
   );
 }

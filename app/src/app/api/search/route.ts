@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (
-      ["heure", "plusieurs_heures", "demi_journee", "journee", "vingt_quatre_heures"].includes(typeReservation)
+      ["heure", "plusieurs_heures", "vingt_quatre_heures"].includes(typeReservation)
     ) {
       if (!heureArrivee || !heureDepart) {
         return NextResponse.json(

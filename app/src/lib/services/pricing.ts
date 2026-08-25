@@ -145,6 +145,10 @@ export function computePriceFromData(input: {
     }
     case "demi_journee": {
       nightsOrUnits = Math.max(1, Math.ceil(hoursBetween(startDate, endDate) / 4));
+      /* Sans heures explicites (midnight→midnight), forcing 1 unité
+         pour éviter ceil(24/4)=6. Le client réserve "une demi-journée",
+         pas 6 demi-journées. */
+      if (!input.startTime && !input.endTime) nightsOrUnits = 1;
       unitPrice = findRateByType(applicableTarifs, "demi_journee");
       baseRate = unitPrice;
       break;

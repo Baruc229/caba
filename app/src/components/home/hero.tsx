@@ -55,7 +55,9 @@ const SEJOUR_TYPES = [
   { value: "plusieurs_heures", label: "Quelques heures" },
 ] as const;
 
-const HOURLY_TYPES = new Set(["journee", "vingt_quatre_heures", "demi_journee", "plusieurs_heures"]);
+/* Types pour lesquels le client choisit réellement ses heures
+   (24h et quelques heures). Les autres infèrent du système. */
+const NEEDS_HOURS = new Set(["vingt_quatre_heures", "plusieurs_heures"]);
 
 const AVATARS = [
   { initials: "AK", background: "var(--color-accent-secondary)" },
@@ -218,7 +220,7 @@ function GuestsField() {
 export function Hero() {
   const [sejourType, setSejourType] = useState<string>("nuee");
 
-  const hourly = HOURLY_TYPES.has(sejourType);
+  const needsHours = NEEDS_HOURS.has(sejourType);
 
   return (
     <section
@@ -293,7 +295,7 @@ export function Hero() {
               Rechercher
             </button>
 
-            {hourly && (
+            {needsHours && (
               <div className="hours-row">
                 <div className="search-field hours-field">
                   <label htmlFor="heure-arrivee" className="search-label">
