@@ -3,7 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
-import { FaArrowLeft, FaArrowRight, FaEye, FaEyeSlash } from "react-icons/fa6";
+import { FaArrowRight, FaEye, FaEyeSlash } from "react-icons/fa6";
+import { PhotoAside } from "@/components/auth/photo-aside";
 import {
   CriteriaList,
   StrengthMeter,
@@ -37,7 +38,7 @@ export function InscriptionForm({
       case "email":
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim())
           ? ""
-          : "Entrez une adresse email valide.";
+          : "L'adresse email doit contenir un @ suivi d'un domaine (ex : nom@exemple.com).";
       case "password":
         if (scorePassword(value) < 2 || !/[A-Z]/.test(value)) {
           return "Le mot de passe ne respecte pas encore les critères.";
@@ -139,22 +140,22 @@ export function InscriptionForm({
   if (emailExists) {
     return (
       <div className="auth-page-v2">
-        <div className="auth-panel auth-panel--wide">
-          <Link href="/" className="auth-home" aria-label="Retour au site">
-            <FaArrowLeft aria-hidden="true" />
-          </Link>
-          <p className="auth-eyebrow">Déjà parmi nous ?</p>
-          <h1 className="auth-display">Profil existant</h1>
-          <p role="alert" className="auth-banner auth-banner--error">
-            Un profil existe déjà avec cet email.
-          </p>
-          <p className="auth-subtitle-v2">
-            Connectez-vous directement — ou utilisez « Mot de passe oublié ? » si besoin.
-          </p>
-          <Link href="/connexion" className="auth-btn auth-btn--link">
-            Se connecter
-            <FaArrowRight className="auth-btn-arrow" aria-hidden="true" />
-          </Link>
+        <div className="auth-panel">
+          <div className="auth-main">
+            <p className="auth-eyebrow">Déjà parmi nous ?</p>
+            <h1 className="auth-display">Profil existant</h1>
+            <p role="alert" className="auth-banner auth-banner--error">
+              Un profil existe déjà avec cet email.
+            </p>
+            <p className="auth-subtitle-v2">
+              Connectez-vous directement — ou utilisez « Mot de passe oublié ? » si besoin.
+            </p>
+            <Link href="/connexion" className="auth-btn auth-btn--link">
+              Se connecter
+              <FaArrowRight className="auth-btn-arrow" aria-hidden="true" />
+            </Link>
+          </div>
+          <PhotoAside />
         </div>
       </div>
     );
@@ -163,11 +164,9 @@ export function InscriptionForm({
   return (
     <div className="auth-page-v2">
       {/* Page continue : identité -> contact -> sécurité, sans étapes */}
-      <div className="auth-panel auth-panel--wide">
-        <Link href="/" className="auth-home" aria-label="Retour au site">
-          <FaArrowLeft aria-hidden="true" />
-        </Link>
-        <p className="auth-eyebrow">Bienvenue chez nous</p>
+      <div className="auth-panel">
+        <div className="auth-main">
+          <p className="auth-eyebrow">Bienvenue</p>
           <h1 className="auth-display">Créez votre profil</h1>
           <p className="auth-subtitle-v2">
             Quelques informations, pour vous accueillir comme il se doit.
@@ -193,6 +192,7 @@ export function InscriptionForm({
                     type="text"
                     autoComplete="given-name"
                     defaultValue={prefillPrenom}
+                    autoFocus
                     onBlur={(event) => blurCheck("prenom", event.target.value)}
                     onInput={() => {
                       if (fieldErrors.prenom) blurCheck("prenom", "");
@@ -235,6 +235,7 @@ export function InscriptionForm({
                     name="email"
                     type="email"
                     autoComplete="email"
+                    placeholder="nom@exemple.com"
                     onBlur={(event) => blurCheck("email", event.target.value)}
                     onInput={() => {
                       if (fieldErrors.email) blurCheck("email", "");
@@ -254,7 +255,7 @@ export function InscriptionForm({
                     type="tel"
                     autoComplete="tel"
                     defaultValue={prefillTelephone}
-                    placeholder="+229 …"
+                    placeholder="+229 XX XX XX XX"
                     className="lfield-input"
                   />
                 </div>
@@ -273,6 +274,7 @@ export function InscriptionForm({
                     name="password"
                     type={showPassword ? "text" : "password"}
                     autoComplete="new-password"
+                    placeholder={showPassword ? "Votre mot de passe" : "••••••••"}
                     value={password}
                     onChange={(event) => setPassword(event.target.value)}
                     onBlur={(event) => blurCheck("password", event.target.value)}
@@ -307,6 +309,7 @@ export function InscriptionForm({
                   name="confirm"
                   type="password"
                   autoComplete="new-password"
+                  placeholder="••••••••"
                   onBlur={(event) => blurCheck("confirm", event.target.value)}
                   onInput={() => {
                     if (fieldErrors.confirm) blurCheck("confirm", "");
@@ -343,6 +346,9 @@ export function InscriptionForm({
           <div className="auth-footer">
             Déjà un profil chez nous ? <Link href="/connexion">Se connecter</Link>
           </div>
+        </div>
+
+        <PhotoAside />
       </div>
     </div>
   );

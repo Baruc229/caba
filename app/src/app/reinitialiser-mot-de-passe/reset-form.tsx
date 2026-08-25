@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { FaArrowRight, FaEye, FaEyeSlash } from "react-icons/fa6";
 import {
   CriteriaList,
   StrengthMeter,
@@ -13,6 +14,7 @@ export function ResetForm({ token }: { token: string }) {
   const router = useRouter();
 
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [status, setStatus] = useState<"idle" | "loading">("idle");
   const [error, setError] = useState("");
@@ -96,17 +98,35 @@ export function ResetForm({ token }: { token: string }) {
           <label htmlFor="reset-new-password" className="lfield-label">
             Nouveau mot de passe
           </label>
-          <input
-            id="reset-new-password"
-            name="password"
-            type="password"
-            autoComplete="new-password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            onBlur={(event) => blurCheck("password", event.target.value)}
-            required
-            className="lfield-input"
-          />
+          <div className="lfield-box">
+            <input
+              id="reset-new-password"
+              name="password"
+              type={showPassword ? "text" : "password"}
+              autoComplete="new-password"
+              placeholder={showPassword ? "Votre nouveau mot de passe" : "••••••••"}
+              autoFocus
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              onBlur={(event) => blurCheck("password", event.target.value)}
+              required
+              className="lfield-input lfield-input--eye"
+            />
+            <button
+              type="button"
+              className="auth-eye"
+              aria-label={
+                showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"
+              }
+              onClick={() => setShowPassword((value) => !value)}
+            >
+              {showPassword ? (
+                <FaEyeSlash aria-hidden="true" />
+              ) : (
+                <FaEye aria-hidden="true" />
+              )}
+            </button>
+          </div>
           <StrengthMeter password={password} />
           <CriteriaList password={password} />
           {fieldError("password")}
@@ -121,6 +141,7 @@ export function ResetForm({ token }: { token: string }) {
             name="confirm"
             type="password"
             autoComplete="new-password"
+            placeholder="••••••••"
             onBlur={(event) => blurCheck("confirm", event.target.value)}
             onInput={() => {
               if (fieldErrors.confirm) blurCheck("confirm", "");
@@ -133,6 +154,9 @@ export function ResetForm({ token }: { token: string }) {
 
         <button type="submit" className="auth-btn" disabled={status === "loading"}>
           {status === "loading" ? "Enregistrement…" : "Réinitialiser le mot de passe"}
+          {status !== "loading" && (
+            <FaArrowRight className="auth-btn-arrow" aria-hidden="true" />
+          )}
         </button>
       </form>
 

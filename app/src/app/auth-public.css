@@ -392,27 +392,6 @@
   }
 }
 
-/* Retour site : icône seule — pas de nom de marque répété */
-.auth-home {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  margin-bottom: 10px;
-  margin-left: -12px;
-  border-radius: 999px;
-  color: var(--color-text-secondary);
-  transition:
-    color 150ms ease,
-    background-color 150ms ease;
-}
-
-.auth-home:hover {
-  color: var(--color-accent-secondary);
-  background-color: rgba(0, 20, 137, 0.06);
-}
-
 /* ─── Accroche rouge Panama — exception produit validée
        (le DS réserve le rouge aux CTA ; direction retenue :
        l'accroche rouge porte la voix de marque) ─── */
@@ -856,7 +835,7 @@ span.auth-btn--link {
       rgba(26, 26, 26, 0.38) 48%,
       rgba(26, 26, 26, 0.82) 100%
     ),
-    url("/hero1.webp");
+    url("/auth.webp");
   background-size: cover;
   background-position: center;
   color: #ffffff;
