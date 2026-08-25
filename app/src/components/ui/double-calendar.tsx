@@ -1,6 +1,14 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import {
+  forwardRef,
+  memo,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import {
   FaCalendarDays,
   FaChevronLeft,
@@ -53,8 +61,8 @@ function formatShort(iso: string): string {
   return `${p.day} ${MONTH_NAMES[p.month - 1].slice(0, 3)}. ${p.year}`;
 }
 
-/* ─── Calendrier mensuel ─── */
-function MonthCalendar({
+/* ─── Calendrier mensuel (memo pour éviter re-render inutile) ─── */
+const MonthCalendar = memo(function MonthCalendar({
   year,
   month,
   minDate,
@@ -113,7 +121,57 @@ function MonthCalendar({
       </div>
     </div>
   );
-}
+});
+
+/* ─── Dropdown calendrier avec forwardRef pour flip + scroll ─── */
+const CalendarDropdown = forwardRef<HTMLDivElement, {
+  year: number;
+  month: number;
+  minDate: string;
+  selected: string;
+  onSelect: (iso: string) => void;
+  canPrevMonth: (y: number, m: number) => boolean;
+  onPrev: () => void;
+  onNext: () => void;
+  label: string;
+}>(function CalendarDropdown(
+  { year, month, minDate, selected, onSelect, canPrevMonth, onPrev, onNext, label },
+  ref,
+) {
+  return (
+    <div className="dp-dropdown" role="dialog" aria-label={label} ref={ref}>
+      <div className="dp-header">
+        <button
+          type="button"
+          className="dp-nav"
+          disabled={canPrevMonth(year, month)}
+          onClick={(e) => { e.stopPropagation(); onPrev(); }}
+          aria-label="Mois précédent"
+        >
+          <FaChevronLeft aria-hidden="true" size={12} />
+        </button>
+        <span className="dp-title">
+          {MONTH_NAMES[month - 1]} {year}
+        </span>
+        <button
+          type="button"
+          className="dp-nav"
+          onClick={(e) => { e.stopPropagation(); onNext(); }}
+          aria-label="Mois suivant"
+        >
+          <FaChevronRight aria-hidden="true" size={12} />
+        </button>
+      </div>
+      <MonthCalendar
+        year={year}
+        month={month}
+        minDate={minDate}
+        selected={selected}
+        onSelect={onSelect}
+      />
+    </div>
+  );
+});
 
 /* ─── DateRangeField : deux champs date dans le hero ─── */
 export function DateRangeField({ min }: { min?: string }) {
@@ -134,21 +192,36 @@ export function DateRangeField({ min }: { min?: string }) {
     return d.getMonth() + 1;
   });
 
-  const arrivalRef = useRef<HTMLDivElement>(null);
-  const departureRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const arrDropRef = useRef<HTMLDivElement>(null);
+  const depDropRef = useRef<HTMLDivElement>(null);
 
   const minDate = min ?? todayISO();
 
-  /* Fermeture click-outside — PAS sur pointerdown */
+  /* Flip dropdown si ça dépasse le bas du viewport */
+  useLayoutEffect(() => {
+    const ref = openArrival ? arrDropRef : openDeparture ? depDropRef : null;
+    if (!ref?.current) return;
+    ref.current.classList.remove("dp-dropdown--above");
+    const rect = ref.current.getBoundingClientRect();
+    if (rect.bottom > window.innerHeight - 8) {
+      ref.current.classList.add("dp-dropdown--above");
+    }
+  }, [openArrival, openDeparture]);
+
+  /* Scroll-into-view à l'ouverture */
+  useEffect(() => {
+    const ref = openArrival ? arrDropRef : openDeparture ? depDropRef : null;
+    if (!ref?.current) return;
+    ref.current.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }, [openArrival, openDeparture]);
+
+  /* Click-outside robuste */
   useEffect(() => {
     if (!openArrival && !openDeparture) return;
+
     const onClick = (e: MouseEvent) => {
-      if (
-        arrivalRef.current &&
-        !arrivalRef.current.contains(e.target as Node) &&
-        departureRef.current &&
-        !departureRef.current.contains(e.target as Node)
-      ) {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
         setOpenArrival(false);
         setOpenDeparture(false);
       }
@@ -159,9 +232,7 @@ export function DateRangeField({ min }: { min?: string }) {
         setOpenDeparture(false);
       }
     };
-    /* timeout 0 pour laisser le click du bouton s'exécuter
-       avant d'attacher le listener — évite le close immédiat
-       sur mobile où le click met plus de temps à se propager */
+
     const id = setTimeout(() => {
       window.addEventListener("click", onClick);
       window.addEventListener("keydown", onKey);
@@ -173,25 +244,27 @@ export function DateRangeField({ min }: { min?: string }) {
     };
   }, [openArrival, openDeparture]);
 
-  const goMonth = (
-    setY: React.Dispatch<React.SetStateAction<number>>,
-    setM: React.Dispatch<React.SetStateAction<number>>,
-    delta: number,
-  ) => {
-    setM((m) => {
-      if (delta === -1 && m === 1) {
-        setY((y) => y - 1);
-        return 12;
-      }
-      if (delta === 1 && m === 12) {
-        setY((y) => y + 1);
-        return 1;
-      }
-      return m + delta;
-    });
-  };
+  const goMonth = useCallback(
+    (
+      setY: React.Dispatch<React.SetStateAction<number>>,
+      setM: React.Dispatch<React.SetStateAction<number>>,
+      delta: number,
+    ) => {
+      setM((m) => {
+        if (delta === -1 && m === 1) { setY((y) => y - 1); return 12; }
+        if (delta === 1 && m === 12) { setY((y) => y + 1); return 1; }
+        return m + delta;
+      });
+    },
+    [],
+  );
 
-  const selectArrival = (iso: string) => {
+  const canPrevMonth = useCallback((y: number, m: number) => {
+    const now = new Date();
+    return y * 12 + m > now.getFullYear() * 12 + now.getMonth() + 1;
+  }, []);
+
+  const selectArrival = useCallback((iso: string) => {
     setArrivalISO(iso);
     setOpenArrival(false);
     setOpenDeparture(true);
@@ -201,75 +274,25 @@ export function DateRangeField({ min }: { min?: string }) {
       setDepYear(d.getUTCFullYear());
       setDepMonth(d.getUTCMonth() + 1);
     }
-  };
+  }, []);
 
-  const selectDeparture = (iso: string) => {
-    if (arrivalISO !== "" && iso <= arrivalISO) {
-      setArrivalISO(iso);
-      setDepartureISO("");
+  const selectDeparture = useCallback((iso: string) => {
+    setArrivalISO((prev) => {
+      if (prev !== "" && iso <= prev) {
+        setDepartureISO("");
+        setOpenDeparture(false);
+        return iso;
+      }
+      setDepartureISO(iso);
       setOpenDeparture(false);
-      return;
-    }
-    setDepartureISO(iso);
-    setOpenDeparture(false);
-  };
-
-  const canPrevMonth = (y: number, m: number) => {
-    const now = new Date();
-    return y * 12 + m > now.getFullYear() * 12 + now.getMonth() + 1;
-  };
-
-  const renderCalendar = (
-    year: number,
-    month: number,
-    setY: React.Dispatch<React.SetStateAction<number>>,
-    setM: React.Dispatch<React.SetStateAction<number>>,
-    selected: string,
-    onSelect: (iso: string) => void,
-  ) => (
-    <div className="dp-dropdown" role="dialog" aria-label="Choix de la date">
-      <div className="dp-header">
-        <button
-          type="button"
-          className="dp-nav"
-          disabled={canPrevMonth(year, month)}
-          onClick={(e) => {
-            e.stopPropagation();
-            goMonth(setY, setM, -1);
-          }}
-          aria-label="Mois précédent"
-        >
-          <FaChevronLeft aria-hidden="true" size={12} />
-        </button>
-        <span className="dp-title">
-          {MONTH_NAMES[month - 1]} {year}
-        </span>
-        <button
-          type="button"
-          className="dp-nav"
-          onClick={(e) => {
-            e.stopPropagation();
-            goMonth(setY, setM, 1);
-          }}
-          aria-label="Mois suivant"
-        >
-          <FaChevronRight aria-hidden="true" size={12} />
-        </button>
-      </div>
-      <MonthCalendar
-        year={year}
-        month={month}
-        minDate={minDate}
-        selected={selected}
-        onSelect={onSelect}
-      />
-    </div>
-  );
+      return prev;
+    });
+  }, []);
 
   return (
-    <>
+    <div ref={containerRef} style={{ display: "contents" }}>
       {/* Champ arrivée */}
-      <div className="search-field" ref={arrivalRef}>
+      <div className="search-field">
         <span className="search-label">Arrivée</span>
         <button
           type="button"
@@ -287,13 +310,25 @@ export function DateRangeField({ min }: { min?: string }) {
             {arrivalISO ? formatShort(arrivalISO) : "Choisir la date d\u2019arrivée"}
           </span>
         </button>
-        {openArrival &&
-          renderCalendar(arrYear, arrMonth, setArrYear, setArrMonth, arrivalISO, selectArrival)}
+        {openArrival && (
+          <CalendarDropdown
+            ref={arrDropRef}
+            year={arrYear}
+            month={arrMonth}
+            minDate={minDate}
+            selected={arrivalISO}
+            onSelect={selectArrival}
+            canPrevMonth={canPrevMonth}
+            onPrev={() => goMonth(setArrYear, setArrMonth, -1)}
+            onNext={() => goMonth(setArrYear, setArrMonth, 1)}
+            label="Choix de la date d'arrivée"
+          />
+        )}
         <input type="hidden" name="arrivee" value={arrivalISO} />
       </div>
 
       {/* Champ départ */}
-      <div className="search-field" ref={departureRef}>
+      <div className="search-field">
         <span className="search-label">Départ</span>
         <button
           type="button"
@@ -311,10 +346,22 @@ export function DateRangeField({ min }: { min?: string }) {
             {departureISO ? formatShort(departureISO) : "Choisir la date de départ"}
           </span>
         </button>
-        {openDeparture &&
-          renderCalendar(depYear, depMonth, setDepYear, setDepMonth, departureISO, selectDeparture)}
+        {openDeparture && (
+          <CalendarDropdown
+            ref={depDropRef}
+            year={depYear}
+            month={depMonth}
+            minDate={minDate}
+            selected={departureISO}
+            onSelect={selectDeparture}
+            canPrevMonth={canPrevMonth}
+            onPrev={() => goMonth(setDepYear, setDepMonth, -1)}
+            onNext={() => goMonth(setDepYear, setDepMonth, 1)}
+            label="Choix de la date de départ"
+          />
+        )}
         <input type="hidden" name="depart" value={departureISO} />
       </div>
-    </>
+    </div>
   );
 }

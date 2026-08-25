@@ -645,13 +645,22 @@
     top: calc(100% + 6px);
     left: 0;
     z-index: 50;
-    width: 294px;
+    width: min(294px, calc(100vw - 32px));
+    max-height: min(360px, calc(100vh - 40px));
+    overflow-y: auto;
+    overscroll-behavior: contain;
     background-color: var(--color-bg-card);
     border: 1px solid var(--color-border-subtle);
     border-radius: 14px;
     box-shadow: var(--shadow-card);
     padding: 14px;
     animation: pop-in 180ms ease both;
+  }
+
+  /* Flip au-dessus si pas de place en bas */
+  .dp-dropdown--above {
+    top: auto;
+    bottom: calc(100% + 6px);
   }
 
   .dp-header {
@@ -769,10 +778,8 @@
 
   @media (max-width: 640px) {
     .dp-dropdown {
-      position: fixed;
-      left: 16px;
-      right: 16px;
-      width: auto;
+      width: min(294px, calc(100vw - 32px));
+      max-height: min(340px, 70vh);
     }
 
     .dp-trigger {
@@ -796,6 +803,10 @@
       opacity: 1;
       transform: none;
     }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .dp-dropdown { animation: none; }
   }
 
   /* ─── Menu déroulant personnalisé ─── */
