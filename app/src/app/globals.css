@@ -774,6 +774,16 @@
       right: 16px;
       width: auto;
     }
+
+    .dp-trigger {
+      min-height: 36px;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    .dp-day {
+      min-height: 36px;
+    }
   }
 
   /* ─── Animations d'ouverture ─── */

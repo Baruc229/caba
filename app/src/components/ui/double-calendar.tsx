@@ -53,7 +53,7 @@ function formatShort(iso: string): string {
   return `${p.day} ${MONTH_NAMES[p.month - 1].slice(0, 3)}. ${p.year}`;
 }
 
-/* ─── Calendrier mensuel compact ─── */
+/* ─── Calendrier mensuel ─── */
 function MonthCalendar({
   year,
   month,
@@ -115,7 +115,7 @@ function MonthCalendar({
   );
 }
 
-/* ─── DateRangeField : deux champs date côte à côte dans le hero ─── */
+/* ─── DateRangeField : deux champs date dans le hero ─── */
 export function DateRangeField({ min }: { min?: string }) {
   const [openArrival, setOpenArrival] = useState(false);
   const [openDeparture, setOpenDeparture] = useState(false);
@@ -139,13 +139,15 @@ export function DateRangeField({ min }: { min?: string }) {
 
   const minDate = min ?? todayISO();
 
-  /* Fermeture click-outside */
+  /* Fermeture click-outside — PAS sur pointerdown */
   useEffect(() => {
     if (!openArrival && !openDeparture) return;
     const onClick = (e: MouseEvent) => {
       if (
-        arrivalRef.current && !arrivalRef.current.contains(e.target as Node) &&
-        departureRef.current && !departureRef.current.contains(e.target as Node)
+        arrivalRef.current &&
+        !arrivalRef.current.contains(e.target as Node) &&
+        departureRef.current &&
+        !departureRef.current.contains(e.target as Node)
       ) {
         setOpenArrival(false);
         setOpenDeparture(false);
@@ -157,9 +159,15 @@ export function DateRangeField({ min }: { min?: string }) {
         setOpenDeparture(false);
       }
     };
-    window.addEventListener("click", onClick);
-    window.addEventListener("keydown", onKey);
+    /* timeout 0 pour laisser le click du bouton s'exécuter
+       avant d'attacher le listener — évite le close immédiat
+       sur mobile où le click met plus de temps à se propager */
+    const id = setTimeout(() => {
+      window.addEventListener("click", onClick);
+      window.addEventListener("keydown", onKey);
+    }, 0);
     return () => {
+      clearTimeout(id);
       window.removeEventListener("click", onClick);
       window.removeEventListener("keydown", onKey);
     };
@@ -168,7 +176,7 @@ export function DateRangeField({ min }: { min?: string }) {
   const goMonth = (
     setY: React.Dispatch<React.SetStateAction<number>>,
     setM: React.Dispatch<React.SetStateAction<number>>,
-    delta: number
+    delta: number,
   ) => {
     setM((m) => {
       if (delta === -1 && m === 1) {
@@ -206,10 +214,7 @@ export function DateRangeField({ min }: { min?: string }) {
     setOpenDeparture(false);
   };
 
-  const canPrevMonth = (
-    y: number,
-    m: number,
-  ) => {
+  const canPrevMonth = (y: number, m: number) => {
     const now = new Date();
     return y * 12 + m > now.getFullYear() * 12 + now.getMonth() + 1;
   };
@@ -279,7 +284,7 @@ export function DateRangeField({ min }: { min?: string }) {
         >
           <FaCalendarDays aria-hidden="true" size={15} />
           <span className={`dp-trigger-text${arrivalISO ? "" : " dp-trigger-text--empty"}`}>
-            {arrivalISO ? formatShort(arrivalISO) : "Choisir"}
+            {arrivalISO ? formatShort(arrivalISO) : "Choisir la date d\u2019arrivée"}
           </span>
         </button>
         {openArrival &&
@@ -303,7 +308,7 @@ export function DateRangeField({ min }: { min?: string }) {
         >
           <FaCalendarDays aria-hidden="true" size={15} />
           <span className={`dp-trigger-text${departureISO ? "" : " dp-trigger-text--empty"}`}>
-            {departureISO ? formatShort(departureISO) : "Choisir"}
+            {departureISO ? formatShort(departureISO) : "Choisir la date de départ"}
           </span>
         </button>
         {openDeparture &&
