@@ -266,7 +266,7 @@ model Property {
   updatedAt         DateTime         @updatedAt
 
   // Relations
-  proprietaire      User             @relation(fields: [proprietaireId], references: [id])
+  proprietaire      User             @relation(fields: [proprietaireId], references: [id], onDelete: Cascade)
   photos            PropertyPhoto[]
   tarifs            Tarif[]
   promotions        Promotion[]
@@ -352,7 +352,7 @@ model Disponibilite {
 
   // Relations
   property      Property           @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-  reservation   Booking?           @relation(fields: [reservationId], references: [id])
+  reservation   Booking?           @relation(fields: [reservationId], references: [id], onDelete: SetNull)
 
   @@index([propertyId, date, statut])
 }
@@ -386,8 +386,8 @@ model Booking {
   updatedAt             DateTime      @updatedAt
 
   // Relations
-  property              Property      @relation(fields: [propertyId], references: [id])
-  client                User          @relation(fields: [clientId], references: [id])
+  property              Property      @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  client                User          @relation(fields: [clientId], references: [id], onDelete: Cascade)
   paiements             Paiement[]
   historique             BookingHistory[]
   messages              Message[]
@@ -413,7 +413,7 @@ model Paiement {
   updatedAt           DateTime      @updatedAt
 
   // Relations
-  reservation         Booking       @relation(fields: [reservationId], references: [id])
+  reservation         Booking       @relation(fields: [reservationId], references: [id], onDelete: Cascade)
 }
 
 model Review {
@@ -432,8 +432,8 @@ model Review {
 
   // Relations
   property      Property     @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-  client        User         @relation(fields: [clientId], references: [id])
-  reservation   Booking?     @relation(fields: [reservationId], references: [id])
+  client        User         @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  reservation   Booking?     @relation(fields: [reservationId], references: [id], onDelete: SetNull)
 
   @@index([propertyId, statut, note])
 }
@@ -502,7 +502,7 @@ model Notification {
   createdAt     DateTime         @default(now())
 
   // Relations
-  utilisateur   User             @relation(fields: [utilisateurId], references: [id])
+  utilisateur   User             @relation(fields: [utilisateurId], references: [id], onDelete: Cascade)
 }
 
 model Message {
@@ -515,9 +515,9 @@ model Message {
   createdAt       DateTime  @default(now())
 
   // Relations
-  reservation     Booking?  @relation(fields: [reservationId], references: [id])
-  expediteur      User      @relation("SentMessages", fields: [expediteurId], references: [id])
-  destinataire    User      @relation("ReceivedMessages", fields: [destinataireId], references: [id])
+  reservation     Booking?  @relation(fields: [reservationId], references: [id], onDelete: SetNull)
+  expediteur      User      @relation("SentMessages", fields: [expediteurId], references: [id], onDelete: Cascade)
+  destinataire    User      @relation("ReceivedMessages", fields: [destinataireId], references: [id], onDelete: Cascade)
 }
 
 model Favorite {
@@ -527,8 +527,8 @@ model Favorite {
   createdAt   DateTime @default(now())
 
   // Relations
-  client      User     @relation(fields: [clientId], references: [id])
-  property    Property @relation(fields: [propertyId], references: [id])
+  client      User     @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  property    Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
 
   @@unique([clientId, propertyId])
 }
@@ -542,8 +542,8 @@ model BookingHistory {
   createdAt       DateTime            @default(now())
 
   // Relations
-  reservation     Booking             @relation(fields: [reservationId], references: [id])
-  utilisateur     User?               @relation(fields: [effectuePar], references: [id])
+  reservation     Booking             @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  utilisateur     User?               @relation(fields: [effectuePar], references: [id], onDelete: SetNull)
 }
 
 model SynchronisationICal {
