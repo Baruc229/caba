@@ -3,6 +3,7 @@ import { Anton, Inter } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
+import { Providers } from "@/components/auth/providers";
 
 const anton = Anton({
   variable: "--font-anton",
@@ -50,14 +51,16 @@ export default function RootLayout({
   return (
     <html lang="fr" className={`${anton.variable} ${inter.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col bg-bg-primary">
-        <a href="#main-content" className="skip-link">
-          Aller au contenu principal
-        </a>
-        <Header />
-        <main id="main-content" className="flex-1">
-          {children}
-        </main>
-        <Footer />
+        <Providers>
+          <a href="#main-content" className="skip-link">
+            Aller au contenu principal
+          </a>
+          <Header />
+          <main id="main-content" className="flex-1">
+            {children}
+          </main>
+          <Footer />
+        </Providers>
       </body>
     </html>
   );
