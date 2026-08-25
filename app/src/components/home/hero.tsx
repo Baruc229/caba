@@ -99,43 +99,61 @@ function ProofPill({ floating = false }: { floating?: boolean }) {
   );
 }
 
+/* Masque de saisie JJ/MM/AAAA : slashes automatiques, 8 chiffres max */
+function masqueDate(brut: string): string {
+  const chiffres = brut.replace(/\D/g, "").slice(0, 8);
+  let sortie = chiffres.slice(0, 2);
+  if (chiffres.length >= 3) sortie += "/" + chiffres.slice(2, 4);
+  if (chiffres.length >= 5) sortie += "/" + chiffres.slice(4, 8);
+  return sortie;
+}
+
+/* Convertit "JJ/MM/AAAA" valide en ISO "AAAA-MM-JJ", sinon null */
+function versIso(valeur: string): string | null {
+  const match = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(valeur);
+  if (!match) return null;
+  const [, jour, mois, annee] = match;
+  if (Number(mois) < 1 || Number(mois) > 12 || Number(jour) < 1 || Number(jour) > 31) {
+    return null;
+  }
+  return `${annee}-${mois}-${jour}`;
+}
+
 function DateField({ id, name, label, min }: { id: string; name: string; label: string; min?: string }) {
-  const inputRef = useRef<HTMLInputElement>(null);
+  // Champ texte masqué : le placeholder jj/mm/aaaa reste visible sur
+  // tous les mobiles (l'input date natif n'affiche rien sur iOS et
+  // tronque le format sur Android), valeur ISO envoyée en hidden
+  const [display, setDisplay] = useState("");
+  const iso = versIso(display);
+  const isoValide =
+    iso !== null && (!min || iso >= min) ? iso : "";
 
   return (
-    <div className="search-field search-field--date">
+    <div className="search-field">
       <label htmlFor={id} className="search-label">
         {label}
       </label>
-      <div
-        className="search-value"
-        onClick={() => {
-          const input = inputRef.current;
-          if (input && typeof input.showPicker === "function") {
-            try {
-              input.showPicker();
-            } catch {
-              input.focus();
-            }
-          }
-        }}
-      >
+      <div className="search-value">
         <FaCalendarDays aria-hidden="true" size={15} />
         <input
-          ref={inputRef}
           id={id}
-          name={name}
-          type="date"
-          min={min}
+          type="text"
+          inputMode="numeric"
+          autoComplete="off"
+          placeholder="jj/mm/aaaa"
           className="search-input"
+          value={display}
+          onChange={(event) => setDisplay(masqueDate(event.target.value))}
         />
       </div>
+      <input type="hidden" name={name} value={isoValide} />
     </div>
   );
 }
 
 function GuestsField() {
   const [open, setOpen] = useState(false);
+  const [dropUp, setDropUp] = useState(false);
   const [counts, setCounts] = useState<GuestCounts>({
     adultes: 2,
     enfants: 0,
@@ -145,19 +163,32 @@ function GuestsField() {
 
   useEffect(() => {
     if (!open) return;
-    const onPointerDown = (e: PointerEvent) => {
+    // Fermeture au clic réel hors du popover — volontairement PAS
+    // sur pointerdown : le doigt qui amorce un scroll déclenche un
+    // pointerdown et fermait le menu pendant que l'utilisateur
+    // cherchait à voir les options.
+    const onClick = (e: MouseEvent) => {
       if (!wrapRef.current?.contains(e.target as Node)) setOpen(false);
     };
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") setOpen(false);
     };
-    window.addEventListener("pointerdown", onPointerDown);
+    window.addEventListener("click", onClick);
     window.addEventListener("keydown", onKeyDown);
     return () => {
-      window.removeEventListener("pointerdown", onPointerDown);
+      window.removeEventListener("click", onClick);
       window.removeEventListener("keydown", onKeyDown);
     };
   }, [open]);
+
+  const toggle = () => {
+    if (!open && wrapRef.current) {
+      // Pas assez de place sous le champ ? Le popover s'ouvre vers le haut
+      const rect = wrapRef.current.getBoundingClientRect();
+      setDropUp(window.innerHeight - rect.bottom < 260 && rect.top > 260);
+    }
+    setOpen((value) => !value);
+  };
 
   const change = (key: GuestKey, min: number, delta: number) => {
     setCounts((current) => ({
@@ -182,7 +213,7 @@ function GuestsField() {
         className="guests-trigger"
         aria-haspopup="dialog"
         aria-expanded={open}
-        onClick={() => setOpen((value) => !value)}
+        onClick={toggle}
       >
         <FaUserGroup aria-hidden="true" size={15} />
         <span className="guests-summary">{summary}</span>
@@ -194,7 +225,11 @@ function GuestsField() {
       </button>
 
       {open && (
-        <div className="guests-popover" role="dialog" aria-label="Choix des voyageurs">
+        <div
+          className={`guests-popover${dropUp ? " guests-popover--up" : ""}`}
+          role="dialog"
+          aria-label="Choix des voyageurs"
+        >
           {GUEST_TYPES.map((type) => (
             <div key={type.key} className="guests-row">
               <div className="guests-type">

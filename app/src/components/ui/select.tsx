@@ -35,6 +35,7 @@ export function Select({
 }: SelectProps) {
   const [uncontrolledValue, setUncontrolledValue] = useState(defaultValue);
   const [open, setOpen] = useState(false);
+  const [dropUp, setDropUp] = useState(false);
   const [highlight, setHighlight] = useState(0);
   const wrapRef = useRef<HTMLDivElement>(null);
 
@@ -43,16 +44,20 @@ export function Select({
 
   useEffect(() => {
     if (!open) return;
-    const onPointerDown = (event: PointerEvent) => {
+    // Fermeture au clic réel hors du menu — volontairement PAS sur
+    // pointerdown : le doigt qui amorce un scroll déclenche un
+    // pointerdown et fermait le menu pendant que l'utilisateur
+    // cherchait à voir les options.
+    const onClick = (event: MouseEvent) => {
       if (!wrapRef.current?.contains(event.target as Node)) setOpen(false);
     };
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") setOpen(false);
     };
-    window.addEventListener("pointerdown", onPointerDown);
+    window.addEventListener("click", onClick);
     window.addEventListener("keydown", onKeyDown);
     return () => {
-      window.removeEventListener("pointerdown", onPointerDown);
+      window.removeEventListener("click", onClick);
       window.removeEventListener("keydown", onKeyDown);
     };
   }, [open]);
@@ -60,6 +65,11 @@ export function Select({
   const openMenu = () => {
     const currentIndex = options.findIndex((option) => option.value === value);
     setHighlight(currentIndex >= 0 ? currentIndex : 0);
+    // Pas assez de place sous le champ ? Le menu s'ouvre vers le haut
+    if (wrapRef.current) {
+      const rect = wrapRef.current.getBoundingClientRect();
+      setDropUp(window.innerHeight - rect.bottom < 240 && rect.top > 240);
+    }
     setOpen(true);
   };
 
@@ -97,7 +107,7 @@ export function Select({
 
       {open && (
         <ul
-          className="select-menu"
+          className={`select-menu${dropUp ? " select-menu--up" : ""}`}
           role="listbox"
           aria-label={ariaLabel}
           tabIndex={-1}
