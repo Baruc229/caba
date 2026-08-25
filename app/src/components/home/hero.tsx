@@ -4,11 +4,9 @@ import { useEffect, useRef, useState } from "react";
 import {
   FaCalendarDays,
   FaChevronDown,
-  FaChevronUp,
   FaClock,
   FaMinus,
   FaPlus,
-  FaSliders,
   FaStar,
   FaUserGroup,
 } from "react-icons/fa6";
@@ -28,23 +26,6 @@ type GuestCounts = Record<GuestKey, number>;
 
 const MAX_GUESTS_PER_TYPE = 9;
 
-const TABS = [
-  { id: "logements", label: "Logements" },
-  { id: "chambres", label: "Chambres" },
-] as const;
-
-type TabId = (typeof TABS)[number]["id"];
-
-const SEJOUR_TYPES = [
-  { value: "nuee", label: "Nuitée(s)" },
-  { value: "journee", label: "Journée" },
-  { value: "vingt_quatre_heures", label: "24 heures" },
-  { value: "demi_journee", label: "Demi-journée" },
-  { value: "plusieurs_heures", label: "Quelques heures" },
-] as const;
-
-const HOURLY_TYPES = new Set(["journee", "vingt_quatre_heures", "demi_journee", "plusieurs_heures"]);
-
 const PROPERTY_TYPE_LABELS: Record<string, string> = {
   chambre: "Chambre",
   chambre_avec_salon: "Chambre avec salon",
@@ -56,10 +37,25 @@ const PROPERTY_TYPE_LABELS: Record<string, string> = {
   maison_entiere: "Maison entière",
 };
 
-interface FilterOptions {
-  types: Array<{ type: string; count: number }>;
-  equipements: Array<{ id: string; nom: string; icone: string | null; categorie: string }>;
-}
+/* Résidence unique : le type de logement remplace les anciens
+   onglets Logements/Chambres — un seul mode de recherche */
+const TYPE_OPTIONS = [
+  { value: "", label: "Tous les types" },
+  ...Object.entries(PROPERTY_TYPE_LABELS).map(([value, label]) => ({
+    value,
+    label,
+  })),
+];
+
+const SEJOUR_TYPES = [
+  { value: "nuee", label: "Nuitée(s)" },
+  { value: "journee", label: "Journée" },
+  { value: "vingt_quatre_heures", label: "24 heures" },
+  { value: "demi_journee", label: "Demi-journée" },
+  { value: "plusieurs_heures", label: "Quelques heures" },
+] as const;
+
+const HOURLY_TYPES = new Set(["journee", "vingt_quatre_heures", "demi_journee", "plusieurs_heures"]);
 
 const AVATARS = [
   { initials: "AK", background: "var(--color-accent-secondary)" },
@@ -271,119 +267,8 @@ function GuestsField() {
   );
 }
 
-function AdvancedFilters({ options }: { options: FilterOptions | null }) {
-  return (
-    <div className="filters-panel" id="filtres-avances">
-      <div className="filters-group filters-group--wide">
-        <label htmlFor="filter-type" className="search-label">
-          Type de logement
-        </label>
-        <Select
-          id="filter-type"
-          name="type"
-          ariaLabel="Type de logement"
-          placeholder="Tous les types"
-          defaultValue=""
-          options={[
-            { value: "", label: "Tous les types" },
-            ...(options?.types ?? []).map((t) => ({
-              value: t.type,
-              label: `${PROPERTY_TYPE_LABELS[t.type] ?? t.type} (${t.count})`,
-            })),
-          ]}
-        />
-      </div>
-
-      <div className="filters-group filters-group--small">
-        <label htmlFor="filter-chambres" className="search-label">
-          Chambres (min)
-        </label>
-        <Select
-          id="filter-chambres"
-          name="chambres"
-          ariaLabel="Nombre de chambres minimum"
-          placeholder="Peu importe"
-          defaultValue=""
-          options={[
-            { value: "", label: "Peu importe" },
-            ...[1, 2, 3, 4].map((n) => ({ value: String(n), label: `${n}+` })),
-          ]}
-        />
-      </div>
-
-      <div className="filters-group filters-group--small">
-        <label htmlFor="filter-lits" className="search-label">
-          Lits (min)
-        </label>
-        <Select
-          id="filter-lits"
-          name="lits"
-          ariaLabel="Nombre de lits minimum"
-          placeholder="Peu importe"
-          defaultValue=""
-          options={[
-            { value: "", label: "Peu importe" },
-            ...[1, 2, 3, 4].map((n) => ({ value: String(n), label: `${n}+` })),
-          ]}
-        />
-      </div>
-
-      <div className="filters-group filters-group--price">
-        <span className="search-label">Prix par séjour (€)</span>
-        <div className="filters-price-row">
-          <input
-            name="prixMin"
-            type="number"
-            min={0}
-            placeholder="Min"
-            aria-label="Prix minimum"
-            className="filters-input"
-          />
-          <span aria-hidden="true" className="filters-price-sep">—</span>
-          <input
-            name="prixMax"
-            type="number"
-            min={0}
-            placeholder="Max"
-            aria-label="Prix maximum"
-            className="filters-input"
-          />
-        </div>
-      </div>
-
-      <fieldset className="filters-group filters-group--full">
-        <legend className="search-label">Équipements</legend>
-        <div className="chip-list">
-          {(options?.equipements ?? []).map((equipement) => (
-            <label key={equipement.id} className="chip">
-              <input type="checkbox" name="equipements" value={equipement.nom} className="sr-only" />
-              <span>{equipement.nom}</span>
-            </label>
-          ))}
-        </div>
-      </fieldset>
-    </div>
-  );
-}
-
 export function Hero() {
-  const [activeTab, setActiveTab] = useState<TabId>("logements");
   const [sejourType, setSejourType] = useState<string>("nuee");
-  const [filtersOpen, setFiltersOpen] = useState(false);
-  const [filterOptions, setFilterOptions] = useState<FilterOptions | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    fetch("/api/search/filters")
-      .then((response) => (response.ok ? response.json() : null))
-      .then((data) => {
-        if (!cancelled && data) setFilterOptions(data);
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   const hourly = HOURLY_TYPES.has(sejourType);
 
@@ -413,45 +298,7 @@ export function Hero() {
         </div>
 
         <form className="search-panel" action="/logements" method="get">
-          <div className="search-tabs" role="tablist" aria-label="Type de recherche">
-            {TABS.map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                role="tab"
-                id={`tab-${tab.id}`}
-                aria-selected={activeTab === tab.id}
-                aria-controls="search-fields"
-                className="search-tab"
-                onClick={() => setActiveTab(tab.id)}
-              >
-                {tab.label}
-              </button>
-            ))}
-
-            <button
-              type="button"
-              className={`filters-toggle${filtersOpen ? " is-open" : ""}`}
-              aria-expanded={filtersOpen}
-              aria-controls="filtres-avances"
-              onClick={() => setFiltersOpen((value) => !value)}
-            >
-              <FaSliders aria-hidden="true" size={13} />
-              Filtres avancés
-              {filtersOpen ? (
-                <FaChevronUp aria-hidden="true" size={10} />
-              ) : (
-                <FaChevronDown aria-hidden="true" size={10} />
-              )}
-            </button>
-          </div>
-
-          <div
-            id="search-fields"
-            role="tabpanel"
-            aria-labelledby={`tab-${activeTab}`}
-            className="search-fields"
-          >
+          <div id="search-fields" className="search-fields">
             <div className="search-field">
               <label htmlFor="type-reservation" className="search-label">
                 Type de séjour
@@ -478,6 +325,23 @@ export function Hero() {
             <DateField id="depart" name="depart" label="Date de départ" />
 
             <GuestsField />
+
+            <div className="search-field">
+              <label htmlFor="type-logement" className="search-label">
+                Type de logement
+              </label>
+              <div className="search-value">
+                <Select
+                  id="type-logement"
+                  variant="field"
+                  ariaLabel="Type de logement"
+                  name="type"
+                  placeholder="Tous les types"
+                  defaultValue=""
+                  options={TYPE_OPTIONS}
+                />
+              </div>
+            </div>
 
             <button type="submit" className="btn-pill btn-primary w-full lg:w-auto lg:px-10">
               Rechercher
@@ -517,8 +381,6 @@ export function Hero() {
               </div>
             )}
           </div>
-
-          {filtersOpen && <AdvancedFilters options={filterOptions} />}
         </form>
       </div>
     </section>

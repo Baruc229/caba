@@ -335,36 +335,9 @@
     }
   }
 
-  .search-tabs {
-    display: flex;
-    gap: 26px;
-    margin-bottom: 14px;
-  }
-
-  .search-tab {
-    padding: 2px 2px 9px;
-    border-bottom: 2px solid transparent;
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--color-text-secondary);
-    cursor: pointer;
-    transition:
-      color 200ms ease,
-      border-color 200ms ease;
-  }
-
-  .search-tab:hover {
-    color: var(--color-text-primary);
-  }
-
-  .search-tab[aria-selected="true"] {
-    color: var(--color-text-primary);
-    border-color: var(--color-accent);
-  }
-
   .search-fields {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr)) auto;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) auto;
     gap: 14px;
     align-items: end;
   }
@@ -631,168 +604,11 @@
     }
   }
 
-  /* ─── Filtres avancés ─── */
-  .filters-toggle {
-    margin-left: auto;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 2px 2px 9px;
-    border-bottom: 2px solid transparent;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--color-accent-secondary);
-    cursor: pointer;
-    transition:
-      color 200ms ease,
-      border-color 200ms ease;
-  }
-
-  .filters-toggle:hover,
-  .filters-toggle.is-open {
-    border-color: var(--color-accent-secondary);
-  }
-
-  .filters-panel {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 14px;
-    margin-top: 16px;
-    padding-top: 16px;
-    border-top: 1px solid var(--color-border-subtle);
-    animation: slide-down 240ms ease both;
-  }
-
-  .filters-group {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    min-width: 0;
-  }
-
-  .filters-group--small {
-    max-width: 150px;
-  }
-
-  .filters-group--price {
-    justify-content: flex-end;
-  }
-
-  .filters-group--full {
-    grid-column: 1 / -1;
-    border: none;
-    padding: 0;
-    margin: 0;
-  }
-
-  .filters-input {
-    width: 100%;
-    border: 1px solid var(--color-border-subtle);
-    border-radius: 9px;
-    background-color: var(--color-bg-card);
-    padding: 8px 11px;
-    font-family: inherit;
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--color-text-primary);
-    outline: none;
-    transition:
-      border-color 150ms ease,
-      box-shadow 150ms ease;
-  }
-
-  .filters-input:hover {
-    border-color: #d8d1c5;
-  }
-
-  .filters-input:focus {
-    border-color: var(--color-accent-secondary);
-    box-shadow: 0 0 0 3px rgba(0, 20, 137, 0.07);
-  }
-
-  .filters-price-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .filters-price-sep {
-    color: #a29a8c;
-  }
-
-  .chip-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 4px;
-  }
-
-  .chip {
-    display: inline-flex;
-    align-items: center;
-    border: 1px solid var(--color-border-subtle);
-    border-radius: 999px;
-    padding: 5px 14px;
-    font-size: 12.5px;
-    font-weight: 500;
-    color: var(--color-text-secondary);
-    cursor: pointer;
-    user-select: none;
-    transition:
-      background-color 150ms ease,
-      border-color 150ms ease,
-      color 150ms ease;
-  }
-
-  .chip:hover {
-    border-color: var(--color-accent-secondary);
-    color: var(--color-text-primary);
-  }
-
-  .chip:has(input:checked) {
-    background-color: var(--color-accent-secondary);
-    border-color: var(--color-accent-secondary);
-    color: #ffffff;
-  }
-
-  .chip input:focus-visible + span {
-    outline: 2px solid var(--color-accent-secondary);
-    outline-offset: 2px;
-    border-radius: 999px;
-  }
-
-  @media (max-width: 1023.98px) {
-    .filters-panel {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-  }
-
-  @media (max-width: 480px) {
-    .filters-panel {
-      grid-template-columns: 1fr;
-    }
-
-    .filters-group--small {
-      max-width: none;
-    }
-  }
-
   /* ─── Animations d'ouverture ─── */
   @keyframes pop-in {
     from {
       opacity: 0;
       transform: translateY(-5px) scale(0.98);
-    }
-    to {
-      opacity: 1;
-      transform: none;
-    }
-  }
-
-  @keyframes slide-down {
-    from {
-      opacity: 0;
-      transform: translateY(-6px);
     }
     to {
       opacity: 1;
@@ -969,7 +785,6 @@
   @media (prefers-reduced-motion: reduce) {
     .guests-popover,
     .select-menu,
-    .filters-panel,
     .seg-thumb {
       animation: none;
       transition: none;
