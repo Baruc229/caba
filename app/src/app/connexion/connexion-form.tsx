@@ -71,12 +71,29 @@ export function ConnexionForm({ echec, succes }: ConnexionFormProps) {
 
     setStatus("loading");
     try {
-      // Flux natuel NextAuth v5 : il redirige lui-même vers /redirection,
-      // qui envoie vers /admin (équipe) ou / (client).
-      // Identifiants invalides -> retour ici avec ?echec=1.
-      await signIn("credentials", { email, password, callbackUrl: "/redirection" });
-    } catch {
-      setError("Une erreur est survenue. Réessayez dans un instant.");
+      const result = await signIn("credentials", {
+        email,
+        password,
+        callbackUrl: "/redirection",
+        redirect: false,
+      });
+
+      if (result?.error) {
+        setError(
+          `Connexion échouée : ${result.error}. Code : ${result.code ?? "inconnu"}.`
+        );
+        setStatus("idle");
+        return;
+      }
+
+      if (result?.url) {
+        window.location.href = result.url;
+      } else {
+        window.location.href = "/redirection";
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setError(`Erreur inattendue : ${msg}`);
       setStatus("idle");
     }
   }

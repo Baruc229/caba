@@ -118,15 +118,31 @@ export function InscriptionForm({
 
     // Connexion automatique puis redirection (client -> site public)
     try {
-      await signIn("credentials", {
+      const result = await signIn("credentials", {
         email: values.email,
         password: values.password,
         callbackUrl: "/",
+        redirect: false,
       });
-    } catch {
+
+      if (result?.error) {
+        setStatus("idle");
+        setError(
+          `Compte créé, mais la connexion a échoué (${result.error}). Connectez-vous manuellement.`
+        );
+        return;
+      }
+
+      if (result?.url) {
+        window.location.href = result.url;
+      } else {
+        window.location.href = "/";
+      }
+    } catch (err: unknown) {
       setStatus("idle");
+      const msg = err instanceof Error ? err.message : String(err);
       setError(
-        "Compte créé, mais la connexion automatique a échoué. Connectez-vous manuellement."
+        `Compte créé, mais erreur inattendue : ${msg}.`
       );
     }
   }
