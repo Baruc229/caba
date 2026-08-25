@@ -3,11 +3,25 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
-import { FaArrowRight, FaEye, FaEyeSlash, FaCircleInfo } from "react-icons/fa6";
+import { FaArrowRight, FaEye, FaEyeSlash, FaCircleInfo, FaStar } from "react-icons/fa6";
 
 interface ConnexionFormProps {
   echec: boolean;
   succes: boolean;
+}
+
+function validerEmail(valeur: string): string {
+  const email = valeur.trim();
+  if (!email) return "Saisissez votre adresse email.";
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return "L'adresse email doit contenir un @ suivi d'un domaine (ex : nom@exemple.com).";
+  }
+  return "";
+}
+
+function validerMotDePasse(valeur: string): string {
+  if (!valeur) return "Saisissez votre mot de passe.";
+  return "";
 }
 
 export function ConnexionForm({ echec, succes }: ConnexionFormProps) {
@@ -48,16 +62,11 @@ export function ConnexionForm({ echec, succes }: ConnexionFormProps) {
     const email = String(data.get("email") ?? "").trim();
     const password = String(data.get("password") ?? "");
 
-    let valid = true;
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setEmailError("Entrez une adresse email valide.");
-      valid = false;
-    }
-    if (!password) {
-      setPasswordError("Saisissez votre mot de passe.");
-      valid = false;
-    }
-    if (!valid) return;
+    const erreurEmail = validerEmail(email);
+    const erreurMotDePasse = validerMotDePasse(password);
+    setEmailError(erreurEmail);
+    setPasswordError(erreurMotDePasse);
+    if (erreurEmail || erreurMotDePasse) return;
 
     setStatus("loading");
     try {
@@ -74,7 +83,7 @@ export function ConnexionForm({ echec, succes }: ConnexionFormProps) {
   return (
     <div className="auth-page-v2">
       <div className="auth-panel">
-        <div className="auth-form-col">
+        <div className="auth-main">
           <p className="auth-eyebrow">Content de vous revoir</p>
           <h1 className="auth-display">Connexion</h1>
 
@@ -111,8 +120,11 @@ export function ConnexionForm({ echec, succes }: ConnexionFormProps) {
                 name="email"
                 type="email"
                 autoComplete="email"
+                placeholder="nom@exemple.com"
+                autoFocus
                 className="lfield-input"
                 onInput={() => setEmailError("")}
+                onBlur={(event) => setEmailError(validerEmail(event.currentTarget.value))}
               />
               {emailError && <p className="auth-error-text">{emailError}</p>}
             </div>
@@ -129,6 +141,7 @@ export function ConnexionForm({ echec, succes }: ConnexionFormProps) {
                   autoComplete="current-password"
                   className="lfield-input lfield-input--eye"
                   onInput={() => setPasswordError("")}
+                  onBlur={(event) => setPasswordError(validerMotDePasse(event.currentTarget.value))}
                 />
                 <button
                   type="button"
@@ -157,20 +170,34 @@ export function ConnexionForm({ echec, succes }: ConnexionFormProps) {
           </div>
         </div>
 
-        <div className="auth-stats">
-          <div className="auth-stat">
-            <strong>4.8/5</strong>
-            <span>Note moyenne des séjours</span>
+        <aside className="auth-aside">
+          <span className="auth-badge">Caba Résidence · Bénin</span>
+          <div className="auth-aside-bottom">
+            <div className="auth-stars" role="img" aria-label="Note moyenne 4,8 sur 5">
+              {Array.from({ length: 5 }).map((_, index) => (
+                <FaStar key={index} aria-hidden="true" />
+              ))}
+            </div>
+            <p className="auth-quote">
+              «&nbsp;Ici, vous n&apos;êtes pas un numéro de réservation&nbsp;— vous êtes notre
+              hôte.&nbsp;»
+            </p>
+            <div className="auth-aside-stats">
+              <div className="auth-aside-stat">
+                <strong>4.8/5</strong>
+                <span>Note moyenne</span>
+              </div>
+              <div className="auth-aside-stat">
+                <strong>240+</strong>
+                <span>Séjours accueillis</span>
+              </div>
+              <div className="auth-aside-stat">
+                <strong>7</strong>
+                <span>Types de logements</span>
+              </div>
+            </div>
           </div>
-          <div className="auth-stat">
-            <strong>240+</strong>
-            <span>Séjours accueillis</span>
-          </div>
-          <div className="auth-stat">
-            <strong>7</strong>
-            <span>Types de logements</span>
-          </div>
-        </div>
+        </aside>
       </div>
     </div>
   );

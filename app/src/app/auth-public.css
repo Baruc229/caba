@@ -365,31 +365,31 @@
   }
 }
 
-/* Panneau (§9.3) : fond blanc, bordure décorative subtile ET
-   ombre bicouche obligatoire — il occupe toute la largeur du
-   gabarit, ce n'est plus une card flottante centrée */
+/* Panneau deux colonnes 55/45 — valeurs strictement identiques au
+   menu de recherche du Header public (globals.css : bordure 1px
+   #EAE6DE, radius 14px, même ombre bicouche) ; overflow:hidden pour
+   que la photo épouse les coins arrondis */
 .auth-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 55fr) minmax(0, 45fr);
+  overflow: hidden;
   background-color: var(--color-bg-card);
-  border: 0.5px solid var(--color-border-subtle);
-  border-radius: var(--radius-card-lg);
-  box-shadow: var(--shadow-card);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 14px;
+  box-shadow:
+    0 24px 48px -12px rgba(31, 26, 20, 0.28),
+    0 6px 16px -6px rgba(31, 26, 20, 0.12);
+}
+
+/* Colonne formulaire (~55%) : lecture unique à gauche du panneau */
+.auth-main {
   padding: 28px 22px;
 }
 
 @media (min-width: 640px) {
-  .auth-panel {
+  .auth-main {
     padding: 56px 64px;
   }
-}
-
-.auth-panel--wide {
-  /* transition : sera supprimé au passage d'inscription */
-  max-width: 560px;
-}
-
-/* Colonne de lecture unique à l'intérieur du panneau */
-.auth-form-col {
-  max-width: 520px;
 }
 
 /* Retour site : icône seule — pas de nom de marque répété */
@@ -841,58 +841,144 @@ span.auth-btn--link {
   cursor: not-allowed;
 }
 
-/* ─── Chiffres clés (Connexion) : occupe la largeur restante du
-       panneau, séparé du formulaire par un trait fin horizontal.
-       3 colonnes desktop → 2 colonnes ≤640px → empilé ≤400px,
-       jamais tronqué (§6) ─── */
-.auth-stats {
+/* ─── Colonne droite (~45%) : photo du complexe + overlay dégradé
+       (garde le texte blanc ≥ 4.5:1 de contraste), badge verre,
+       étoiles dorées, citation voix de marque, statistiques sur
+       trait translucide — jamais d'espace vide ─── */
+.auth-aside {
+  position: relative;
   display: flex;
-  align-items: stretch;
-  gap: 24px;
-  margin-top: 36px;
-  padding-top: 26px;
-  border-top: 0.5px solid var(--color-border-subtle);
+  align-items: flex-end;
+  background-image:
+    linear-gradient(
+      180deg,
+      rgba(26, 26, 26, 0.2) 0%,
+      rgba(26, 26, 26, 0.38) 48%,
+      rgba(26, 26, 26, 0.82) 100%
+    ),
+    url("/hero1.webp");
+  background-size: cover;
+  background-position: center;
+  color: #ffffff;
 }
 
-.auth-stat {
+/* Badge discret haut droit */
+.auth-badge {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  padding: 7px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 9999px;
+  background-color: rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #ffffff;
+}
+
+.auth-aside-bottom {
+  width: 100%;
+  padding: 32px 36px;
+}
+
+/* Étoiles dorées — token or existant (#F2C572) */
+.auth-stars {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 14px;
+  color: var(--color-accent-gold);
+  font-size: 15px;
+}
+
+.auth-quote {
+  margin: 0 0 24px;
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+/* Statistiques sur trait fin translucide */
+.auth-aside-stats {
+  display: flex;
+  gap: 24px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.auth-aside-stat {
   flex: 1;
   min-width: 0;
 }
 
-.auth-stat strong {
+.auth-aside-stat strong {
   display: block;
   font-family: var(--font-display);
   font-style: italic;
   text-transform: uppercase;
-  font-size: clamp(22px, 2.4vw, 30px);
+  font-size: clamp(20px, 2vw, 26px);
   line-height: 1;
-  color: var(--color-text-primary);
 }
 
-.auth-stat span {
+.auth-aside-stat span {
   display: block;
-  margin-top: 8px;
+  margin-top: 6px;
   font-size: 13px;
-  color: var(--color-text-secondary);
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.88);
 }
 
-@media (max-width: 640px) {
-  .auth-stats {
-    margin-top: 28px;
-    padding-top: 22px;
-    flex-wrap: wrap;
-    gap: 18px 24px;
+/* Mobile : la photo devient bandeau haut (180–200px), badge +
+   citation conservés, stats masquées faute d'espace */
+@media (max-width: 880px) {
+  .auth-panel {
+    grid-template-columns: 1fr;
   }
 
-  .auth-stat {
-    flex: 1 1 38%;
+  .auth-aside {
+    order: -1;
+    min-height: 180px;
+    max-height: 200px;
+  }
+
+  .auth-aside-bottom {
+    padding: 20px 22px;
+  }
+
+  .auth-stars {
+    margin-bottom: 10px;
+  }
+
+  .auth-quote {
+    margin: 0;
+    font-size: 15px;
+  }
+
+  .auth-aside-stats {
+    display: none;
   }
 }
 
-@media (max-width: 400px) {
-  .auth-stat {
-    flex-basis: 100%;
-  }
+/* Focus clavier visible sur tous les contrôles (accessibilité) */
+.auth-btn:focus-visible {
+  box-shadow: 0 0 0 3px rgba(0, 20, 137, 0.35);
+}
+
+.auth-eye:focus-visible {
+  box-shadow: 0 0 0 3px rgba(0, 20, 137, 0.25);
+  color: var(--color-accent-secondary);
+}
+
+.auth-footer a:focus-visible,
+.lfield-forgot a:focus-visible,
+.auth-back-link:focus-visible,
+.auth-resend-btn:focus-visible {
+  outline: 2px solid var(--color-accent-secondary);
+  outline-offset: 3px;
+  border-radius: 4px;
 }
 
 /* ─── Responsive (§6 : mobile first, zéro débordement) ─── */
@@ -903,11 +989,7 @@ span.auth-btn--link {
 }
 
 @media (max-width: 480px) {
-  .auth-panel {
-    padding: 28px 22px;
-  }
-
-  .auth-panel--wide {
+  .auth-main {
     padding: 28px 22px;
   }
 
