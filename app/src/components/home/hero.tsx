@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from "react";
 import {
-  FaCalendarDays,
   FaChevronDown,
   FaClock,
   FaMinus,
@@ -11,6 +10,7 @@ import {
   FaUserGroup,
 } from "react-icons/fa6";
 import { Select } from "@/components/ui/select";
+import { DateRangeField } from "@/components/ui/double-calendar";
 
 const TODAY = new Date().toISOString().slice(0, 10);
 
@@ -91,58 +91,6 @@ function ProofPill({ floating = false }: { floating?: boolean }) {
         </div>
         <p className="proof-note">+240 séjours notés 4.8</p>
       </div>
-    </div>
-  );
-}
-
-/* Masque de saisie JJ/MM/AAAA : slashes automatiques, 8 chiffres max */
-function masqueDate(brut: string): string {
-  const chiffres = brut.replace(/\D/g, "").slice(0, 8);
-  let sortie = chiffres.slice(0, 2);
-  if (chiffres.length >= 3) sortie += "/" + chiffres.slice(2, 4);
-  if (chiffres.length >= 5) sortie += "/" + chiffres.slice(4, 8);
-  return sortie;
-}
-
-/* Convertit "JJ/MM/AAAA" valide en ISO "AAAA-MM-JJ", sinon null */
-function versIso(valeur: string): string | null {
-  const match = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(valeur);
-  if (!match) return null;
-  const [, jour, mois, annee] = match;
-  if (Number(mois) < 1 || Number(mois) > 12 || Number(jour) < 1 || Number(jour) > 31) {
-    return null;
-  }
-  return `${annee}-${mois}-${jour}`;
-}
-
-function DateField({ id, name, label, min }: { id: string; name: string; label: string; min?: string }) {
-  // Champ texte masqué : le placeholder jj/mm/aaaa reste visible sur
-  // tous les mobiles (l'input date natif n'affiche rien sur iOS et
-  // tronque le format sur Android), valeur ISO envoyée en hidden
-  const [display, setDisplay] = useState("");
-  const iso = versIso(display);
-  const isoValide =
-    iso !== null && (!min || iso >= min) ? iso : "";
-
-  return (
-    <div className="search-field">
-      <label htmlFor={id} className="search-label">
-        {label}
-      </label>
-      <div className="search-value">
-        <FaCalendarDays aria-hidden="true" size={15} />
-        <input
-          id={id}
-          type="text"
-          inputMode="numeric"
-          autoComplete="off"
-          placeholder="jj/mm/aaaa"
-          className="search-input"
-          value={display}
-          onChange={(event) => setDisplay(masqueDate(event.target.value))}
-        />
-      </div>
-      <input type="hidden" name={name} value={isoValide} />
     </div>
   );
 }
@@ -320,9 +268,7 @@ export function Hero() {
               </div>
             </div>
 
-            <DateField id="arrivee" name="arrivee" label="Date d'arrivée" min={TODAY} />
-
-            <DateField id="depart" name="depart" label="Date de départ" />
+            <DateRangeField min={TODAY} />
 
             <GuestsField />
 

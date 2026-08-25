@@ -337,7 +337,7 @@
 
   .search-fields {
     display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr)) auto;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) auto;
     gap: 14px;
     align-items: end;
   }
@@ -601,6 +601,324 @@
     .hours-field {
       max-width: none;
       flex: 1 1 160px;
+    }
+  }
+
+  /* ─── Double calendrier (sélecteur de dates) ─── */
+  .search-field--range {
+    position: relative;
+  }
+
+  .range-trigger {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    font-family: inherit;
+    text-align: left;
+  }
+
+  .range-trigger > svg {
+    flex-shrink: 0;
+    color: var(--color-accent-secondary);
+  }
+
+  .range-value {
+    flex: 1;
+    min-width: 0;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .range-value--placeholder {
+    color: var(--color-text-secondary);
+    font-weight: 400;
+  }
+
+  .dc-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 50;
+    width: max-content;
+    max-width: calc(100vw - 32px);
+    background-color: var(--color-bg-card);
+    border: 1px solid var(--color-border-subtle);
+    border-radius: 16px;
+    box-shadow:
+      0 24px 48px -12px rgba(31, 26, 20, 0.28),
+      0 6px 16px -6px rgba(31, 26, 20, 0.12);
+    padding: 16px;
+    animation: pop-in 200ms ease both;
+  }
+
+  .dc-panel-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    padding: 0 4px;
+  }
+
+  .dc-nav-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--color-border-subtle);
+    border-radius: 8px;
+    background-color: transparent;
+    color: var(--color-text-primary);
+    cursor: pointer;
+    transition:
+      background-color 150ms ease,
+      border-color 150ms ease;
+  }
+
+  .dc-nav-btn:hover:not(:disabled) {
+    border-color: var(--color-accent-secondary);
+    background-color: rgba(0, 20, 137, 0.05);
+  }
+
+  .dc-nav-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+
+  .dc-panel-step {
+    display: flex;
+    gap: 6px;
+  }
+
+  .dc-step-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--color-border-subtle);
+    transition: background-color 200ms ease;
+  }
+
+  .dc-step-dot--active {
+    background-color: var(--color-accent-secondary);
+  }
+
+  .dc-calendars {
+    display: flex;
+    gap: 0;
+  }
+
+  .dc-divider {
+    width: 1px;
+    background-color: var(--color-border-subtle);
+    margin: 0 12px;
+    align-self: stretch;
+  }
+
+  .dc-month {
+    min-width: 240px;
+  }
+
+  .dc-month--active {
+    position: relative;
+  }
+
+  .dc-month--active::after {
+    content: "";
+    position: absolute;
+    bottom: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 24px;
+    height: 3px;
+    border-radius: 2px;
+    background-color: var(--color-accent-secondary);
+  }
+
+  .dc-month-header {
+    margin-bottom: 10px;
+    padding: 0 2px;
+  }
+
+  .dc-month-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    text-transform: capitalize;
+  }
+
+  .dc-month-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+  }
+
+  .dc-weekday {
+    text-align: center;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #a29a8c;
+    padding-block: 4px;
+  }
+
+  .dc-day {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    font-size: 12.5px;
+    font-weight: 600;
+    border: none;
+    background: none;
+    color: var(--color-text-primary);
+    cursor: pointer;
+    transition:
+      background-color 120ms ease,
+      color 120ms ease;
+  }
+
+  .dc-day:hover:not(.dc-day--disabled):not(.dc-day--empty) {
+    background-color: rgba(0, 20, 137, 0.06);
+  }
+
+  .dc-day--empty {
+    visibility: hidden;
+    cursor: default;
+  }
+
+  .dc-day--disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+
+  .dc-day--today::after {
+    content: "";
+    position: absolute;
+    bottom: 4px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background-color: var(--color-accent);
+  }
+
+  .dc-day--start,
+  .dc-day--end {
+    background-color: var(--color-accent-secondary);
+    color: #ffffff;
+  }
+
+  .dc-day--start:hover,
+  .dc-day--end:hover {
+    background-color: #00106b;
+  }
+
+  .dc-day--start::after,
+  .dc-day--end::after {
+    background-color: #ffffff;
+  }
+
+  .dc-day--in-range {
+    background-color: rgba(0, 20, 137, 0.08);
+    border-radius: 0;
+  }
+
+  .dc-day--hover-range {
+    background-color: rgba(0, 20, 137, 0.05);
+    border-radius: 0;
+  }
+
+  .dc-day--start {
+    border-radius: 8px 0 0 8px;
+  }
+
+  .dc-day--end {
+    border-radius: 0 8px 8px 0;
+  }
+
+  .dc-day--start.dc-day--end {
+    border-radius: 8px;
+  }
+
+  .dc-panel-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--color-border-subtle);
+  }
+
+  .dc-footer-hint {
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+  }
+
+  .dc-reset-btn {
+    border: none;
+    background: none;
+    font-family: inherit;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--color-accent);
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: background-color 150ms ease;
+  }
+
+  .dc-reset-btn:hover {
+    background-color: rgba(210, 16, 52, 0.08);
+  }
+
+  @media (max-width: 640px) {
+    .dc-dropdown {
+      left: 0;
+      right: 0;
+      transform: none;
+      max-width: none;
+      width: auto;
+    }
+
+    .dc-calendars {
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .dc-divider {
+      width: 100%;
+      height: 1px;
+      margin: 0;
+    }
+
+    .dc-month {
+      min-width: 0;
+      width: 100%;
+    }
+
+    .dc-month-grid {
+      gap: 1px;
+    }
+
+    .dc-day {
+      width: 100%;
+      aspect-ratio: 1;
     }
   }
 
