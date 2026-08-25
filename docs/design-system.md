@@ -216,19 +216,16 @@ Aucun :
 
 ### 7.1 Comportement
 
-Le header est un **sticky header déclenché au scroll** (scroll-triggered
-sticky header, « detached header ») :
+Le header est une **barre classique pleine largeur**, au rendu constant
+(aucune transformation au scroll) :
 
-- **Au repos (haut de page)** : il est **incorporé au flux** de la page,
-  transparent, sans bordure ni ombre — il se fond dans le fond `--bg-primary` ;
-- **Au défilement** (> 24px) : il **se décolle** et adopte sa version flottante —
-  fond `--bg-card`, bordure 0.5px `#EAE6DE`, ombre douce (`shadow-header`),
-  transition 300ms ;
-- Il reste fixé en haut de l'écran pendant tout le défilement (`sticky top-0`).
-
-- **Forme** : bannière arrondie (radius 16px), marge extérieure ~12px mobile / ~20px desktop ;
-- **Fond (décollé)** : `--bg-card` (#FFFFFF), bordure 0.5px `#EAE6DE`, ombre douce (`shadow-header`) ;
-- **Largeur** : 1400px maximum, centrée ;
+- **Fond** : `--bg-card` (#FFFFFF) opaque dès le chargement, bordure fine
+  `#EAE6DE` en bas — pas d'ombre, pas de coins arrondis, pas d'état
+  « décollé » ;
+- **Position** : `sticky top-0` (reste accessible pendant le défilement,
+  sans jamais changer d'apparence) ;
+- **Largeur** : bandeau 100 % de l'écran, contenu aligné au conteneur
+  1300px ;
 - **Hauteur interne** : 72px ;
 - **Z-index** : 1000 (toujours au-dessus du contenu).
 

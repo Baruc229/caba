@@ -21,15 +21,7 @@ export function Header() {
   const pathname = usePathname();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [lang, setLang] = useState<"fr" | "en">("fr");
-  const [scrolled, setScrolled] = useState(false);
   const [currency, setCurrency] = useCurrency();
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
   useEffect(() => {
     document.body.style.overflow = drawerOpen ? "hidden" : "";
@@ -62,15 +54,8 @@ export function Header() {
   );
 
   return (
-    <header className="sticky top-0 z-[1000] px-3 pt-3 lg:px-5 lg:pt-5">
-      <div
-        className={`mx-auto max-w-[1300px] rounded-2xl border-[0.5px] transition-all duration-300 ${
-          scrolled
-            ? "border-border-subtle bg-bg-card shadow-header"
-            : "border-transparent bg-transparent"
-        }`}
-      >
-        <div className="flex h-[72px] items-center justify-between gap-6 px-4 sm:px-6 lg:px-8">
+    <header className="sticky top-0 z-[1000] border-b border-border-subtle bg-bg-card">
+      <div className="mx-auto flex h-[72px] max-w-[1300px] items-center justify-between gap-6 px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-6">
           <Link href="/" className="heading-display whitespace-nowrap text-xl lg:text-2xl">
             Caba Résidence
@@ -122,7 +107,6 @@ export function Header() {
           >
             <FaBars aria-hidden="true" />
           </button>
-        </div>
         </div>
       </div>
 
