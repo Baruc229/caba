@@ -287,20 +287,23 @@ sticky header, « detached header ») :
 
 ### 8.1 Structure générale
 
-Le footer est organisé en **deux sections verticales** séparées d'un espace fin (8px) :
+Le footer est un **bandeau pleine largeur** (fond bord à bord — aucun conteneur
+ombré ni arrondi), organisé en deux sections verticales séparées par un trait fin :
 
-1. **Section Informations et newsletter** (1 grande card, 4 colonnes internes) :
+1. **Section Informations et newsletter** (4 colonnes internes, contenu aligné au
+   conteneur du site) :
    logo/description/adresse/**réseaux sociaux** | Navigation | Légal | Newsletter ;
-2. **Section Pied de page** : copyright seul dans **sa propre card**, texte centré.
+2. **Section Pied de page** : copyright seul, centré, sous un trait fin.
 
 Ordre des colonnes : logo → Navigation → Légal → Restons en contact (newsletter
 en dernière position, mobile comme desktop). Sur mobile (< 640px) les contenus
 des colonnes sont **centrés** et l'écart entre colonnes est porté à 32px.
 Champs et bouton du formulaire en taille réduite (padding vertical 8px).
 
-Chaque card : fond `--bg-card` (#FFFFFF), bordure fine `#EAE6DE`, ombre douce
-(`shadow-card`), coins arrondis 16px, padding interne généreux 24px mobile →
-32px tablette → 48px desktop (le contenu respire sur les 4 côtés).
+Bandeau : fond `--bg-card` (#FFFFFF) sur toute la largeur de l'écran, délimité
+par une bordure fine `#EAE6DE` en haut — pas d'ombre, pas de coins arrondis.
+Le contenu reste aligné au conteneur (max 1300-1400px), padding vertical
+généreux (40px mobile → 56px desktop).
 
 ### 8.2 Section Informations et newsletter (une seule grande card)
 
@@ -323,15 +326,15 @@ Formulaire : bloc plafonné à 320px de large, champs empilés pleine largeur
 
 ### 8.3 Section Pied de page
 
-Copyright seul, centré, sans card : « © {année} Caba Résidence. Tous droits
-réservés. » — 12px gris (#6B6459), année calculée côté serveur.
+Copyright seul, centré, sous un simple trait fin horizontal : « © {année} Caba
+Résidence. Tous droits réservés. » — 12px gris (#6B6459), année calculée côté serveur.
 
 ### 8.5 Style global du footer
 
 | Propriété | Valeur |
 |-----------|--------|
 | Fond page | `--bg-primary` (#F7F5F1) |
-| Cards | `--bg-card` (#FFFFFF), bordure `#EAE6DE`, ombre douce |
+| Bandeau footer | fond blanc pleine largeur, trait fin `#EAE6DE`, sans ombre ni radius |
 | Texte | Gris (#6B6459) pour le corps, #1A1A1A pour les titres |
 | Liens | Gris → bleu #001489 au hover ; icônes sociales → rouge au hover |
 | Espacement entre sections | 8px — sections resserrées |
@@ -342,12 +345,12 @@ réservés. » — 12px gris (#6B6459), année calculée côté serveur.
 #### Mobile (< 768px)
 
 - Toutes les colonnes s'empilent (gap 16px entre colonnes internes) ;
-- Chaque card prend 100 % de la largeur, aucun débordement horizontal (testé à 320px).
+- Le bandeau s'étend sur 100 % de la largeur, aucun débordement horizontal (testé à 320px).
 
 #### Desktop (≥ 1024px)
 
-- Informations et newsletter : 4 colonnes internes dans une seule card ;
-- Pied de page : copyright + réseaux sociaux en 2 cards.
+- Informations et newsletter : 4 colonnes internes dans le bandeau pleine largeur ;
+- Pied de page : copyright seul sous un trait fin.
 
 ---
 
