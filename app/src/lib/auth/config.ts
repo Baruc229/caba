@@ -41,21 +41,35 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         password: { label: "Mot de passe", type: "password" },
       },
       async authorize(credentials) {
+        console.log("[AUTH] authorize called, credentials:", JSON.stringify(Object.keys(credentials ?? {})));
         if (!credentials?.email || !credentials?.password) {
+          console.log("[AUTH] credentials missing");
           return null;
         }
 
         const email = (credentials.email as string).toLowerCase().trim();
-        const user = await prisma.user.findUnique({
-          where: { email },
-        });
+        console.log("[AUTH] looking for email:", email);
 
-        if (!user || !user.actif) {
+        let user;
+        try {
+          user = await prisma.user.findUnique({ where: { email } });
+        } catch (e: unknown) {
+          const msg = e instanceof Error ? e.message : String(e);
+          console.error("[AUTH] prisma error:", msg);
           return null;
         }
 
-        // Brute-force : compte temporairement verrouille
+        if (!user) {
+          console.log("[AUTH] user not found");
+          return null;
+        }
+        if (!user.actif) {
+          console.log("[AUTH] user inactive");
+          return null;
+        }
+
         if (user.verrouilleJusqua && user.verrouilleJusqua > new Date()) {
+          console.log("[AUTH] account locked until", user.verrouilleJusqua);
           return null;
         }
 
@@ -65,6 +79,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         );
 
         if (!isPasswordValid) {
+          console.log("[AUTH] password invalid");
           const tentatives = user.tentativesEchouees + 1;
           await prisma.user.update({
             where: { id: user.id },
@@ -81,6 +96,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           return null;
         }
 
+        console.log("[AUTH] login success for", email);
         await prisma.user.update({
           where: { id: user.id },
           data: {
