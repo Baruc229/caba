@@ -219,8 +219,17 @@ function GuestsField() {
 
 export function Hero() {
   const [sejourType, setSejourType] = useState<string>("nuee");
+  const [heureArrivee, setHeureArrivee] = useState("08:00");
 
   const needsHours = NEEDS_HOURS.has(sejourType);
+  const is24h = sejourType === "vingt_quatre_heures";
+
+  /* Pour "24 heures" : le départ est l'arrivée + 24h automatiquement */
+  const heureDepartAuto = (() => {
+    const [h, m] = heureArrivee.split(":").map(Number);
+    const next = (h + 24) % 24;
+    return `${String(next).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+  })();
 
   return (
     <section
@@ -306,7 +315,8 @@ export function Hero() {
                       id="heure-arrivee"
                       name="heureArrivee"
                       type="time"
-                      defaultValue="08:00"
+                      value={heureArrivee}
+                      onChange={(e) => setHeureArrivee(e.target.value)}
                       className="search-input"
                     />
                   </div>
@@ -317,13 +327,26 @@ export function Hero() {
                     Heure de départ
                   </label>
                   <div className="search-value">
-                    <input
-                      id="heure-depart"
-                      name="heureDepart"
-                      type="time"
-                      defaultValue="18:00"
-                      className="search-input"
-                    />
+                    {is24h ? (
+                      <>
+                        <input
+                          type="text"
+                          readOnly
+                          tabIndex={-1}
+                          className="search-input"
+                          value={heureDepartAuto}
+                        />
+                        <input type="hidden" name="heureDepart" value={heureDepartAuto} />
+                      </>
+                    ) : (
+                      <input
+                        id="heure-depart"
+                        name="heureDepart"
+                        type="time"
+                        defaultValue="18:00"
+                        className="search-input"
+                      />
+                    )}
                   </div>
                 </div>
               </div>
