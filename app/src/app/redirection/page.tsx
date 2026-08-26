@@ -18,6 +18,8 @@ export default async function RedirectionPage({
 
   const session = await auth();
 
+  console.log("[REDIRECT] session:", session ? `role=${session.user.role}, email=${session.user.email}` : "null");
+
   if (!session?.user) {
     redirect("/connexion");
   }

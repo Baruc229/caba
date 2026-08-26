@@ -33,6 +33,7 @@ const MAX_TENTATIVES = 5;
 const VERROU_MINUTES = 15;
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  trustHost: true,
   providers: [
     Credentials({
       name: "credentials",

@@ -2,7 +2,13 @@ import { NextResponse, type NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 
 export async function middleware(request: NextRequest) {
-  const token = await getToken({ req: request, secret: process.env.AUTH_SECRET });
+  const token = await getToken({
+    req: request,
+    secret: process.env.AUTH_SECRET,
+    secureCookie: process.env.NODE_ENV === "production",
+  });
+
+  console.log("[MIDDLEWARE]", request.nextUrl.pathname, "token:", token ? `role=${token.role}` : "null");
 
   if (!token) {
     const url = new URL("/connexion", request.url);
