@@ -80,8 +80,13 @@ export function ConnexionForm({ echec, succes, emailVerifie }: ConnexionFormProp
       });
 
       if (result?.error) {
+        const errorMap: Record<string, string> = {
+          CredentialsSignin:
+            "Email ou mot de passe incorrect. Vérifiez vos identifiants ou réinitialisez votre mot de passe.",
+        };
         setError(
-          `Connexion échouée : ${result.error}. Code : ${result.code ?? "inconnu"}.`
+          errorMap[result.error] ??
+            "Une erreur est survenue lors de la connexion. Veuillez réessayer."
         );
         setStatus("idle");
         return;
