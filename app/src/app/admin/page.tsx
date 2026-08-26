@@ -320,6 +320,13 @@ export default function TableauDeBordPage() {
 
   const isHidden = useCallback((id: string) => hiddenWidgets.has(id), [hiddenWidgets]);
 
+  const showAllWidgets = useCallback(() => {
+    setHiddenWidgets(new Set());
+    writeHiddenWidgets(new Set());
+  }, []);
+
+  const hiddenCount = hiddenWidgets.size;
+
   /* Fetch data */
   useEffect(() => {
     let cancelled = false;
@@ -417,6 +424,16 @@ export default function TableauDeBordPage() {
           <p className="bo-page-desc">Vue d&apos;ensemble de l&apos;activite du complexe.</p>
         </div>
       </div>
+
+      {hiddenCount > 0 && (
+        <div className="bo-widget-reset">
+          <FaEyeSlash size={13} aria-hidden="true" />
+          <span>{hiddenCount} section{hiddenCount > 1 ? "s" : ""} masquee{hiddenCount > 1 ? "s" : ""}</span>
+          <button type="button" className="bo-widget-reset-btn" onClick={showAllWidgets}>
+            Tout afficher
+          </button>
+        </div>
+      )}
 
       {/* ─── KPI CARDS ─── */}
       {isHidden("kpis") ? null : (

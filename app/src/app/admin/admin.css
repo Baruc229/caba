@@ -626,6 +626,14 @@
   font-size: 13px;
 }
 
+.bo-empty-icon {
+  display: block;
+  margin: 0 auto 12px;
+  font-size: 32px;
+  color: var(--bo-text-2);
+  opacity: 0.35;
+}
+
 .bo-phase-tag {
   display: inline-flex;
   align-items: center;
@@ -1417,6 +1425,38 @@
 
 .bo-widget-toggle.is-hidden {
   opacity: 0.4;
+}
+
+/* ─── Widget reset bar (quand des sections sont masquées) ─── */
+.bo-widget-reset {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  margin-bottom: 16px;
+  border-radius: var(--bo-radius-sm);
+  background-color: var(--bo-card);
+  border: 1px dashed var(--bo-border);
+  font-size: 13px;
+  color: var(--bo-text-2);
+}
+
+.bo-widget-reset-btn {
+  margin-left: auto;
+  padding: 4px 12px;
+  border: 1px solid var(--bo-accent);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--bo-accent);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 120ms ease, color 120ms ease;
+}
+
+.bo-widget-reset-btn:hover {
+  background-color: var(--bo-accent);
+  color: #fff;
 }
 
 /* ─── Responsive dashboard ─── */

@@ -65,7 +65,6 @@ export default async function RolesPage() {
             personnalisés arriveront en Phase 8.
           </p>
         </div>
-        <span className="bo-phase-tag">Phase 1/8 — socle</span>
       </div>
 
       <UsersManager initialUsers={initialUsers} />

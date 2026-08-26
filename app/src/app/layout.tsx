@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
 import { Anton, Inter } from "next/font/google";
 import "./globals.css";
-import { Header } from "@/components/layout/header";
-import { Footer } from "@/components/layout/footer";
 import { Providers } from "@/components/auth/providers";
+import { LayoutShell } from "@/components/layout/layout-shell";
 
 const anton = Anton({
   variable: "--font-anton",
@@ -55,11 +54,7 @@ export default function RootLayout({
           <a href="#main-content" className="skip-link">
             Aller au contenu principal
           </a>
-          <Header />
-          <main id="main-content" className="flex-1">
-            {children}
-          </main>
-          <Footer />
+          <LayoutShell>{children}</LayoutShell>
         </Providers>
       </body>
     </html>

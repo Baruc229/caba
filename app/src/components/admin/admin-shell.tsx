@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import {
@@ -138,7 +139,7 @@ export function AdminShell({
                   : pathname === full || pathname.startsWith(`${full}/`);
               return (
                 <li key={item.href}>
-                  <a
+                  <Link
                     href={full}
                     className={`bo-nav-item${isActive ? " is-active" : ""}`}
                     aria-current={isActive ? "page" : undefined}
@@ -146,7 +147,7 @@ export function AdminShell({
                   >
                     <item.icon aria-hidden="true" />
                     <span>{item.label}</span>
-                  </a>
+                  </Link>
                 </li>
               );
             })}
@@ -169,9 +170,9 @@ export function AdminShell({
           </div>
 
           <div className="bo-topbar-right">
-            <button type="button" className="bo-icon-btn" aria-label="Notifications">
+            <Link href="/admin/messages" className="bo-icon-btn" aria-label="Notifications">
               <FaBell aria-hidden="true" />
-            </button>
+            </Link>
             <span className="bo-topbar-sep" aria-hidden="true" />
             <span className="bo-avatar" aria-hidden="true">
               {initials(user.prenom, user.nom)}
