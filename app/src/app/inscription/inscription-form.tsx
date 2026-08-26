@@ -384,7 +384,13 @@ export function InscriptionForm({
           </form>
 
           <div className="auth-footer">
-            Déjà un profil chez nous ? <Link href="/connexion">Se connecter</Link>
+            Déjà un profil chez nous ?{" "}
+            <Link
+              href="/connexion"
+              onMouseDown={(e) => e.preventDefault()}
+            >
+              Se connecter
+            </Link>
           </div>
         </div>
 

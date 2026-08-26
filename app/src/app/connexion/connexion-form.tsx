@@ -196,7 +196,13 @@ export function ConnexionForm({ echec, succes, emailVerifie }: ConnexionFormProp
           </form>
 
           <div className="auth-footer">
-            Pas encore de profil chez nous ? <Link href="/inscription">S&apos;inscrire</Link>
+            Pas encore de profil chez nous ?{" "}
+            <Link
+              href="/inscription"
+              onMouseDown={(e) => e.preventDefault()}
+            >
+              S&apos;inscrire
+            </Link>
           </div>
         </div>
 
