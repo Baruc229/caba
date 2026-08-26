@@ -1,14 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { FaTriangleExclamation, FaEnvelope, FaPaperPlane, FaCircleCheck } from "react-icons/fa6";
 import { PhotoAside } from "@/components/auth/photo-aside";
 
 export default function VerificationPage() {
-  const params = new URLSearchParams(window.location.search);
-  const error = params.get("error");
-  const resendToken = params.get("resend");
+  const searchParams = useSearchParams();
+  const error = searchParams.get("error");
 
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
