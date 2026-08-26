@@ -26,8 +26,12 @@ function validerMotDePasse(valeur: string): string {
   return "";
 }
 
+const LOGIN_ERRORS: Record<string, string> = {
+  CredentialsSignin:
+    "Email ou mot de passe incorrect. Vérifiez vos identifiants ou réinitialisez votre mot de passe.",
+};
+
 export function ConnexionForm({ echec, succes, emailVerifie }: ConnexionFormProps) {
-  // Contrôle différé après le premier rendu (page instantanée)
   const [staffManquant, setStaffManquant] = useState(false);
 
   useEffect(() => {
@@ -80,12 +84,8 @@ export function ConnexionForm({ echec, succes, emailVerifie }: ConnexionFormProp
       });
 
       if (result?.error) {
-        const errorMap: Record<string, string> = {
-          CredentialsSignin:
-            "Email ou mot de passe incorrect. Vérifiez vos identifiants ou réinitialisez votre mot de passe.",
-        };
         setError(
-          errorMap[result.error] ??
+          LOGIN_ERRORS[result.error] ??
             "Une erreur est survenue lors de la connexion. Veuillez réessayer."
         );
         setStatus("idle");
@@ -97,9 +97,8 @@ export function ConnexionForm({ echec, succes, emailVerifie }: ConnexionFormProp
       } else {
         window.location.href = "/redirection";
       }
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
-      setError(`Erreur inattendue : ${msg}`);
+    } catch {
+      setError("Une erreur est survenue. Veuillez réessayer.");
       setStatus("idle");
     }
   }

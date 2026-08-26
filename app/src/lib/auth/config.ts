@@ -42,64 +42,32 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         password: { label: "Mot de passe", type: "password" },
       },
       async authorize(credentials) {
-        console.log("[AUTH] === authorize START ===");
-        console.log("[AUTH] credentials type:", typeof credentials);
-        console.log("[AUTH] credentials keys:", JSON.stringify(Object.keys(credentials ?? {})));
-        console.log("[AUTH] credentials:", JSON.stringify(credentials));
-
-        if (!credentials?.email || !credentials?.password) {
-          console.log("[AUTH] FAIL: credentials missing");
-          return null;
-        }
+        if (!credentials?.email || !credentials?.password) return null;
 
         const email = (credentials.email as string).toLowerCase().trim();
         const password = credentials.password as string;
-        console.log("[AUTH] email:", email);
-        console.log("[AUTH] password length:", password.length);
-        console.log("[AUTH] password type:", typeof password);
 
         let user;
         try {
           user = await prisma.user.findUnique({ where: { email } });
-          console.log("[AUTH] prisma query OK, user found:", !!user);
-        } catch (e: unknown) {
-          const msg = e instanceof Error ? e.message : String(e);
-          console.error("[AUTH] FAIL: prisma error:", msg);
+        } catch {
           return null;
         }
 
-        if (!user) {
-          console.log("[AUTH] FAIL: user not found for email:", email);
-          return null;
-        }
-        if (!user.actif) {
-          console.log("[AUTH] FAIL: user inactive:", email);
-          return null;
-        }
-        if (!user.emailConfirme) {
-          console.log("[AUTH] FAIL: email not verified:", email);
-          return null;
-        }
+        if (!user) return null;
+        if (!user.actif) return null;
+        if (!user.emailConfirme) return null;
 
-        if (user.verrouilleJusqua && user.verrouilleJusqua > new Date()) {
-          console.log("[AUTH] FAIL: account locked until", user.verrouilleJusqua);
-          return null;
-        }
-
-        console.log("[AUTH] comparing password, hash prefix:", user.password.slice(0, 7), "hash length:", user.password.length);
+        if (user.verrouilleJusqua && user.verrouilleJusqua > new Date()) return null;
 
         let isPasswordValid: boolean;
         try {
           isPasswordValid = await bcrypt.compare(password, user.password);
-          console.log("[AUTH] bcrypt.compare result:", isPasswordValid);
-        } catch (e: unknown) {
-          const msg = e instanceof Error ? e.message : String(e);
-          console.error("[AUTH] FAIL: bcrypt.compare error:", msg);
+        } catch {
           return null;
         }
 
         if (!isPasswordValid) {
-          console.log("[AUTH] FAIL: password invalid for", email);
           const tentatives = user.tentativesEchouees + 1;
           await prisma.user.update({
             where: { id: user.id },
@@ -116,7 +84,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           return null;
         }
 
-        console.log("[AUTH] SUCCESS: login for", email);
         await prisma.user.update({
           where: { id: user.id },
           data: {

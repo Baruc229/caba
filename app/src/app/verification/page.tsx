@@ -2,31 +2,36 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { FaTriangleExclamation, FaEnvelope, FaPaperPlane } from "react-icons/fa6";
+import { FaTriangleExclamation, FaEnvelope, FaPaperPlane, FaCircleCheck } from "react-icons/fa6";
 import { PhotoAside } from "@/components/auth/photo-aside";
 
 export default function VerificationPage() {
   const params = new URLSearchParams(window.location.search);
   const error = params.get("error");
+  const resendToken = params.get("resend");
+
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
+  const [sentVerifyUrl, setSentVerifyUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const errorMessages: Record<string, string> = {
-    missing: "Aucun jeton de verification fourni.",
-    invalid: "Ce lien de verification est invalide ou a expire.",
-    server: "Une erreur est survenue. Veuillez reessayer.",
+    missing: "Aucun jeton de vérification fourni.",
+    invalid: "Ce lien de vérification est invalide ou a expiré.",
+    server: "Une erreur est survenue. Veuillez réessayer.",
   };
 
   async function handleResend() {
     if (!email.trim()) return;
     setLoading(true);
     try {
-      await fetch("/api/auth/resend-verify", {
+      const res = await fetch("/api/auth/resend-verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: email.trim() }),
       });
+      const data = await res.json();
+      setSentVerifyUrl(data.verifyUrl ?? null);
       setSent(true);
     } catch {
       setSent(true);
@@ -49,7 +54,15 @@ export default function VerificationPage() {
 
             {sent ? (
               <div className="auth-banner auth-banner--success">
-                Un nouveau lien a ete envoye. Verifiez votre boite de reception.
+                Un nouveau lien a été envoyé. Vérifiez votre boîte de réception.
+                {sentVerifyUrl && (
+                  <span style={{ display: "block", marginTop: 8 }}>
+                    <a href={sentVerifyUrl} style={{ fontWeight: 600 }}>
+                      <FaCircleCheck style={{ marginRight: 6 }} />
+                      Ou cliquez ici pour activer votre compte
+                    </a>
+                  </span>
+                )}
               </div>
             ) : (
               <>
@@ -67,6 +80,9 @@ export default function VerificationPage() {
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="nom@exemple.com"
                     className="lfield-input"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") handleResend();
+                    }}
                   />
                 </div>
                 <button
@@ -82,7 +98,7 @@ export default function VerificationPage() {
             )}
 
             <Link href="/connexion" className="auth-btn auth-btn--link" style={{ marginTop: 16 }}>
-              Retour a la connexion
+              Retour à la connexion
             </Link>
           </div>
           <PhotoAside />
@@ -98,9 +114,9 @@ export default function VerificationPage() {
           <div className="auth-success-icon">
             <FaEnvelope aria-hidden="true" />
           </div>
-          <h1 className="auth-display auth-display--sm">Verification en cours...</h1>
+          <h1 className="auth-display auth-display--sm">Vérification en cours…</h1>
           <p className="auth-subtitle-v2">
-            Si vous n&apos;etes pas automatiquement redirige, votre compte est pret.
+            Si vous n&apos;êtes pas automatiquement redirigé, votre compte est prêt.
           </p>
           <Link href="/connexion" className="auth-btn auth-btn--link">
             Se connecter

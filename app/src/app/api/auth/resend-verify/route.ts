@@ -14,12 +14,8 @@ export async function POST(request: NextRequest) {
 
     const user = await prisma.user.findUnique({ where: { email } });
 
-    if (!user) {
-      return NextResponse.json({ message: "Si cet email existe, un lien a ete envoye." }, { status: 200 });
-    }
-
-    if (user.emailConfirme) {
-      return NextResponse.json({ message: "Cet email est deja verifie." }, { status: 200 });
+    if (!user || user.emailConfirme) {
+      return NextResponse.json({ message: "Si cet email existe, un lien a ete envoye." });
     }
 
     const verifyToken = crypto.randomBytes(32).toString("hex");
@@ -32,10 +28,14 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    const emailSent = await sendVerificationEmail(email, user.prenom, verifyToken);
-    console.log("[RESEND] Email sent:", emailSent, "to:", email);
+    const { sent: emailSent, verifyUrl } = await sendVerificationEmail(email, user.prenom, verifyToken);
+    console.log("[RESEND]", email, "emailSent:", emailSent);
 
-    return NextResponse.json({ message: "Si cet email existe, un lien a ete envoye.", emailSent });
+    return NextResponse.json({
+      message: "Si cet email existe, un lien a ete envoye.",
+      emailSent,
+      verifyUrl,
+    });
   } catch (error) {
     console.error("[RESEND] Error:", error);
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });

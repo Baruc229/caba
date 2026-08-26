@@ -27,6 +27,7 @@ export function InscriptionForm({
   const [error, setError] = useState("");
   const [emailExists, setEmailExists] = useState(false);
   const [verifyUrl, setVerifyUrl] = useState<string | null>(null);
+  const [emailSent, setEmailSent] = useState(true);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   function validateField(name: string, value: string): string {
@@ -51,7 +52,6 @@ export function InscriptionForm({
     }
   }
 
-  // Validation "on blur" : le message apparaît en quittant le champ
   function blurCheck(name: string, value: string) {
     setFieldErrors((prev) => ({ ...prev, [name]: validateField(name, value) }));
   }
@@ -118,6 +118,7 @@ export function InscriptionForm({
 
     const result = await response.json();
     setVerifyUrl(result.verifyUrl ?? null);
+    setEmailSent(result.emailSent !== false);
     setStatus("idle");
   }
 
@@ -161,18 +162,39 @@ export function InscriptionForm({
             </div>
             <p className="auth-eyebrow">Vérification</p>
             <h1 className="auth-display auth-display--sm">Vérifiez votre email</h1>
-            <p className="auth-subtitle-v2">
-              Un lien de vérification a été envoyé à votre adresse email.
-              Cliquez dessus pour activer votre compte.
-            </p>
-            <div className="auth-banner auth-banner--success">
-              Un lien de vérification a été envoyé à <strong>{verifyUrl?.split("token=")[1] ? "" : ""}</strong>.
-              Vérifiez votre boîte de réception et cliquez sur le lien pour activer votre compte.
-            </div>
-            <p className="auth-subtitle-v2" style={{ marginTop: 16, fontSize: 13 }}>
-              Vous n&apos;avez pas reçu l&apos;email ?{" "}
-              <Link href="/connexion">Retour à la connexion</Link>
-            </p>
+
+            {emailSent ? (
+              <>
+                <p className="auth-subtitle-v2">
+                  Un email de vérification vous a été envoyé. Vérifiez votre boîte de réception
+                  et cliquez sur le lien pour activer votre compte.
+                </p>
+                <p className="auth-subtitle-v2" style={{ marginTop: 12, fontSize: 13 }}>
+                  Vous n&apos;avez pas reçu l&apos;email ?{" "}
+                  <Link href={`/verification?resend=${encodeURIComponent(verifyUrl.split("token=")[1] || "")}`}>
+                    Renvoyer le lien
+                  </Link>
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="auth-subtitle-v2">
+                  L&apos;email n&apos;a pas pu être envoyé. Vous pouvez activer votre compte
+                  en cliquant directement sur le lien ci-dessous :
+                </p>
+                <a href={verifyUrl} className="auth-btn" style={{ marginTop: 16 }}>
+                  <FaCircleCheck aria-hidden="true" />
+                  Activer mon compte
+                </a>
+                <p className="auth-subtitle-v2" style={{ marginTop: 12, fontSize: 13 }}>
+                  Ce lien est valable 24 heures.
+                </p>
+              </>
+            )}
+
+            <Link href="/connexion" className="auth-btn auth-btn--link" style={{ marginTop: 16 }}>
+              Retour à la connexion
+            </Link>
           </div>
           <PhotoAside />
         </div>
@@ -182,7 +204,6 @@ export function InscriptionForm({
 
   return (
     <div className="auth-page-v2">
-      {/* Page continue : identité -> contact -> sécurité, sans étapes */}
       <div className="auth-panel">
         <div className="auth-main">
           <p className="auth-eyebrow">Bienvenue</p>

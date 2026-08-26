@@ -4,10 +4,6 @@ import crypto from "crypto";
 import { prisma } from "@/lib/prisma";
 import { sendVerificationEmail } from "@/lib/email";
 
-function generateVerifyToken(): string {
-  return crypto.randomBytes(32).toString("hex");
-}
-
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -27,10 +23,7 @@ export async function POST(request: NextRequest) {
       !/\d/.test(password)
     ) {
       return NextResponse.json(
-        {
-          error:
-            "Le mot de passe doit contenir au moins 8 caracteres, une majuscule et un chiffre",
-        },
+        { error: "Le mot de passe doit contenir au moins 8 caracteres, une majuscule et un chiffre" },
         { status: 400 }
       );
     }
@@ -56,7 +49,7 @@ export async function POST(request: NextRequest) {
     }
 
     const hashedPassword = await bcrypt.hash(password, 12);
-    const verifyToken = generateVerifyToken();
+    const verifyToken = crypto.randomBytes(32).toString("hex");
 
     const user = await prisma.user.create({
       data: {
@@ -75,33 +68,25 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    const verifyUrl = `/verification?token=${verifyToken}`;
+    const { sent: emailSent, verifyUrl } = await sendVerificationEmail(
+      normalizedEmail,
+      prenom,
+      verifyToken
+    );
 
-    // Envoi email de vérification
-    let emailSent = false;
-    try {
-      emailSent = await sendVerificationEmail(normalizedEmail, prenom, verifyToken);
-      console.log("[REGISTER] Email sent:", emailSent, "to:", normalizedEmail);
-    } catch (err) {
-      console.error("[REGISTER] Email send error:", err);
-    }
+    console.log("[REGISTER]", normalizedEmail, "emailSent:", emailSent);
 
     return NextResponse.json(
       {
-        message: "Compte cree. Veuillez verifier votre email.",
-        user: {
-          id: user.id,
-          email: user.email,
-          nom: user.nom,
-          prenom: user.prenom,
-        },
+        message: "Compte cree. Verifiez votre email.",
+        user: { id: user.id, email: user.email, nom: user.nom, prenom: user.prenom },
         verifyUrl,
         emailSent,
       },
       { status: 201 }
     );
   } catch (error) {
-    console.error("Erreur lors de l'inscription:", error);
+    console.error("[REGISTER] Error:", error);
     return NextResponse.json(
       { error: "Une erreur est survenue lors de l'inscription" },
       { status: 500 }
