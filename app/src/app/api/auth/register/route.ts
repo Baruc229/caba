@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import { prisma } from "@/lib/prisma";
+import { sendVerificationEmail } from "@/lib/email";
 
 function generateVerifyToken(): string {
   return crypto.randomBytes(32).toString("hex");
@@ -75,6 +76,11 @@ export async function POST(request: NextRequest) {
     });
 
     const verifyUrl = `/verification?token=${verifyToken}`;
+
+    // Envoi email de vérification (best-effort)
+    sendVerificationEmail(normalizedEmail, prenom, verifyToken).catch((err) =>
+      console.error("[REGISTER] Email send failed:", err)
+    );
 
     return NextResponse.json(
       {
