@@ -3,12 +3,18 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { FaBars, FaXmark } from "react-icons/fa6";
 import { Segmented } from "@/components/ui/segmented";
 import {
   CurrencySwitcher,
   useCurrency,
 } from "./currency-switcher";
+import {
+  UserMenu,
+  UserBottomSheet,
+  UserMenuMobileTrigger,
+} from "./user-menu";
 
 const NAV_LINKS = [
   { href: "/", label: "Accueil" },
@@ -19,16 +25,21 @@ const NAV_LINKS = [
 
 export function Header() {
   const pathname = usePathname();
+  const { data: session } = useSession();
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [sheetOpen, setSheetOpen] = useState(false);
   const [lang, setLang] = useState<"fr" | "en">("fr");
   const [currency, setCurrency] = useCurrency();
 
+  const user = session?.user;
+  const isClient = user?.role === "client";
+
   useEffect(() => {
-    document.body.style.overflow = drawerOpen ? "hidden" : "";
+    document.body.style.overflow = drawerOpen || sheetOpen ? "hidden" : "";
     return () => {
       document.body.style.overflow = "";
     };
-  }, [drawerOpen]);
+  }, [drawerOpen, sheetOpen]);
 
   useEffect(() => {
     if (!drawerOpen) return;
@@ -39,7 +50,17 @@ export function Header() {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [drawerOpen]);
 
+  useEffect(() => {
+    if (!sheetOpen) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setSheetOpen(false);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [sheetOpen]);
+
   const closeDrawer = useCallback(() => setDrawerOpen(false), []);
+  const closeSheet = useCallback(() => setSheetOpen(false), []);
 
   const langSwitch = (
     <Segmented
@@ -82,13 +103,33 @@ export function Header() {
           </nav>
         </div>
 
+        {/* ── Desktop right zone ── */}
         <div className="hidden items-center gap-4 lg:flex">
-          <Link
-            href="/connexion"
-            className="rounded-full px-4 py-2 text-sm font-medium text-text-secondary transition-colors hover:text-accent-secondary"
-          >
-            Connexion
-          </Link>
+          {isClient && user ? (
+            <UserMenu
+              user={{
+                prenom: user.prenom,
+                nom: user.nom,
+                email: user.email ?? "",
+                avatarUrl: null,
+                role: user.role,
+              }}
+            />
+          ) : user ? (
+            <Link
+              href="/admin"
+              className="rounded-full px-4 py-2 text-sm font-medium text-text-secondary transition-colors hover:text-accent-secondary"
+            >
+              Back-office
+            </Link>
+          ) : (
+            <Link
+              href="/connexion"
+              className="rounded-full px-4 py-2 text-sm font-medium text-text-secondary transition-colors hover:text-accent-secondary"
+            >
+              Connexion
+            </Link>
+          )}
           <Link href="/recherche" className="btn-pill btn-primary px-8">
             Réserver
           </Link>
@@ -96,8 +137,21 @@ export function Header() {
           <CurrencySwitcher currency={currency} onChange={setCurrency} />
         </div>
 
+        {/* ── Mobile right zone ── */}
         <div className="flex items-center gap-3 lg:hidden">
           {langSwitch}
+          {isClient && user ? (
+            <UserMenuMobileTrigger
+              user={{
+                prenom: user.prenom,
+                nom: user.nom,
+                email: user.email ?? "",
+                avatarUrl: null,
+                role: user.role,
+              }}
+              onClick={() => setSheetOpen(true)}
+            />
+          ) : null}
           <button
             type="button"
             className="flex h-10 w-10 items-center justify-center text-xl text-text-primary"
@@ -110,6 +164,7 @@ export function Header() {
         </div>
       </div>
 
+      {/* ── Mobile drawer ── */}
       {drawerOpen && (
         <button
           type="button"
@@ -145,11 +200,11 @@ export function Header() {
               key={link.href}
               href={link.href}
               aria-current={pathname === link.href ? "page" : undefined}
-                className={`rounded-lg px-4 py-3 text-base ${
-                  pathname === link.href
-                    ? "bg-bg-primary font-semibold text-accent-secondary"
-                    : "text-text-secondary hover:bg-bg-primary hover:text-text-primary"
-                }`}
+              className={`rounded-lg px-4 py-3 text-base ${
+                pathname === link.href
+                  ? "bg-bg-primary font-semibold text-accent-secondary"
+                  : "text-text-secondary hover:bg-bg-primary hover:text-text-primary"
+              }`}
               onClick={closeDrawer}
             >
               {link.label}
@@ -159,15 +214,31 @@ export function Header() {
 
         <div className="mt-auto flex flex-col items-center gap-4 border-t border-border-subtle p-6">
           <CurrencySwitcher currency={currency} onChange={setCurrency} />
-          <Link
-            href="/connexion"
-            className="btn-pill btn-primary w-full"
-            onClick={closeDrawer}
-          >
-            Connexion
-          </Link>
+          {!isClient && (
+            <Link
+              href="/connexion"
+              className="btn-pill btn-primary w-full"
+              onClick={closeDrawer}
+            >
+              Connexion
+            </Link>
+          )}
         </div>
       </aside>
+
+      {/* ── Mobile bottom sheet (user account) ── */}
+      {sheetOpen && isClient && user && (
+        <UserBottomSheet
+          user={{
+            prenom: user.prenom,
+            nom: user.nom,
+            email: user.email ?? "",
+            avatarUrl: null,
+            role: user.role,
+          }}
+          onClose={closeSheet}
+        />
+      )}
     </header>
   );
 }
