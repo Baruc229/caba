@@ -166,12 +166,9 @@ export function InscriptionForm({
               Cliquez dessus pour activer votre compte.
             </p>
             <div className="auth-banner auth-banner--success">
-              <strong>Pour l&apos;instant :</strong> cliquez le lien ci-dessous pour activer votre compte.
+              Un lien de vérification a été envoyé à <strong>{verifyUrl?.split("token=")[1] ? "" : ""}</strong>.
+              Vérifiez votre boîte de réception et cliquez sur le lien pour activer votre compte.
             </div>
-            <a href={verifyUrl} className="auth-btn">
-              <FaCircleCheck aria-hidden="true" />
-              Vérifier mon email
-            </a>
             <p className="auth-subtitle-v2" style={{ marginTop: 16, fontSize: 13 }}>
               Vous n&apos;avez pas reçu l&apos;email ?{" "}
               <Link href="/connexion">Retour à la connexion</Link>

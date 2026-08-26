@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { SignJWT } from "jose";
+
+const secret = new TextEncoder().encode(process.env.AUTH_SECRET);
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -30,9 +33,31 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    return NextResponse.redirect(new URL("/connexion?verifie=1", request.url));
+    const jwt = await new SignJWT({
+      role: user.role,
+      id: user.id,
+      prenom: user.prenom,
+      nom: user.nom,
+    })
+      .setProtectedHeader({ alg: "HS256" })
+      .setIssuedAt()
+      .setExpirationTime("8h")
+      .sign(secret);
+
+    const redirectUrl = user.role === "client" ? "/" : "/admin";
+    const response = NextResponse.redirect(new URL(redirectUrl, request.url));
+
+    response.cookies.set("authjs.session-token", jwt, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: 8 * 60 * 60,
+    });
+
+    return response;
   } catch (error) {
-    console.error("Verify error:", error);
+    console.error("[VERIFY] Error:", error);
     return NextResponse.redirect(new URL("/verification?error=server", request.url));
   }
 }
