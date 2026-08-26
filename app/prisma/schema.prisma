@@ -222,6 +222,8 @@ model User {
   invitationExpire  DateTime?
 
   // Inscription publique
+  emailVerifyToken   String?   @unique
+  emailVerifyExpire  DateTime?
   cgvAccepteesAt    DateTime?
   marketingOptIn    Boolean   @default(false)
 

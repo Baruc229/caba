@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { signIn } from "next-auth/react";
-import { FaArrowRight, FaEye, FaEyeSlash } from "react-icons/fa6";
+import { FaArrowRight, FaEye, FaEyeSlash, FaCircleCheck, FaEnvelope } from "react-icons/fa6";
 import { PhotoAside } from "@/components/auth/photo-aside";
 import {
   CriteriaList,
@@ -27,6 +26,7 @@ export function InscriptionForm({
   const [status, setStatus] = useState<"idle" | "loading">("idle");
   const [error, setError] = useState("");
   const [emailExists, setEmailExists] = useState(false);
+  const [verifyUrl, setVerifyUrl] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   function validateField(name: string, value: string): string {
@@ -116,35 +116,9 @@ export function InscriptionForm({
       return;
     }
 
-    // Connexion automatique puis redirection (client -> site public)
-    try {
-      const result = await signIn("credentials", {
-        email: values.email,
-        password: values.password,
-        callbackUrl: "/",
-        redirect: false,
-      });
-
-      if (result?.error) {
-        setStatus("idle");
-        setError(
-          `Compte créé, mais la connexion a échoué (${result.error}). Connectez-vous manuellement.`
-        );
-        return;
-      }
-
-      if (result?.url) {
-        window.location.href = result.url;
-      } else {
-        window.location.href = "/";
-      }
-    } catch (err: unknown) {
-      setStatus("idle");
-      const msg = err instanceof Error ? err.message : String(err);
-      setError(
-        `Compte créé, mais erreur inattendue : ${msg}.`
-      );
-    }
+    const result = await response.json();
+    setVerifyUrl(result.verifyUrl ?? null);
+    setStatus("idle");
   }
 
   function fieldError(name: string) {
@@ -170,6 +144,38 @@ export function InscriptionForm({
               Se connecter
               <FaArrowRight className="auth-btn-arrow" aria-hidden="true" />
             </Link>
+          </div>
+          <PhotoAside />
+        </div>
+      </div>
+    );
+  }
+
+  if (verifyUrl) {
+    return (
+      <div className="auth-page-v2">
+        <div className="auth-panel">
+          <div className="auth-main">
+            <div className="auth-success-icon">
+              <FaEnvelope aria-hidden="true" />
+            </div>
+            <p className="auth-eyebrow">Vérification</p>
+            <h1 className="auth-display auth-display--sm">Vérifiez votre email</h1>
+            <p className="auth-subtitle-v2">
+              Un lien de vérification a été envoyé à votre adresse email.
+              Cliquez dessus pour activer votre compte.
+            </p>
+            <div className="auth-banner auth-banner--success">
+              <strong>Pour l&apos;instant :</strong> cliquez le lien ci-dessous pour activer votre compte.
+            </div>
+            <a href={verifyUrl} className="auth-btn">
+              <FaCircleCheck aria-hidden="true" />
+              Vérifier mon email
+            </a>
+            <p className="auth-subtitle-v2" style={{ marginTop: 16, fontSize: 13 }}>
+              Vous n&apos;avez pas reçu l&apos;email ?{" "}
+              <Link href="/connexion">Retour à la connexion</Link>
+            </p>
           </div>
           <PhotoAside />
         </div>

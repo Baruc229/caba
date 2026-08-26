@@ -9,6 +9,7 @@ import { PhotoAside } from "@/components/auth/photo-aside";
 interface ConnexionFormProps {
   echec: boolean;
   succes: boolean;
+  emailVerifie?: boolean;
 }
 
 function validerEmail(valeur: string): string {
@@ -25,7 +26,7 @@ function validerMotDePasse(valeur: string): string {
   return "";
 }
 
-export function ConnexionForm({ echec, succes }: ConnexionFormProps) {
+export function ConnexionForm({ echec, succes, emailVerifie }: ConnexionFormProps) {
   // Contrôle différé après le premier rendu (page instantanée)
   const [staffManquant, setStaffManquant] = useState(false);
 
@@ -119,6 +120,12 @@ export function ConnexionForm({ echec, succes }: ConnexionFormProps) {
             <p role="status" className="auth-banner auth-banner--success">
               Votre mot de passe a bien été modifié. Connectez-vous avec vos nouveaux
               identifiants.
+            </p>
+          )}
+
+          {emailVerifie && (
+            <p role="status" className="auth-banner auth-banner--success">
+              Votre email a été vérifié avec succès. Vous pouvez maintenant vous connecter.
             </p>
           )}
 

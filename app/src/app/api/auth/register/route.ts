@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
+import crypto from "crypto";
 import { prisma } from "@/lib/prisma";
+
+function generateVerifyToken(): string {
+  return crypto.randomBytes(32).toString("hex");
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -50,6 +55,7 @@ export async function POST(request: NextRequest) {
     }
 
     const hashedPassword = await bcrypt.hash(password, 12);
+    const verifyToken = generateVerifyToken();
 
     const user = await prisma.user.create({
       data: {
@@ -59,20 +65,27 @@ export async function POST(request: NextRequest) {
         prenom,
         telephone: telephone || null,
         role: "client",
+        actif: true,
+        emailConfirme: false,
+        emailVerifyToken: verifyToken,
+        emailVerifyExpire: new Date(Date.now() + 24 * 60 * 60 * 1000),
         cgvAccepteesAt: new Date(),
         marketingOptIn: Boolean(marketingOptIn),
       },
     });
 
+    const verifyUrl = `/verification?token=${verifyToken}`;
+
     return NextResponse.json(
       {
-        message: "Compte cree avec succes",
+        message: "Compte cree. Veuillez verifier votre email.",
         user: {
           id: user.id,
           email: user.email,
           nom: user.nom,
           prenom: user.prenom,
         },
+        verifyUrl,
       },
       { status: 201 }
     );

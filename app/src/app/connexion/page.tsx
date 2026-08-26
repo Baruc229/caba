@@ -10,9 +10,15 @@ export const metadata = {
 export default async function ConnexionPage({
   searchParams,
 }: {
-  searchParams: Promise<{ echec?: string; succes?: string }>;
+  searchParams: Promise<{ echec?: string; succes?: string; verifie?: string }>;
 }) {
-  const { echec, succes } = await searchParams;
+  const { echec, succes, verifie } = await searchParams;
 
-  return <ConnexionForm echec={echec === "1"} succes={succes === "1"} />;
+  return (
+    <ConnexionForm
+      echec={echec === "1"}
+      succes={succes === "1"}
+      emailVerifie={verifie === "1"}
+    />
+  );
 }

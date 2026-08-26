@@ -76,6 +76,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           console.log("[AUTH] FAIL: user inactive:", email);
           return null;
         }
+        if (!user.emailConfirme) {
+          console.log("[AUTH] FAIL: email not verified:", email);
+          return null;
+        }
 
         if (user.verrouilleJusqua && user.verrouilleJusqua > new Date()) {
           console.log("[AUTH] FAIL: account locked until", user.verrouilleJusqua);
