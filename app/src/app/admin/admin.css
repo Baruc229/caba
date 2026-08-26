@@ -1508,17 +1508,11 @@
 }
 
 .bo-dash-empty-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 72px;
-  height: 72px;
-  margin-bottom: 20px;
-  border-radius: 50%;
-  background-color: var(--bo-bg);
-  font-size: 32px;
+  display: block;
+  margin: 0 auto 16px;
+  font-size: 40px;
   color: var(--bo-text-2);
-  opacity: 0.6;
+  opacity: 0.45;
 }
 
 .bo-dash-empty-title {
