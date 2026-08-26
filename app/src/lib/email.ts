@@ -18,7 +18,8 @@ interface SendEmailParams {
 export async function sendEmail({ to, subject, htmlContent }: SendEmailParams): Promise<boolean> {
   try {
     const brevo = getClient();
-    await brevo.transactionalEmails.sendTransacEmail({
+    console.log("[EMAIL] Sending to:", to, "from:", process.env.BREVO_SENDER_EMAIL);
+    const result = await brevo.transactionalEmails.sendTransacEmail({
       sender: {
         email: process.env.BREVO_SENDER_EMAIL!,
         name: process.env.BREVO_SENDER_NAME || "Caba Residence",
@@ -27,9 +28,10 @@ export async function sendEmail({ to, subject, htmlContent }: SendEmailParams): 
       subject,
       htmlContent,
     });
+    console.log("[EMAIL] Success, messageId:", JSON.stringify(result));
     return true;
   } catch (error) {
-    console.error("[EMAIL] Brevo send error:", error);
+    console.error("[EMAIL] Brevo send error:", JSON.stringify(error));
     return false;
   }
 }

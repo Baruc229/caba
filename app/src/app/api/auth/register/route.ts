@@ -77,10 +77,14 @@ export async function POST(request: NextRequest) {
 
     const verifyUrl = `/verification?token=${verifyToken}`;
 
-    // Envoi email de vérification (best-effort)
-    sendVerificationEmail(normalizedEmail, prenom, verifyToken).catch((err) =>
-      console.error("[REGISTER] Email send failed:", err)
-    );
+    // Envoi email de vérification
+    let emailSent = false;
+    try {
+      emailSent = await sendVerificationEmail(normalizedEmail, prenom, verifyToken);
+      console.log("[REGISTER] Email sent:", emailSent, "to:", normalizedEmail);
+    } catch (err) {
+      console.error("[REGISTER] Email send error:", err);
+    }
 
     return NextResponse.json(
       {
@@ -92,6 +96,7 @@ export async function POST(request: NextRequest) {
           prenom: user.prenom,
         },
         verifyUrl,
+        emailSent,
       },
       { status: 201 }
     );
