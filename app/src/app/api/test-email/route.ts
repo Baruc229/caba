@@ -1,25 +1,44 @@
 import { NextResponse } from "next/server";
-import { sendEmail } from "@/lib/email";
 
 export async function GET() {
   const results: Record<string, unknown> = {};
 
-  // Check env vars
-  results.brevoKey = process.env.BREVO_API_KEY ? "present (" + process.env.BREVO_API_KEY.slice(0, 10) + "...)" : "MISSING";
+  results.brevoKey = process.env.BREVO_API_KEY
+    ? "present (" + process.env.BREVO_API_KEY.slice(0, 12) + "...)"
+    : "MISSING";
   results.senderEmail = process.env.BREVO_SENDER_EMAIL || "MISSING";
   results.senderName = process.env.BREVO_SENDER_NAME || "MISSING";
-  results.nextauthUrl = process.env.NEXTAUTH_URL || "MISSING";
 
-  // Try sending test email to the sender itself
+  const apiKey = process.env.BREVO_API_KEY;
+  const senderEmail = process.env.BREVO_SENDER_EMAIL;
+
+  if (!apiKey || !senderEmail) {
+    results.error = "Missing BREVO_API_KEY or BREVO_SENDER_EMAIL";
+    return NextResponse.json(results, { status: 500 });
+  }
+
   try {
-    const sent = await sendEmail({
-      to: process.env.BREVO_SENDER_EMAIL!,
-      subject: "Test Caba Residence",
-      htmlContent: "<p>Test email from Caba Residence API</p>",
+    const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+      method: "POST",
+      headers: {
+        "api-key": apiKey,
+        "Content-Type": "application/json",
+        accept: "application/json",
+      },
+      body: JSON.stringify({
+        sender: { email: senderEmail, name: "Caba Residence" },
+        to: [{ email: senderEmail }],
+        subject: "Test Caba Residence",
+        htmlContent: "<p>Test email from Caba Residence API</p>",
+        textContent: "Test email from Caba Residence API",
+      }),
     });
-    results.sendResult = sent;
+
+    results.httpStatus = response.status;
+    const body = await response.text();
+    results.responseBody = body;
   } catch (err) {
-    results.sendError = String(err);
+    results.fetchError = String(err);
   }
 
   return NextResponse.json(results, { status: 200 });
