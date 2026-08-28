@@ -10,7 +10,6 @@ import {
   FaUser,
   FaRightFromBracket,
   FaChevronDown,
-  FaXmark,
 } from "react-icons/fa6";
 import { UserAvatar } from "./user-avatar";
 
@@ -216,72 +215,64 @@ export function UserBottomSheet({
     <>
       <button
         type="button"
-        className="user-sidesheet-overlay"
+        className="user-sheet-overlay"
         aria-label="Fermer"
         onClick={onClose}
       />
       <div
-        className="user-sidesheet"
+        className="user-sheet"
         role="dialog"
         aria-modal="true"
         aria-label="Menu utilisateur"
       >
-        <div className="user-sidesheet-header">
-          <span className="heading-display text-lg">Mon compte</span>
-          <button
-            type="button"
-            className="user-sidesheet-close"
-            aria-label="Fermer le menu"
-            onClick={onClose}
-          >
-            <FaXmark aria-hidden="true" />
-          </button>
-        </div>
+        <div className="user-sheet-handle" aria-hidden="true" />
 
-        <div className="user-menu-header">
-          <UserAvatar
-            prenom={user.prenom}
-            nom={user.nom}
-            avatarUrl={user.avatarUrl}
-            size={40}
-          />
-          <div className="user-menu-header-text">
-            <span className="user-menu-header-name">
-              {user.prenom} {user.nom}
-            </span>
-            <span className="user-menu-header-email">{user.email}</span>
+        <div className="user-sheet-grab">
+          <div className="user-menu-header">
+            <UserAvatar
+              prenom={user.prenom}
+              nom={user.nom}
+              avatarUrl={user.avatarUrl}
+              size={40}
+            />
+            <div className="user-menu-header-text">
+              <span className="user-menu-header-name">
+                {user.prenom} {user.nom}
+              </span>
+              <span className="user-menu-header-email">{user.email}</span>
+            </div>
           </div>
-        </div>
 
-        <div className="user-menu-separator" />
+          <div className="user-menu-separator" />
 
-        {MENU_ITEMS.map((item) => (
+          {MENU_ITEMS.map((item) => (
+            <button
+              key={item.href}
+              type="button"
+              role="menuitem"
+              className="user-menu-option"
+              onClick={() => handleOptionClick(item.href)}
+            >
+              <item.icon aria-hidden="true" className="user-menu-option-icon" />
+              {item.label}
+            </button>
+          ))}
+
+          <div className="user-menu-separator" />
+
           <button
-            key={item.href}
             type="button"
             role="menuitem"
-            className="user-menu-option"
-            onClick={() => handleOptionClick(item.href)}
+            className="user-menu-option user-menu-option--danger"
+            onClick={handleLogout}
           >
-            <item.icon aria-hidden="true" className="user-menu-option-icon" />
-            {item.label}
+            <FaRightFromBracket
+              aria-hidden="true"
+              className="user-menu-option-icon"
+            />
+            Déconnexion
           </button>
-        ))}
-
-        <div className="user-menu-separator" />
-
-        <button
-          type="button"
-          role="menuitem"
-          className="user-menu-option user-menu-option--danger"
-          onClick={handleLogout}
-        >
-          <FaRightFromBracket
-            aria-hidden="true"
-            className="user-menu-option-icon"
-          />
-          Déconnexion
-        </button>
+        </div>
       </div>
     </>
   );
@@ -299,6 +290,7 @@ export function UserMenuMobileTrigger({
       type="button"
       className="user-avatar-trigger-mobile"
       aria-label={`Menu de ${user.prenom} ${user.nom}`}
+      aria-haspopup="dialog"
       onClick={onClick}
     >
       <UserAvatar
@@ -307,6 +299,7 @@ export function UserMenuMobileTrigger({
         avatarUrl={user.avatarUrl}
         size={32}
       />
+      <FaChevronDown aria-hidden="true" className="user-avatar-chevron" />
     </button>
   );
 }

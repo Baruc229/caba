@@ -1355,25 +1355,39 @@
 
 /* ── Mobile avatar trigger ── */
 .user-avatar-trigger-mobile {
-  display: flex;
+  display: inline-flex;
   align-items: center;
+  gap: 2px;
   justify-content: center;
   min-width: 44px;
   min-height: 44px;
-  padding: 0;
-  border: none;
+  padding: 0 4px;
+  border: 1px solid transparent;
+  border-radius: 9999px;
   background: transparent;
   cursor: pointer;
+  transition: border-color 150ms ease;
+}
+
+.user-avatar-trigger-mobile:hover {
+  border-color: var(--color-border-subtle);
 }
 
 .user-avatar-trigger-mobile:focus-visible {
   outline: 2px solid var(--color-accent-secondary);
   outline-offset: 2px;
-  border-radius: 50%;
+  border-radius: 9999px;
 }
 
-/* ── Side sheet mobile (menu utilisateur, depuis la droite) ── */
-.user-sidesheet-overlay {
+.user-avatar-chevron {
+  width: 10px;
+  height: 10px;
+  color: var(--color-text-secondary);
+  flex-shrink: 0;
+}
+
+/* ── Bottom sheet compact mobile (menu utilisateur) ── */
+.user-sheet-overlay {
   position: fixed;
   inset: 0;
   z-index: 1098;
@@ -1382,70 +1396,49 @@
   cursor: default;
 }
 
-.user-sidesheet {
+.user-sheet {
   position: fixed;
-  top: 0;
+  left: 0;
   right: 0;
   bottom: 0;
   z-index: 1099;
-  width: 20rem;
-  max-width: 85vw;
   background: var(--color-bg-card);
-  box-shadow: -12px 0 40px rgba(31, 26, 20, 0.2);
-  display: flex;
-  flex-direction: column;
-  overflow-y: auto;
-  padding-bottom: env(safe-area-inset-bottom, 16px);
-  animation: sidesheetSlideIn 250ms cubic-bezier(0.32, 0.72, 0, 1) forwards;
+  border-radius: 18px 18px 0 0;
+  box-shadow: 0 -12px 40px rgba(31, 26, 20, 0.2);
+  padding: 0 14px calc(env(safe-area-inset-bottom, 16px) + 16px);
+  animation: userSheetSlideUp 250ms cubic-bezier(0.32, 0.72, 0, 1) forwards;
 }
 
-@keyframes sidesheetSlideIn {
+@keyframes userSheetSlideUp {
   from {
-    transform: translateX(100%);
+    transform: translateY(100%);
   }
   to {
-    transform: translateX(0);
+    transform: translateY(0);
   }
 }
 
-.user-sidesheet-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 72px;
-  padding: 0 20px;
-  border-bottom: 1px solid var(--color-border-subtle);
+.user-sheet-handle {
+  width: 36px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--color-border-subtle);
+  margin: 10px auto 6px;
 }
 
-.user-sidesheet-close {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border: none;
-  background: transparent;
-  color: var(--color-text-primary);
-  font-size: 22px;
-  cursor: pointer;
+.user-sheet-grab {
+  padding-top: 6px;
 }
 
-.user-sidesheet-close:focus-visible {
-  outline: 2px solid var(--color-accent-secondary);
-  outline-offset: 2px;
-  border-radius: 8px;
+.user-sheet .user-menu-header,
+.user-sheet .user-menu-option {
+  margin-left: 10px;
+  margin-right: 10px;
 }
 
-/* Contenu sous l'en-tête du side sheet */
-.user-sidesheet > .user-menu-header,
-.user-sidesheet > .user-menu-option {
-  margin-left: 12px;
-  margin-right: 12px;
-}
-
-.user-sidesheet > .user-menu-separator {
-  margin-left: 16px;
-  margin-right: 16px;
+.user-sheet .user-menu-separator {
+  margin-left: 14px;
+  margin-right: 14px;
 }
 
 /* Menus ouverts vers le HAUT quand le champ est bas dans l'écran
