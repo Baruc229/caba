@@ -8,7 +8,6 @@ import { FaBars, FaXmark } from "react-icons/fa6";
 import { Segmented } from "@/components/ui/segmented";
 import {
   CurrencySwitcher,
-  useCurrency,
 } from "./currency-switcher";
 import {
   UserMenu,
@@ -19,6 +18,7 @@ import {
   MiniLangSwitcher,
   MiniCurrencySwitcher,
 } from "./mini-switches";
+import { useApp } from "@/components/providers/app-provider";
 
 const NAV_LINKS = [
   { href: "/", label: "Accueil" },
@@ -39,10 +39,9 @@ export function Header({
 }) {
   const pathname = usePathname();
   const { data: session } = useSession();
+  const { lang, setLang, currency, setCurrency } = useApp();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
-  const [lang, setLang] = useState<"fr" | "en">("fr");
-  const [currency, setCurrency] = useCurrency();
 
   // La session serveur (initialUser) évite d'attendre le fetch client de
   // /api/auth/session ; useSession() prend le relais dès qu'elle est prête.
