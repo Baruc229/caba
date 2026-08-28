@@ -214,7 +214,7 @@ export function Header() {
 
         <div className="mt-auto flex flex-col items-center gap-4 border-t border-border-subtle p-6">
           <CurrencySwitcher currency={currency} onChange={setCurrency} />
-          {!isClient && (
+          {!user ? (
             <Link
               href="/connexion"
               className="btn-pill btn-primary w-full"
@@ -222,7 +222,15 @@ export function Header() {
             >
               Connexion
             </Link>
-          )}
+          ) : !isClient ? (
+            <Link
+              href="/admin"
+              className="btn-pill btn-primary w-full"
+              onClick={closeDrawer}
+            >
+              Back-office
+            </Link>
+          ) : null}
         </div>
       </aside>
 

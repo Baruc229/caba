@@ -91,12 +91,12 @@ export async function sendVerificationEmail(
               <a href="${verifyUrl}" style="display:inline-block;padding:15px 40px;border-radius:999px;background:#001489;color:#ffffff;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:15px;font-weight:600;text-decoration:none;letter-spacing:.01em;">Vérifier mon email</a>
             </td>
           </tr>
-          <!-- Note lien -->
+          <!-- Lien fallback (sans afficher l'URL contenant le token) -->
           <tr>
             <td align="center" style="padding:14px 32px 0;">
               <p style="margin:0;font-size:12px;line-height:1.5;color:#a29a8c;">
-                Si le bouton ne fonctionne pas, copiez ce lien dans votre navigateur :<br/>
-                <a href="${verifyUrl}" style="color:#001489;text-decoration:underline;">${verifyUrl}</a>
+                Si le bouton ne fonctionne pas,
+                <a href="${verifyUrl}" style="color:#001489;text-decoration:underline;">vérifiez votre email en cliquant ici</a>.
               </p>
             </td>
           </tr>

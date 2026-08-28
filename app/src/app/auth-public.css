@@ -801,21 +801,39 @@ span.auth-btn--link {
 }
 
 .auth-resend-btn {
-  padding: 0;
-  border: none;
-  background: none;
+  padding: 12px 24px;
+  border: 2px solid var(--color-accent-secondary);
+  border-radius: 9999px;
+  background: var(--color-accent-secondary);
   font-family: inherit;
-  font-size: inherit;
+  font-size: 14px;
   font-weight: 600;
-  color: var(--color-accent-secondary);
+  color: #ffffff;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition:
+    background-color 200ms ease,
+    border-color 200ms ease,
+    color 200ms ease,
+    opacity 200ms ease;
 }
 
 .auth-resend-btn:hover:not(:disabled) {
-  text-decoration: underline;
+  background-color: var(--color-accent-active);
+  border-color: var(--color-accent-active);
+  text-decoration: none;
+}
+
+.auth-resend-btn:active:not(:disabled) {
+  transform: translateY(1px);
 }
 
 .auth-resend-btn:disabled {
+  background-color: transparent;
+  border-color: var(--color-border-input);
   color: var(--color-border-input);
   cursor: not-allowed;
 }

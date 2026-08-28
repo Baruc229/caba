@@ -8,15 +8,30 @@ export async function middleware(request: NextRequest) {
     secureCookie: process.env.NODE_ENV === "production",
   });
 
-  console.log("[MIDDLEWARE]", request.nextUrl.pathname, "token:", token ? `role=${token.role}` : "null");
+  const { pathname } = request.nextUrl;
 
+  // Routes d'authentification réservées aux NON-connectés
+  const authPages = ["/connexion", "/inscription", "/mot-de-passe-oublie", "/reinitialiser-mot-de-passe"];
+  const isAuthPage = authPages.some(
+    (p) => pathname === p || pathname.startsWith(`${p}/`)
+  );
+
+  // Non authentifié : seules les pages d'auth sont accessibles, le reste → /connexion
   if (!token) {
+    if (isAuthPage) return NextResponse.next();
     const url = new URL("/connexion", request.url);
-    url.searchParams.set("next", request.nextUrl.pathname);
+    url.searchParams.set("next", pathname);
     return NextResponse.redirect(url);
   }
 
-  if (token.role === "client") {
+  // Authentifié : interdire les pages d'auth, rediriger selon le rôle
+  if (isAuthPage) {
+    const target = token.role === "client" ? "/" : "/admin";
+    return NextResponse.redirect(new URL(target, request.url));
+  }
+
+  // Client connecté : n'a pas d'accès au back-office
+  if (token.role === "client" && pathname.startsWith("/admin")) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 
@@ -24,5 +39,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin", "/admin/:path*"],
+  matcher: ["/admin", "/admin/:path*", "/connexion", "/inscription", "/mot-de-passe-oublie", "/reinitialiser-mot-de-passe"],
 };
