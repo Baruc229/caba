@@ -47,9 +47,12 @@ export async function GET(request: NextRequest) {
     const redirectUrl = user.role === "client" ? "/" : "/admin";
     const response = NextResponse.redirect(new URL(redirectUrl, request.url));
 
-    response.cookies.set("authjs.session-token", jwt, {
+    const isProd = process.env.NODE_ENV === "production";
+    const cookieName = isProd ? "__Secure-authjs.session-token" : "authjs.session-token";
+
+    response.cookies.set(cookieName, jwt, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: isProd,
       sameSite: "lax",
       path: "/",
       maxAge: 8 * 60 * 60,
