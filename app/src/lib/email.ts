@@ -59,25 +59,68 @@ export async function sendVerificationEmail(
   const htmlContent = `<!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"></head>
-<body style="margin:0;padding:0;background:#f7f5f1;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
-  <div style="max-width:480px;margin:40px auto;background:#fff;border-radius:14px;border:1px solid #eae6de;overflow:hidden;box-shadow:0 24px 48px -12px rgba(31,26,20,.28),0 6px 16px -6px rgba(31,26,20,.12);">
-    <div style="padding:36px 32px 28px;text-align:center;">
-      <p style="margin:0 0 8px;font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#d21034;">Caba Résidence</p>
-      <h1 style="margin:0 0 16px;font-size:24px;font-weight:800;color:#1a1a1a;">Bienvenue ${prenom}</h1>
-      <p style="margin:0 0 28px;font-size:15px;line-height:1.55;color:#6b6459;">
-        Merci pour votre inscription. Veuillez vérifier votre adresse email en cliquant sur le bouton ci-dessous.
-      </p>
-      <a href="${verifyUrl}" style="display:inline-block;padding:14px 36px;border-radius:999px;background:#d21034;color:#fff;font-size:15px;font-weight:600;text-decoration:none;">
-        Vérifier mon email
-      </a>
-      <p style="margin:24px 0 0;font-size:13px;line-height:1.5;color:#6b6459;">
-        Ce lien expire dans 24 heures. Si vous n'avez pas créé de compte, ignorez cet email.
-      </p>
-    </div>
-    <div style="padding:18px 32px;border-top:1px solid #eae6de;text-align:center;">
-      <p style="margin:0;font-size:12px;color:#a29a8c;">© ${new Date().getFullYear()} Caba Résidence — Cotonou, Bénin</p>
-    </div>
-  </div>
+<body style="margin:0;padding:0;background:#f7f5f1;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f7f5f1;padding:32px 16px 24px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="480" cellpadding="0" cellspacing="0" style="width:100%;max-width:480px;background:#ffffff;border-radius:16px;border:1px solid #eae6de;overflow:hidden;">
+          <!-- Marque -->
+          <tr>
+            <td align="center" style="padding:34px 32px 0;">
+              <span style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:12px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:#d21034;">Caba Résidence</span>
+            </td>
+          </tr>
+          <!-- Titre -->
+          <tr>
+            <td align="center" style="padding:12px 32px 0;">
+              <h1 style="margin:0;font-family:'Arial Black','Helvetica Neue',Helvetica,Arial,sans-serif;font-size:26px;line-height:1.05;letter-spacing:.02em;text-transform:uppercase;font-style:italic;color:#1a1a1a;">Bienvenue,<br/>${prenom}</h1>
+            </td>
+          </tr>
+          <!-- Intro -->
+          <tr>
+            <td align="center" style="padding:18px 32px 0;">
+              <p style="margin:0;font-size:15px;line-height:1.6;color:#6b6459;">
+                Merci pour votre inscription. Il ne reste qu'une étape :<br/>
+                confirmez votre adresse email pour activer votre compte.
+              </p>
+            </td>
+          </tr>
+          <!-- CTA -->
+          <tr>
+            <td align="center" style="padding:26px 32px 0;">
+              <a href="${verifyUrl}" style="display:inline-block;padding:15px 40px;border-radius:999px;background:#001489;color:#ffffff;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:15px;font-weight:600;text-decoration:none;letter-spacing:.01em;">Vérifier mon email</a>
+            </td>
+          </tr>
+          <!-- Note lien -->
+          <tr>
+            <td align="center" style="padding:14px 32px 0;">
+              <p style="margin:0;font-size:12px;line-height:1.5;color:#a29a8c;">
+                Si le bouton ne fonctionne pas, copiez ce lien dans votre navigateur :<br/>
+                <a href="${verifyUrl}" style="color:#001489;text-decoration:underline;">${verifyUrl}</a>
+              </p>
+            </td>
+          </tr>
+          <!-- Info expiration -->
+          <tr>
+            <td align="center" style="padding:22px 32px 0;">
+              <p style="margin:0;font-size:13px;line-height:1.55;color:#6b6459;">
+                Ce lien expire dans <strong>24 heures</strong>.<br/>
+                Si vous n'avez pas créé de compte, vous pouvez ignorer cet email.
+              </p>
+            </td>
+          </tr>
+          <!-- Pied -->
+          <tr>
+            <td align="center" style="padding:26px 32px 22px;background:#ffffff;">
+              <div style="width:100%;border-top:1px solid #eae6de;margin:0 0 18px;"></div>
+              <p style="margin:0 0 4px;font-size:13px;font-weight:600;color:#001489;">Caba Résidence</p>
+              <p style="margin:0;font-size:12px;color:#a29a8c;">Cotonou, Bénin — © ${new Date().getFullYear()}</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
 </body>
 </html>`;
 
