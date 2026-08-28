@@ -68,7 +68,9 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    const { sent: emailSent, verifyUrl } = await sendVerificationEmail(
+    const verifyUrl = `/verification?token=${verifyToken}&email=${encodeURIComponent(normalizedEmail)}`;
+
+    const { sent: emailSent } = await sendVerificationEmail(
       normalizedEmail,
       prenom,
       verifyToken

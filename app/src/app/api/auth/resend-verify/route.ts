@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       message: "Si cet email existe, un lien a ete envoye.",
       emailSent,
-      verifyUrl,
+      verifyUrl: `/verification?token=${verifyToken}&email=${encodeURIComponent(email)}`,
     });
   } catch (error) {
     console.error("[RESEND] Error:", error);
