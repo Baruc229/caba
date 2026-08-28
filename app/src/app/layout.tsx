@@ -3,6 +3,7 @@ import { Anton, Inter } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/auth/providers";
 import { LayoutShell } from "@/components/layout/layout-shell";
+import { auth } from "@/lib/auth/config";
 
 const anton = Anton({
   variable: "--font-anton",
@@ -42,11 +43,27 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  let session;
+  try {
+    session = await auth();
+  } catch {
+    session = null;
+  }
+
+  const initialUser = session?.user
+    ? {
+        prenom: session.user.prenom ?? "",
+        nom: session.user.nom ?? "",
+        email: session.user.email ?? "",
+        role: session.user.role ?? "",
+      }
+    : null;
+
   return (
     <html lang="fr" className={`${anton.variable} ${inter.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col bg-bg-primary">
@@ -54,7 +71,7 @@ export default function RootLayout({
           <a href="#main-content" className="skip-link">
             Aller au contenu principal
           </a>
-          <LayoutShell>{children}</LayoutShell>
+          <LayoutShell initialUser={initialUser}>{children}</LayoutShell>
         </Providers>
       </body>
     </html>

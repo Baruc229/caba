@@ -23,7 +23,16 @@ const NAV_LINKS = [
   { href: "/contact", label: "Contact" },
 ];
 
-export function Header() {
+export function Header({
+  initialUser = null,
+}: {
+  initialUser?: {
+    prenom: string;
+    nom: string;
+    email: string | null;
+    role: string;
+  } | null;
+}) {
   const pathname = usePathname();
   const { data: session } = useSession();
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -31,7 +40,9 @@ export function Header() {
   const [lang, setLang] = useState<"fr" | "en">("fr");
   const [currency, setCurrency] = useCurrency();
 
-  const user = session?.user;
+  // La session serveur (initialUser) évite d'attendre le fetch client de
+  // /api/auth/session ; useSession() prend le relais dès qu'elle est prête.
+  const user = session?.user ?? initialUser;
   const isClient = user?.role === "client";
 
   useEffect(() => {
