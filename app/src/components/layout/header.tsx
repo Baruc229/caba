@@ -15,6 +15,10 @@ import {
   UserBottomSheet,
   UserMenuMobileTrigger,
 } from "./user-menu";
+import {
+  MiniLangSwitcher,
+  MiniCurrencySwitcher,
+} from "./mini-switches";
 
 const NAV_LINKS = [
   { href: "/", label: "Accueil" },
@@ -87,9 +91,9 @@ export function Header({
 
   return (
     <header className="sticky top-0 z-[1000] border-b border-border-subtle bg-bg-card">
-      <div className="mx-auto flex h-[72px] max-w-[1300px] items-center justify-between gap-2 px-4 sm:gap-6 sm:px-6 lg:px-8">
-        <div className="flex items-center gap-4 lg:gap-6">
-          <Link href="/" className="heading-display whitespace-nowrap text-lg lg:text-2xl">
+      <div className="mx-auto flex h-[72px] max-w-[1300px] items-center justify-between gap-1 px-3 sm:gap-6 sm:px-6 lg:px-8">
+        <div className="flex items-center gap-3 lg:gap-6">
+          <Link href="/" className="heading-display whitespace-nowrap text-base lg:text-2xl">
             Caba Résidence
           </Link>
 
@@ -149,7 +153,9 @@ export function Header({
         </div>
 
         {/* ── Mobile right zone ── */}
-        <div className="flex items-center gap-2 lg:hidden">
+        <div className="flex items-center gap-1.5 lg:hidden">
+          <MiniLangSwitcher lang={lang} onChange={setLang} />
+          <MiniCurrencySwitcher currency={currency} onChange={setCurrency} />
           {isClient && user ? (
             <UserMenuMobileTrigger
               user={{
