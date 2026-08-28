@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 
-export async function GET() {
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const toEmail = searchParams.get("to") || process.env.BREVO_SENDER_EMAIL;
   const results: Record<string, unknown> = {};
 
   results.brevoKey = process.env.BREVO_API_KEY
@@ -27,7 +29,7 @@ export async function GET() {
       },
       body: JSON.stringify({
         sender: { email: senderEmail, name: "Caba Residence" },
-        to: [{ email: senderEmail }],
+        to: [{ email: toEmail }],
         subject: "Test Caba Residence",
         htmlContent: "<p>Test email from Caba Residence API</p>",
         textContent: "Test email from Caba Residence API",
@@ -35,6 +37,7 @@ export async function GET() {
     });
 
     results.httpStatus = response.status;
+    results.sentTo = toEmail;
     const body = await response.text();
     results.responseBody = body;
   } catch (err) {
