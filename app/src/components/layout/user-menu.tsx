@@ -10,6 +10,7 @@ import {
   FaUser,
   FaRightFromBracket,
   FaChevronDown,
+  FaXmark,
 } from "react-icons/fa6";
 import { UserAvatar } from "./user-avatar";
 
@@ -188,8 +189,6 @@ export function UserBottomSheet({
   onClose: () => void;
 }) {
   const router = useRouter();
-  const sheetRef = useRef<HTMLDivElement>(null);
-  const startY = useRef(0);
 
   const handleLogout = useCallback(async () => {
     onClose();
@@ -206,48 +205,45 @@ export function UserBottomSheet({
   );
 
   useEffect(() => {
-    const sheet = sheetRef.current;
-    if (!sheet) return;
-
-    const onTouchStart = (e: TouchEvent) => {
-      startY.current = e.touches[0].clientY;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
     };
-    const onTouchMove = (e: TouchEvent) => {
-      const delta = e.touches[0].clientY - startY.current;
-      if (delta > 80) onClose();
-    };
-
-    sheet.addEventListener("touchstart", onTouchStart, { passive: true });
-    sheet.addEventListener("touchmove", onTouchMove, { passive: true });
-    return () => {
-      sheet.removeEventListener("touchstart", onTouchStart);
-      sheet.removeEventListener("touchmove", onTouchMove);
-    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
   }, [onClose]);
 
   return (
     <>
       <button
         type="button"
-        className="bottom-sheet-overlay"
+        className="user-sidesheet-overlay"
         aria-label="Fermer"
         onClick={onClose}
       />
       <div
-        ref={sheetRef}
-        className="bottom-sheet-panel"
+        className="user-sidesheet"
         role="dialog"
         aria-modal="true"
         aria-label="Menu utilisateur"
       >
-        <div className="bottom-sheet-handle" />
+        <div className="user-sidesheet-header">
+          <span className="heading-display text-lg">Mon compte</span>
+          <button
+            type="button"
+            className="user-sidesheet-close"
+            aria-label="Fermer le menu"
+            onClick={onClose}
+          >
+            <FaXmark aria-hidden="true" />
+          </button>
+        </div>
 
         <div className="user-menu-header">
           <UserAvatar
             prenom={user.prenom}
             nom={user.nom}
             avatarUrl={user.avatarUrl}
-            size={36}
+            size={40}
           />
           <div className="user-menu-header-text">
             <span className="user-menu-header-name">

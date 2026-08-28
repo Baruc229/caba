@@ -1372,54 +1372,80 @@
   border-radius: 50%;
 }
 
-/* ── Bottom sheet mobile ── */
-.bottom-sheet-overlay {
+/* ── Side sheet mobile (menu utilisateur, depuis la droite) ── */
+.user-sidesheet-overlay {
   position: fixed;
   inset: 0;
-  z-index: 1099;
+  z-index: 1098;
   background: rgba(0, 0, 0, 0.4);
   border: none;
   cursor: default;
 }
 
-.bottom-sheet-panel {
+.user-sidesheet {
   position: fixed;
-  bottom: 0;
-  left: 0;
+  top: 0;
   right: 0;
-  z-index: 1100;
+  bottom: 0;
+  z-index: 1099;
+  width: 20rem;
+  max-width: 85vw;
   background: var(--color-bg-card);
-  border-radius: 16px 16px 0 0;
-  box-shadow: 0 -12px 40px rgba(31, 26, 20, 0.2);
-  max-height: 80vh;
+  box-shadow: -12px 0 40px rgba(31, 26, 20, 0.2);
+  display: flex;
+  flex-direction: column;
   overflow-y: auto;
-  padding: 0 0 env(safe-area-inset-bottom, 16px);
-  transform: translateY(100%);
-  animation: sheetSlideUp 250ms cubic-bezier(0.32, 0.72, 0, 1) forwards;
+  padding-bottom: env(safe-area-inset-bottom, 16px);
+  animation: sidesheetSlideIn 250ms cubic-bezier(0.32, 0.72, 0, 1) forwards;
 }
 
-@keyframes sheetSlideUp {
+@keyframes sidesheetSlideIn {
   from {
-    transform: translateY(100%);
+    transform: translateX(100%);
   }
   to {
-    transform: translateY(0);
+    transform: translateX(0);
   }
 }
 
-.bottom-sheet-handle {
-  width: 36px;
-  height: 4px;
-  border-radius: 2px;
-  background: var(--color-border-subtle);
-  margin: 10px auto 4px;
+.user-sidesheet-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 72px;
+  padding: 0 20px;
+  border-bottom: 1px solid var(--color-border-subtle);
 }
 
-@media (min-width: 640px) {
-  .bottom-sheet-panel {
-    max-width: 400px;
-    margin: 0 auto;
-  }
+.user-sidesheet-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: transparent;
+  color: var(--color-text-primary);
+  font-size: 22px;
+  cursor: pointer;
+}
+
+.user-sidesheet-close:focus-visible {
+  outline: 2px solid var(--color-accent-secondary);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+/* Contenu sous l'en-tête du side sheet */
+.user-sidesheet > .user-menu-header,
+.user-sidesheet > .user-menu-option {
+  margin-left: 12px;
+  margin-right: 12px;
+}
+
+.user-sidesheet > .user-menu-separator {
+  margin-left: 16px;
+  margin-right: 16px;
 }
 
 /* Menus ouverts vers le HAUT quand le champ est bas dans l'écran

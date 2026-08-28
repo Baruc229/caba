@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
       .setExpirationTime("8h")
       .sign(secret);
 
-    const redirectUrl = user.role === "client" ? "/" : "/admin";
+    const redirectUrl = user.role === "client" ? "/?verified=1" : "/admin?verified=1";
     const response = NextResponse.redirect(new URL(redirectUrl, request.url));
 
     const isProd = process.env.NODE_ENV === "production";
