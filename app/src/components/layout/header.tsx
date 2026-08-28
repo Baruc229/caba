@@ -257,6 +257,10 @@ export function Header({
             avatarUrl: null,
             role: user.role,
           }}
+          langSwitch={langSwitch}
+          currencySwitch={
+            <CurrencySwitcher currency={currency} onChange={setCurrency} />
+          }
           onClose={closeSheet}
         />
       )}

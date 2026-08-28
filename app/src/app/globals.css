@@ -1430,6 +1430,15 @@
   padding-top: 6px;
 }
 
+/* Préférences (langue + devise) dans le menu utilisateur */
+.user-sheet-preferences {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 14px;
+}
+
 .user-sheet .user-menu-header,
 .user-sheet .user-menu-option {
   margin-left: 10px;
