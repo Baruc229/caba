@@ -42,6 +42,11 @@ export const dictionaries = {
       cgv: "CGV",
       newsletterDesc:
         "Recevez nos meilleures offres et soyez informé de l'arrivée de nouveaux logements.",
+      newsletterOffers: "Recevoir nos offres et nouveautés",
+      newsletterEmailPlaceholder: "Votre adresse email",
+      newsletterPhone: "Votre numéro de téléphone",
+      newsletterPhonePlaceholder: "Votre numéro de téléphone (optionnel)",
+      newsletterSubscribe: "S'inscrire",
     },
     common: {
       connexion: "Connexion",
@@ -431,6 +436,27 @@ export const dictionaries = {
         "Ce lien de réinitialisation est invalide ou a expiré — pour votre sécurité, il n\u2019est valable qu\u2019une heure et une seule utilisation.",
       tokenInvalidAction: "Demander un nouveau lien",
     },
+    meta: {
+      globalTitle: "Caba Résidence — Location de logements de qualité",
+      globalDesc:
+        "Caba Résidence est un complexe résidentiel proposant des logements de qualité à louer, des chambres aux villas, pour séjours confortables et élégants.",
+      accueilTitle: "Caba Résidence — Location de logements de qualité",
+      logementsTitle: "Caba Résidence — Recherche de logements",
+      logementsDesc:
+        "Recherchez parmi nos chambres, studios, suites et villas. Disponibilités en temps réel et réservation en ligne.",
+      connexionTitle: "Connexion — Caba Résidence",
+      inscriptionTitle: "Créer un compte — Caba Résidence",
+      motDePasseOublieTitle: "Mot de passe oublié — Caba Résidence",
+      resetTitle: "Nouveau mot de passe — Caba Résidence",
+      verificationTitle: "Vérification — Caba Résidence",
+      invitationTitle: "Définir mon mot de passe — Caba Résidence",
+      notFoundTitle: "Page introuvable (404) — Caba Résidence",
+      notFoundDesc:
+        "La page que vous recherchez n'existe pas ou a été déplacée. Retrouvez nos logements à louer à Cotonou, Bénin.",
+      reservationsTitle: "Mes réservations — Caba Résidence",
+      favorisTitle: "Mes favoris — Caba Résidence",
+      profilTitle: "Mon profil — Caba Résidence",
+    },
   },
   en: {
     nav: {
@@ -467,6 +493,11 @@ export const dictionaries = {
       cgv: "Terms & conditions",
       newsletterDesc:
         "Receive our best offers and be informed about new accommodations.",
+      newsletterOffers: "Receive our offers and news",
+      newsletterEmailPlaceholder: "Your email address",
+      newsletterPhone: "Your phone number",
+      newsletterPhonePlaceholder: "Your phone number (optional)",
+      newsletterSubscribe: "Subscribe",
     },
     common: {
       connexion: "Log in",
@@ -855,6 +886,27 @@ export const dictionaries = {
       tokenInvalidMessage:
         "This reset link is invalid or has expired — for your security, it is valid for one hour and one use only.",
       tokenInvalidAction: "Request a new link",
+    },
+    meta: {
+      globalTitle: "Caba Residence — Quality accommodations to rent",
+      globalDesc:
+        "Caba Residence is a residential complex offering quality accommodations to rent, from rooms to villas, for comfortable and elegant stays.",
+      accueilTitle: "Caba Residence — Quality accommodations to rent",
+      logementsTitle: "Caba Residence — Property search",
+      logementsDesc:
+        "Browse our rooms, studios, suites and villas. Real-time availability and online booking.",
+      connexionTitle: "Log in — Caba Residence",
+      inscriptionTitle: "Create an account — Caba Residence",
+      motDePasseOublieTitle: "Forgot password — Caba Residence",
+      resetTitle: "New password — Caba Residence",
+      verificationTitle: "Verification — Caba Residence",
+      invitationTitle: "Set my password — Caba Residence",
+      notFoundTitle: "Page not found (404) — Caba Residence",
+      notFoundDesc:
+        "The page you are looking for does not exist or has been moved. Find our accommodations to rent in Cotonou, Benin.",
+      reservationsTitle: "My bookings — Caba Residence",
+      favorisTitle: "My favorites — Caba Residence",
+      profilTitle: "My profile — Caba Residence",
     },
   },
 } as const;

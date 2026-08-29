@@ -5,6 +5,7 @@ import Link from "next/link";
 import { FaArrowRight, FaEnvelopeOpenText, FaLock } from "react-icons/fa6";
 import { PhotoAside } from "@/components/auth/photo-aside";
 import { useApp } from "@/components/providers/app-provider";
+import { DocumentTitle } from "@/components/seo/document-title";
 
 export default function MotDePasseOubliePage() {
   const { t } = useApp();
@@ -55,6 +56,7 @@ export default function MotDePasseOubliePage() {
 
   return (
     <div className="auth-min">
+      <DocumentTitle titleKey="meta.motDePasseOublieTitle" />
       <div className="auth-panel">
         <div className="auth-main">
           <p className="auth-eyebrow">{t("resetpwd.forgotEyebrow")}</p>

@@ -10,6 +10,7 @@ import {
   scorePassword,
 } from "@/components/auth/password-strength";
 import { useApp } from "@/components/providers/app-provider";
+import { DocumentTitle } from "@/components/seo/document-title";
 
 interface InscriptionFormProps {
   prefillPrenom: string;
@@ -133,6 +134,7 @@ export function InscriptionForm({
   if (emailExists) {
     return (
       <div className="auth-page-v2">
+        <DocumentTitle titleKey="meta.inscriptionTitle" />
         <div className="auth-panel">
           <div className="auth-main">
             <p className="auth-eyebrow">{t("auth.exists.eyebrow")}</p>
@@ -157,6 +159,7 @@ export function InscriptionForm({
   if (verifyUrl) {
     return (
       <div className="auth-page-v2">
+        <DocumentTitle titleKey="meta.inscriptionTitle" />
         <div className="auth-panel">
           <div className="auth-main">
             <div className="auth-success-icon">
@@ -204,6 +207,7 @@ export function InscriptionForm({
 
   return (
     <div className="auth-page-v2">
+      <DocumentTitle titleKey="meta.inscriptionTitle" />
       <div className="auth-panel">
         <div className="auth-main">
           <p className="auth-eyebrow">{t("auth.inscription.eyebrow")}</p>

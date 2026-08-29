@@ -12,6 +12,7 @@ import {
 } from "react-icons/fa6";
 import { PhotoAside } from "@/components/auth/photo-aside";
 import { useApp } from "@/components/providers/app-provider";
+import { DocumentTitle } from "@/components/seo/document-title";
 
 export function VerificationContent() {
   const { t } = useApp();
@@ -75,6 +76,7 @@ export function VerificationContent() {
   if (success) {
     return (
       <div className="auth-page-v2">
+        <DocumentTitle titleKey="meta.verificationTitle" />
         <div className="auth-panel">
           <div className="auth-main">
             <div className="auth-success-icon">
@@ -94,6 +96,7 @@ export function VerificationContent() {
   if (token && !error) {
     return (
       <div className="auth-page-v2">
+        <DocumentTitle titleKey="meta.verificationTitle" />
         <div className="auth-panel">
           <div className="auth-main">
             <div className="auth-success-icon">
@@ -153,6 +156,7 @@ export function VerificationContent() {
   // État d'erreur : lien invalide/expiré
   return (
     <div className="auth-page-v2">
+      <DocumentTitle titleKey="meta.verificationTitle" />
       <div className="auth-panel">
         <div className="auth-main">
           <div className="auth-icon-circle">

@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import { FaArrowRight } from "react-icons/fa6";
+import { useApp } from "@/components/providers/app-provider";
 
 export function NewsletterForm() {
+  const { t } = useApp();
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
 
@@ -16,32 +18,32 @@ export function NewsletterForm() {
       className="mx-auto flex w-full max-w-xs flex-col gap-3 sm:mx-0"
     >
       <label htmlFor="newsletter-email" className="sr-only">
-        Recevoir nos offres et nouveautés
+        {t("footer.newsletterOffers")}
       </label>
       <input
         id="newsletter-email"
         name="email"
         type="email"
         required
-        placeholder="Votre adresse email"
+        placeholder={t("footer.newsletterEmailPlaceholder")}
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         className={inputClass}
       />
       <label htmlFor="newsletter-phone" className="sr-only">
-        Votre numéro de téléphone
+        {t("footer.newsletterPhone")}
       </label>
       <input
         id="newsletter-phone"
         name="phone"
         type="tel"
-        placeholder="Votre numéro de téléphone (optionnel)"
+        placeholder={t("footer.newsletterPhonePlaceholder")}
         value={phone}
         onChange={(e) => setPhone(e.target.value)}
         className={inputClass}
       />
       <button type="submit" className="btn-pill btn-primary w-full">
-        S&apos;inscrire
+        {t("footer.newsletterSubscribe")}
         <FaArrowRight aria-hidden="true" />
       </button>
     </form>

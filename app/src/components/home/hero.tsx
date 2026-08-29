@@ -12,6 +12,7 @@ import {
 import { Select } from "@/components/ui/select";
 import { DateRangeField } from "@/components/ui/double-calendar";
 import { useApp } from "@/components/providers/app-provider";
+import { DocumentTitle } from "@/components/seo/document-title";
 
 const TODAY = new Date().toISOString().slice(0, 10);
 
@@ -232,6 +233,7 @@ export function Hero() {
       aria-label={t("home.searchLabel")}
       className="px-4 pt-4 sm:px-6 sm:pt-6 lg:px-0 lg:pt-16"
     >
+      <DocumentTitle titleKey="meta.accueilTitle" descKey="meta.globalDesc" />
       <div className="hero-wrap">
         <ProofPill floating />
 

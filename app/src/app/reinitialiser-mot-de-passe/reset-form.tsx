@@ -10,6 +10,7 @@ import {
   scorePassword,
 } from "@/components/auth/password-strength";
 import { useApp } from "@/components/providers/app-provider";
+import { DocumentTitle } from "@/components/seo/document-title";
 
 export function ResetForm({ token }: { token: string }) {
   const router = useRouter();
@@ -81,6 +82,7 @@ export function ResetForm({ token }: { token: string }) {
 
   return (
     <>
+      <DocumentTitle titleKey="meta.resetTitle" />
       <p className="auth-eyebrow">{t("resetpwd.resetEyebrow")}</p>
       <h1 className="auth-display auth-display--sm">{t("resetpwd.resetTitle")}</h1>
       <p className="auth-subtitle-v2">

@@ -6,6 +6,7 @@ import { signIn } from "next-auth/react";
 import { FaArrowRight, FaEye, FaEyeSlash, FaCircleInfo } from "react-icons/fa6";
 import { PhotoAside } from "@/components/auth/photo-aside";
 import { useApp } from "@/components/providers/app-provider";
+import { DocumentTitle } from "@/components/seo/document-title";
 
 interface ConnexionFormProps {
   echec: boolean;
@@ -101,6 +102,7 @@ export function ConnexionForm({ echec, succes, emailVerifie }: ConnexionFormProp
 
   return (
     <div className="auth-page-v2">
+      <DocumentTitle titleKey="meta.connexionTitle" />
       <div className="auth-panel">
         <div className="auth-main">
           <p className="auth-eyebrow">{t("auth.connexion.eyebrow")}</p>

@@ -10,6 +10,7 @@ import { SortBar } from "@/components/search/sort-bar";
 import { Pagination } from "@/components/search/pagination";
 import { SkeletonCard } from "@/components/search/skeleton-card";
 import { useApp } from "@/components/providers/app-provider";
+import { DocumentTitle } from "@/components/seo/document-title";
 
 const LIMIT = 12;
 
@@ -191,6 +192,7 @@ export function LogementsClient({
 
   return (
     <section className="logements-page" aria-label={t("search.formAriaLabel")}>
+      <DocumentTitle titleKey="meta.logementsTitle" descKey="meta.logementsDesc" />
       <div className="logements-search-wrap">
         <SearchBarCompact
           initialArrivee={initialArrivee}

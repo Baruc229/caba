@@ -9,6 +9,7 @@ import {
   StrengthMeter,
 } from "@/components/auth/password-strength";
 import { useApp } from "@/components/providers/app-provider";
+import { DocumentTitle } from "@/components/seo/document-title";
 
 export function AccepterInvitationForm({ token }: { token: string }) {
   const router = useRouter();
@@ -64,6 +65,7 @@ export function AccepterInvitationForm({ token }: { token: string }) {
   if (success) {
     return (
       <>
+        <DocumentTitle titleKey="meta.invitationTitle" />
         <div className="auth-success-icon" style={{ marginTop: 20 }}>
           <FaCircleCheck aria-hidden="true" />
         </div>
@@ -90,6 +92,7 @@ export function AccepterInvitationForm({ token }: { token: string }) {
   if (!token) {
     return (
       <>
+        <DocumentTitle titleKey="meta.invitationTitle" />
         <h1 className="auth-title">{t("invite.lienInvalide")}</h1>
         <p className="auth-banner auth-banner--error">
           {t("invite.lienIncomplet")}
@@ -100,6 +103,7 @@ export function AccepterInvitationForm({ token }: { token: string }) {
 
   return (
     <>
+      <DocumentTitle titleKey="meta.invitationTitle" />
       <p className="auth-brand" style={{ cursor: "default" }}>
         Caba Résidence
       </p>

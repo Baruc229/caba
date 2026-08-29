@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { FaArrowRight, FaHouse } from "react-icons/fa6";
 import { useApp } from "@/components/providers/app-provider";
+import { DocumentTitle } from "@/components/seo/document-title";
 
 export function NotFoundContent() {
   const { t } = useApp();
@@ -12,6 +13,7 @@ export function NotFoundContent() {
       aria-label={t("notfound.ariaLabel")}
       className="flex flex-1 items-center justify-center px-4 py-16 sm:px-6 lg:py-24"
     >
+      <DocumentTitle titleKey="meta.notFoundTitle" descKey="meta.notFoundDesc" />
       <div className="w-full max-w-[640px] rounded-2xl border-[0.5px] border-border-subtle bg-bg-card p-8 text-center shadow-card sm:p-12">
         <p className="text-sm font-semibold uppercase tracking-[0.3em] text-accent-secondary">
           {t("notfound.error404")}
