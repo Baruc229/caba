@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { ReactNode } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
@@ -184,13 +183,9 @@ export function UserMenu({ user }: { user: UserMenuUser }) {
 export function UserBottomSheet({
   user,
   onClose,
-  langSwitch,
-  currencySwitch,
 }: {
   user: UserMenuUser;
   onClose: () => void;
-  langSwitch?: ReactNode;
-  currencySwitch?: ReactNode;
 }) {
   const router = useRouter();
 
@@ -249,16 +244,6 @@ export function UserBottomSheet({
           </div>
 
           <div className="user-menu-separator" />
-
-          {(langSwitch || currencySwitch) && (
-            <>
-              <div className="user-sheet-preferences">
-                {langSwitch}
-                {currencySwitch}
-              </div>
-              <div className="user-menu-separator" />
-            </>
-          )}
 
           {MENU_ITEMS.map((item) => (
             <button
