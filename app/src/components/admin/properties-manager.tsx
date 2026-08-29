@@ -158,6 +158,15 @@ interface FormState {
   photoUrl: string;
 }
 
+interface GalleryPhoto {
+  id: string;
+  url: string;
+  urlThumbnail: string | null;
+  ordre: number;
+  estPrincipale: boolean;
+  legende: string | null;
+}
+
 function Field({
   label,
   htmlFor,
@@ -191,6 +200,8 @@ export function PropertiesManager({ initialRows }: { initialRows: PropertyRow[] 
   const [status, setStatus] = useState<"idle" | "loading">("idle");
   const [banner, setBanner] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [gallery, setGallery] = useState<GalleryPhoto[]>([]);
+  const [galleryState, setGalleryState] = useState<"idle" | "working">("idle");
 
   async function reload() {
     const res = await fetch("/api/admin/properties");
@@ -237,9 +248,125 @@ export function PropertiesManager({ initialRows }: { initialRows: PropertyRow[] 
     }
   }
 
+  async function handleGalleryUpload(
+    event: React.ChangeEvent<HTMLInputElement>,
+    propertyId: string | null
+  ) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    if (!propertyId) {
+      setBanner({ type: "error", text: "Enregistrez d'abord le logement avant d'ajouter des photos." });
+      return;
+    }
+    setGalleryState("working");
+
+    const upBody = new FormData();
+    upBody.append("file", file);
+    try {
+      const upRes = await fetch("/api/upload", { method: "POST", body: upBody });
+      const upData = await upRes.json();
+      if (!upRes.ok) {
+        setBanner({ type: "error", text: upData.error ?? "Upload échoué." });
+        setGalleryState("idle");
+        return;
+      }
+
+      const addRes = await fetch("/api/admin/properties/photos", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ propertyId, url: upData.url }),
+      });
+      const addData = await addRes.json();
+      if (!addRes.ok) {
+        setBanner({ type: "error", text: addData.error ?? "Ajout de la photo échoué." });
+        setGalleryState("idle");
+        return;
+      }
+      setGallery((g) => [
+        ...g,
+        {
+          id: addData.photo.id,
+          url: addData.photo.url,
+          urlThumbnail: addData.photo.urlThumbnail,
+          ordre: addData.photo.ordre,
+          estPrincipale: addData.photo.estPrincipale,
+          legende: addData.photo.legende,
+        },
+      ]);
+      setGalleryState("idle");
+      event.target.value = "";
+    } catch {
+      setBanner({ type: "error", text: "Erreur lors de l'ajout de la photo." });
+      setGalleryState("idle");
+    }
+  }
+
+  async function gallerySetPrincipal(photoId: string) {
+    setGalleryState("working");
+    const res = await fetch("/api/admin/properties/photos", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "setPrincipal", photoId }),
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      setBanner({ type: "error", text: body.error ?? "Erreur." });
+      setGalleryState("idle");
+      return;
+    }
+    setGallery((g) =>
+      g.map((p) => ({ ...p, estPrincipale: p.id === photoId }))
+    );
+    setGalleryState("idle");
+  }
+
+  async function galleryRemove(photoId: string) {
+    setGalleryState("working");
+    const res = await fetch(`/api/admin/properties/photos?photoId=${photoId}`, {
+      method: "DELETE",
+    });
+    const body = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      setBanner({ type: "error", text: body.error ?? "Erreur." });
+      setGalleryState("idle");
+      return;
+    }
+    setGallery((g) =>
+      g
+        .filter((p) => p.id !== photoId)
+        .map((p, i) => ({ ...p, ordre: i }))
+    );
+    setGalleryState("idle");
+  }
+
+  async function galleryReorder(orderedIds: string[]) {
+    const propertyId = editingId;
+    if (!propertyId) return;
+    const res = await fetch("/api/admin/properties/photos", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "reorder", propertyId, orderedIds }),
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      setBanner({ type: "error", text: body.error ?? "Erreur de réordonnancement." });
+    }
+  }
+
+  async function galleryMove(photoId: string, dir: -1 | 1) {
+    const index = gallery.findIndex((p) => p.id === photoId);
+    const target = index + dir;
+    if (index < 0 || target < 0 || target >= gallery.length) return;
+    const next = [...gallery];
+    [next[index], next[target]] = [next[target], next[index]];
+    setGallery(next.map((p, i) => ({ ...p, ordre: i })));
+    await galleryReorder(next.map((p) => p.id));
+  }
+
   async function openCreate() {
     setForm(emptyForm);
     setEditingId(null);
+    setGallery([]);
     setBanner(null);
     setModalOpen(true);
   }
@@ -276,6 +403,16 @@ export function PropertiesManager({ initialRows }: { initialRows: PropertyRow[] 
       typeTarif: property.typeTarif ?? "nuee",
       photoUrl: property.photoPrincipale ?? "",
     });
+    setGallery(
+      (property.photos ?? []).map((p: GalleryPhoto) => ({
+        id: p.id,
+        url: p.url,
+        urlThumbnail: p.urlThumbnail,
+        ordre: p.ordre,
+        estPrincipale: p.estPrincipale,
+        legende: p.legende,
+      }))
+    );
     setEditingId(id);
     setModalOpen(true);
   }
@@ -775,6 +912,132 @@ export function PropertiesManager({ initialRows }: { initialRows: PropertyRow[] 
                     rows={4}
                   />
                 </div>
+
+                {editingId && (
+                  <div className="bo-field" style={{ marginTop: 18 }}>
+                    <span className="bo-label">Galerie ({gallery.length} photo{gallery.length > 1 ? "s" : ""})</span>
+                    <p className="bo-form-hint">
+                      Ajoutez plusieurs photos, définissez la photo principale et réordonnez-les.
+                    </p>
+
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginTop: 10 }}>
+                      {gallery.map((photo, i) => (
+                        <div
+                          key={photo.id}
+                          style={{
+                            position: "relative",
+                            width: 120,
+                            border: photo.estPrincipale
+                              ? "2px solid var(--bo-accent)"
+                              : "1px solid var(--bo-border)",
+                            borderRadius: 8,
+                            overflow: "hidden",
+                          }}
+                        >
+                          <img
+                            src={photo.urlThumbnail ?? photo.url}
+                            alt={photo.legende ?? `Photo ${i + 1}`}
+                            style={{ width: "100%", height: 78, objectFit: "cover", display: "block" }}
+                          />
+                          <div style={{ padding: 6, display: "flex", gap: 4, justifyContent: "center" }}>
+                            <button
+                              type="button"
+                              className="bo-btn bo-btn--ghost"
+                              style={{ padding: "2px 6px", fontSize: 12 }}
+                              onClick={() => galleryMove(photo.id, -1)}
+                              disabled={i === 0}
+                              aria-label="Monter"
+                            >
+                              ↑
+                            </button>
+                            <button
+                              type="button"
+                              className="bo-btn bo-btn--ghost"
+                              style={{ padding: "2px 6px", fontSize: 12 }}
+                              onClick={() => galleryMove(photo.id, 1)}
+                              disabled={i === gallery.length - 1}
+                              aria-label="Descendre"
+                            >
+                              ↓
+                            </button>
+                          </div>
+                          {!photo.estPrincipale && (
+                            <button
+                              type="button"
+                              onClick={() => gallerySetPrincipal(photo.id)}
+                              style={{
+                                position: "absolute",
+                                top: 4,
+                                left: 4,
+                                fontSize: 11,
+                                padding: "2px 6px",
+                                borderRadius: 4,
+                                border: "none",
+                                background: "rgba(0,0,0,0.55)",
+                                color: "#fff",
+                                cursor: "pointer",
+                              }}
+                            >
+                              Définir principale
+                            </button>
+                          )}
+                          {photo.estPrincipale && (
+                            <span
+                              style={{
+                                position: "absolute",
+                                top: 4,
+                                right: 4,
+                                fontSize: 11,
+                                padding: "2px 6px",
+                                borderRadius: 4,
+                                background: "var(--bo-accent)",
+                                color: "#fff",
+                              }}
+                            >
+                              Principale
+                            </span>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => galleryRemove(photo.id)}
+                            style={{
+                              position: "absolute",
+                              top: 4,
+                              right: 4,
+                              fontSize: 11,
+                              padding: "2px 6px",
+                              borderRadius: 4,
+                              border: "none",
+                              background: "var(--bo-danger, #dc2626)",
+                              color: "#fff",
+                              cursor: "pointer",
+                              display: photo.estPrincipale ? "none" : "block",
+                            }}
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div style={{ marginTop: 12 }}>
+                      <label
+                        htmlFor="pr-gallery-file"
+                        className="bo-btn bo-btn--secondary"
+                        style={{ display: "inline-flex", cursor: "pointer" }}
+                      >
+                        {galleryState === "working" ? "Ajout…" : "+ Ajouter une photo"}
+                      </label>
+                      <input
+                        id="pr-gallery-file"
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp,image/gif,image/avif"
+                        onChange={(e) => handleGalleryUpload(e, editingId)}
+                        style={{ display: "none" }}
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="bo-modal-footer">
