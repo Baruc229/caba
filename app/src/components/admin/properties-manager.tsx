@@ -207,6 +207,36 @@ export function PropertiesManager({ initialRows }: { initialRows: PropertyRow[] 
     []
   );
 
+  const [uploadState, setUploadState] = useState<
+    "idle" | "uploading" | "error"
+  >("idle");
+  const [uploadError, setUploadError] = useState("");
+
+  async function handleFileUpload(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setUploadState("uploading");
+    setUploadError("");
+
+    const body = new FormData();
+    body.append("file", file);
+
+    try {
+      const res = await fetch("/api/upload", { method: "POST", body });
+      const data = await res.json();
+      if (!res.ok) {
+        setUploadState("error");
+        setUploadError(data.error ?? "Upload échoué.");
+        return;
+      }
+      setForm((f) => ({ ...f, photoUrl: data.url }));
+      setUploadState("idle");
+    } catch {
+      setUploadState("error");
+      setUploadError("Erreur lors de l'upload.");
+    }
+  }
+
   async function openCreate() {
     setForm(emptyForm);
     setEditingId(null);
@@ -680,7 +710,40 @@ export function PropertiesManager({ initialRows }: { initialRows: PropertyRow[] 
                       ))}
                     </select>
                   </Field>
-                  <Field label="Photo principale (URL)" htmlFor="pr-photo" hint="Collez l'URL d'une image (ex: image hébergée, upload ultérieur).">
+                  <Field
+                    label="Photo principale"
+                    htmlFor="pr-photo-file"
+                    hint="Formats acceptés : JPEG, PNG, WEBP, GIF, AVIF (max 5 Mo)."
+                  >
+                    {form.photoUrl && (
+                      <img
+                        src={form.photoUrl}
+                        alt="Aperçu"
+                        style={{
+                          width: "100%",
+                          maxHeight: 140,
+                          objectFit: "cover",
+                          borderRadius: 8,
+                          marginBottom: 10,
+                        }}
+                      />
+                    )}
+                    <input
+                      id="pr-photo-file"
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp,image/gif,image/avif"
+                      onChange={handleFileUpload}
+                      className="bo-input"
+                      style={{ padding: 8 }}
+                    />
+                    {uploadState === "uploading" && (
+                      <p className="bo-form-hint">Upload en cours…</p>
+                    )}
+                    {uploadState === "error" && (
+                      <p className="bo-form-error">{uploadError}</p>
+                    )}
+                  </Field>
+                  <Field label="…ou coller une URL d'image" htmlFor="pr-photo">
                     <input
                       id="pr-photo"
                       type="text"
