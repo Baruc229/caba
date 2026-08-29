@@ -11,49 +11,21 @@ import {
 } from "react-icons/fa6";
 import { Select } from "@/components/ui/select";
 import { DateRangeField } from "@/components/ui/double-calendar";
+import { useApp } from "@/components/providers/app-provider";
 
 const TODAY = new Date().toISOString().slice(0, 10);
 
 const GUEST_TYPES = [
-  { key: "adultes", name: "Adultes", hint: "18 ans et plus", min: 1, partitive: "d'adultes" },
-  { key: "enfants", name: "Enfants", hint: "2 à 17 ans", min: 0, partitive: "d'enfants" },
-  { key: "bebes", name: "Bébés", hint: "Moins de 2 ans", min: 0, partitive: "de bébés" },
-] as const;
+  { key: "adultes" as const, min: 1 },
+  { key: "enfants" as const, min: 0 },
+  { key: "bebes" as const, min: 0 },
+];
 
 type GuestKey = (typeof GUEST_TYPES)[number]["key"];
 
 type GuestCounts = Record<GuestKey, number>;
 
 const MAX_GUESTS_PER_TYPE = 9;
-
-const PROPERTY_TYPE_LABELS: Record<string, string> = {
-  chambre: "Chambre",
-  chambre_avec_salon: "Chambre avec salon",
-  studio: "Studio",
-  appartement_meuble: "Appartement meublé",
-  suite: "Suite",
-  villa: "Villa",
-  duplex: "Duplex",
-  maison_entiere: "Maison entière",
-};
-
-/* Résidence unique : le type de logement remplace les anciens
-   onglets Logements/Chambres — un seul mode de recherche */
-const TYPE_OPTIONS = [
-  { value: "", label: "Tous les types" },
-  ...Object.entries(PROPERTY_TYPE_LABELS).map(([value, label]) => ({
-    value,
-    label,
-  })),
-];
-
-const SEJOUR_TYPES = [
-  { value: "nuee", label: "Nuitée(s)" },
-  { value: "journee", label: "Journée" },
-  { value: "vingt_quatre_heures", label: "24 heures" },
-  { value: "demi_journee", label: "Demi-journée" },
-  { value: "plusieurs_heures", label: "Quelques heures" },
-] as const;
 
 /* Types pour lesquels le client choisit réellement ses heures
    (24h et quelques heures). Les autres infèrent du système. */
@@ -65,7 +37,13 @@ const AVATARS = [
   { initials: "CM", background: "var(--color-accent-gold)", color: "#1a1a1a" },
 ];
 
+function guestT(t: (p: string) => string, key: GuestKey, field: string): string {
+  const cap = key.charAt(0).toUpperCase() + key.slice(1);
+  return t(`home.guest${cap}${field}`);
+}
+
 function ProofPill({ floating = false }: { floating?: boolean }) {
+  const { t } = useApp();
   return (
     <div
       className={
@@ -86,18 +64,19 @@ function ProofPill({ floating = false }: { floating?: boolean }) {
         ))}
       </div>
       <div>
-        <div className="proof-stars" aria-label="Note de 5 étoiles">
+        <div className="proof-stars" aria-label={t("home.proofPillAria")}>
           {Array.from({ length: 5 }).map((_, index) => (
             <FaStar key={index} aria-hidden="true" size={13} />
           ))}
         </div>
-        <p className="proof-note">+240 séjours notés 4.8</p>
+        <p className="proof-note">{t("home.proofPillText")}</p>
       </div>
     </div>
   );
 }
 
 function GuestsField() {
+  const { t } = useApp();
   const [open, setOpen] = useState(false);
   const [dropUp, setDropUp] = useState(false);
   const [counts, setCounts] = useState<GuestCounts>({
@@ -109,10 +88,6 @@ function GuestsField() {
 
   useEffect(() => {
     if (!open) return;
-    // Fermeture au clic réel hors du popover — volontairement PAS
-    // sur pointerdown : le doigt qui amorce un scroll déclenche un
-    // pointerdown et fermait le menu pendant que l'utilisateur
-    // cherchait à voir les options.
     const onClick = (e: MouseEvent) => {
       if (!wrapRef.current?.contains(e.target as Node)) setOpen(false);
     };
@@ -129,7 +104,6 @@ function GuestsField() {
 
   const toggle = () => {
     if (!open && wrapRef.current) {
-      // Pas assez de place sous le champ ? Le popover s'ouvre vers le haut
       const rect = wrapRef.current.getBoundingClientRect();
       setDropUp(window.innerHeight - rect.bottom < 260 && rect.top > 260);
     }
@@ -143,17 +117,20 @@ function GuestsField() {
     }));
   };
 
-  const summary = [
-    `${counts.adultes} ${counts.adultes > 1 ? "adultes" : "adulte"}`,
-    counts.enfants > 0 ? `${counts.enfants} ${counts.enfants > 1 ? "enfants" : "enfant"}` : null,
-    counts.bebes > 0 ? `${counts.bebes} ${counts.bebes > 1 ? "bébés" : "bébé"}` : null,
-  ]
+  const summary = GUEST_TYPES.map(({ key, min }) => {
+    const n = counts[key];
+    if (n === 0) return null;
+    const word = n > 1
+      ? guestT(t, key, "Plural")
+      : guestT(t, key, "Singular");
+    return `${n} ${word}`;
+  })
     .filter(Boolean)
     .join(" · ");
 
   return (
     <div className="search-field guests" ref={wrapRef}>
-      <span className="search-label">Voyageurs</span>
+      <span className="search-label">{t("home.guestsLabel")}</span>
       <button
         type="button"
         className="guests-trigger"
@@ -174,33 +151,33 @@ function GuestsField() {
         <div
           className={`guests-popover${dropUp ? " guests-popover--up" : ""}`}
           role="dialog"
-          aria-label="Choix des voyageurs"
+          aria-label={t("home.guestsAria")}
         >
-          {GUEST_TYPES.map((type) => (
-            <div key={type.key} className="guests-row">
+          {GUEST_TYPES.map(({ key, min }) => (
+            <div key={key} className="guests-row">
               <div className="guests-type">
-                <span className="guests-name">{type.name}</span>
-                <span className="guests-hint">{type.hint}</span>
+                <span className="guests-name">{guestT(t, key, "Name")}</span>
+                <span className="guests-hint">{guestT(t, key, "Hint")}</span>
               </div>
               <div className="stepper">
                 <button
                   type="button"
                   className="stepper-btn"
-                  aria-label={`Réduire le nombre ${type.partitive}`}
-                  disabled={counts[type.key] <= type.min}
-                  onClick={() => change(type.key, type.min, -1)}
+                  aria-label={`${t("home.stepperReduce")} ${guestT(t, key, "Partitive")}`}
+                  disabled={counts[key] <= min}
+                  onClick={() => change(key, min, -1)}
                 >
                   <FaMinus aria-hidden="true" size={10} />
                 </button>
                 <span className="stepper-value stepper-value--count" aria-live="polite">
-                  {counts[type.key]}
+                  {counts[key]}
                 </span>
                 <button
                   type="button"
                   className="stepper-btn"
-                  aria-label={`Augmenter le nombre ${type.partitive}`}
-                  disabled={counts[type.key] >= MAX_GUESTS_PER_TYPE}
-                  onClick={() => change(type.key, type.min, 1)}
+                  aria-label={`${t("home.stepperIncrease")} ${guestT(t, key, "Partitive")}`}
+                  disabled={counts[key] >= MAX_GUESTS_PER_TYPE}
+                  onClick={() => change(key, min, 1)}
                 >
                   <FaPlus aria-hidden="true" size={10} />
                 </button>
@@ -217,14 +194,33 @@ function GuestsField() {
   );
 }
 
+const PROPERTY_TYPE_ENTRIES: [string, string][] = [
+  ["chambre", "typeChambre"],
+  ["chambre_avec_salon", "typeChambreAvecSalon"],
+  ["studio", "typeStudio"],
+  ["appartement_meuble", "typeAppartementMeuble"],
+  ["suite", "typeSuite"],
+  ["villa", "typeVilla"],
+  ["duplex", "typeDuplex"],
+  ["maison_entiere", "typeMaisonEntiere"],
+];
+
+const SEJOUR_ENTRIES: [string, string][] = [
+  ["nuee", "sejourNuee"],
+  ["journee", "sejourJournee"],
+  ["vingt_quatre_heures", "sejourVingtQuatreHeures"],
+  ["demi_journee", "sejourDemiJournee"],
+  ["plusieurs_heures", "sejourPlusieursHeures"],
+];
+
 export function Hero() {
+  const { t } = useApp();
   const [sejourType, setSejourType] = useState<string>("nuee");
   const [heureArrivee, setHeureArrivee] = useState("08:00");
 
   const needsHours = NEEDS_HOURS.has(sejourType);
   const is24h = sejourType === "vingt_quatre_heures";
 
-  /* Pour "24 heures" : le départ est l'arrivée + 24h automatiquement */
   const heureDepartAuto = (() => {
     const [h, m] = heureArrivee.split(":").map(Number);
     const next = (h + 24) % 24;
@@ -233,7 +229,7 @@ export function Hero() {
 
   return (
     <section
-      aria-label="Recherche de logements"
+      aria-label={t("home.searchLabel")}
       className="px-4 pt-4 sm:px-6 sm:pt-6 lg:px-0 lg:pt-16"
     >
       <div className="hero-wrap">
@@ -241,14 +237,14 @@ export function Hero() {
 
         <div className="hero">
           <div className="hero-content">
-            <span className="hero-badge">Complexe résidentiel · Bénin</span>
+            <span className="hero-badge">{t("home.badge")}</span>
             <h1 className="hero-title">
-              Trouvez votre{" "}
-              <span className="hero-title-accent">havre de paix</span> au Bénin
+              {t("home.heroTitle")}{" "}
+              <span className="hero-title-accent">{t("home.heroTitleAccent")}</span>{" "}
+              {t("home.heroTitleSuffix")}
             </h1>
             <p className="hero-subtitle">
-              Chambres, studios, suites et villas à Cotonou — disponibilités en
-              temps réel et réservation en ligne.
+              {t("home.heroSubtitle")}
             </p>
             <div className="mt-4 lg:hidden">
               <ProofPill />
@@ -260,18 +256,18 @@ export function Hero() {
           <div id="search-fields" className="search-fields">
             <div className="search-field">
               <label htmlFor="type-reservation" className="search-label">
-                Type de séjour
+                {t("home.stayTypeLabel")}
               </label>
               <div className="search-value">
                 <FaClock aria-hidden="true" size={15} />
                 <Select
                   id="type-reservation"
                   variant="field"
-                  ariaLabel="Type de séjour"
+                  ariaLabel={t("home.stayTypeAria")}
                   name="typeReservation"
-                  options={SEJOUR_TYPES.map((type) => ({
-                    value: type.value,
-                    label: type.label,
+                  options={SEJOUR_ENTRIES.map(([value, key]) => ({
+                    value,
+                    label: t(`home.${key}`),
                   }))}
                   value={sejourType}
                   onChange={(nextValue) => setSejourType(nextValue)}
@@ -285,30 +281,36 @@ export function Hero() {
 
             <div className="search-field">
               <label htmlFor="type-logement" className="search-label">
-                Type de logement
+                {t("home.propertyTypeLabel")}
               </label>
               <div className="search-value">
                 <Select
                   id="type-logement"
                   variant="field"
-                  ariaLabel="Type de logement"
+                  ariaLabel={t("home.propertyTypeAria")}
                   name="type"
-                  placeholder="Tous les types"
+                  placeholder={t("home.allTypes")}
                   defaultValue=""
-                  options={TYPE_OPTIONS}
+                  options={[
+                    { value: "", label: t("home.allTypes") },
+                    ...PROPERTY_TYPE_ENTRIES.map(([value, key]) => ({
+                      value,
+                      label: t(`home.${key}`),
+                    })),
+                  ]}
                 />
               </div>
             </div>
 
             <button type="submit" className="btn-pill btn-primary w-full lg:w-auto lg:px-10">
-              Rechercher
+              {t("home.searchButton")}
             </button>
 
             {needsHours && (
               <div className="hours-row">
                 <div className="search-field hours-field">
                   <label htmlFor="heure-arrivee" className="search-label">
-                    Heure d&apos;arrivée
+                    {t("home.arrivalTimeLabel")}
                   </label>
                   <div className="search-value">
                     <input
@@ -324,7 +326,7 @@ export function Hero() {
                 <span aria-hidden="true" className="hours-sep">→</span>
                 <div className="search-field hours-field">
                   <label htmlFor="heure-depart" className="search-label">
-                    Heure de départ
+                    {t("home.departureTimeLabel")}
                   </label>
                   <div className="search-value">
                     {is24h ? (

@@ -1,6 +1,7 @@
 "use client";
 
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa6";
+import { useApp } from "@/components/providers/app-provider";
 
 interface PaginationProps {
   page: number;
@@ -10,6 +11,7 @@ interface PaginationProps {
 }
 
 export function Pagination({ page, totalPages, onPageChange, gridRef }: PaginationProps) {
+  const { t } = useApp();
   if (totalPages <= 1) return null;
 
   const scrollToGrid = () => {
@@ -35,13 +37,13 @@ export function Pagination({ page, totalPages, onPageChange, gridRef }: Paginati
   }
 
   return (
-    <nav className="pagination" aria-label="Pagination">
+    <nav className="pagination" aria-label={t("logements.pagination")}>
       <button
         type="button"
         className="pagination-btn pagination-arrow"
         disabled={page <= 1}
         onClick={() => goTo(page - 1)}
-        aria-label="Page précédente"
+        aria-label={t("logements.prevPage")}
       >
         <FaChevronLeft aria-hidden="true" size={12} />
       </button>
@@ -67,7 +69,7 @@ export function Pagination({ page, totalPages, onPageChange, gridRef }: Paginati
         className="pagination-btn pagination-arrow"
         disabled={page >= totalPages}
         onClick={() => goTo(page + 1)}
-        aria-label="Page suivante"
+        aria-label={t("logements.nextPage")}
       >
         <FaChevronRight aria-hidden="true" size={12} />
       </button>

@@ -4,29 +4,30 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { FaArrowRight, FaEnvelopeOpenText, FaLock } from "react-icons/fa6";
 import { PhotoAside } from "@/components/auth/photo-aside";
-
-function validerEmail(valeur: string): string {
-  const email = valeur.trim();
-  if (!email) return "Saisissez votre adresse email.";
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    return "L'adresse email doit contenir un @ suivi d'un domaine (ex : nom@exemple.com).";
-  }
-  return "";
-}
+import { useApp } from "@/components/providers/app-provider";
 
 export default function MotDePasseOubliePage() {
+  const { t } = useApp();
   const [submitted, setSubmitted] = useState(false);
   const [lastEmail, setLastEmail] = useState("");
   const [cooldown, setCooldown] = useState(0);
   const [status, setStatus] = useState<"idle" | "loading">("idle");
   const [fieldError, setFieldError] = useState("");
 
-  // Décompte du délai anti-spam avant un nouvel envoi
   useEffect(() => {
     if (cooldown <= 0) return;
     const timer = setTimeout(() => setCooldown((value) => value - 1), 1000);
     return () => clearTimeout(timer);
   }, [cooldown]);
+
+  function validerEmail(valeur: string): string {
+    const email = valeur.trim();
+    if (!email) return t("resetpwd.emailEmpty");
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return t("resetpwd.emailInvalid");
+    }
+    return "";
+  }
 
   async function sendReset(email: string) {
     setStatus("loading");
@@ -36,7 +37,6 @@ export default function MotDePasseOubliePage() {
       body: JSON.stringify({ email }),
     });
 
-    // Réponse volontairement identique que le compte existe ou non
     setSubmitted(true);
     setCooldown(60);
     setStatus("idle");
@@ -57,8 +57,8 @@ export default function MotDePasseOubliePage() {
     <div className="auth-min">
       <div className="auth-panel">
         <div className="auth-main">
-          <p className="auth-eyebrow">Mot de passe oublié</p>
-          <h1 className="auth-display auth-display--sm">Récupérez l&apos;accès</h1>
+          <p className="auth-eyebrow">{t("resetpwd.forgotEyebrow")}</p>
+          <h1 className="auth-display auth-display--sm">{t("resetpwd.forgotTitle")}</h1>
 
           {submitted ? (
             <>
@@ -66,8 +66,7 @@ export default function MotDePasseOubliePage() {
                 <FaEnvelopeOpenText />
               </div>
               <p role="status" className="auth-subtitle-v2">
-                Si un profil existe pour cet email, un lien de réinitialisation vient
-                d&apos;être envoyé. Il est valable une heure.
+                {t("resetpwd.successMessage")}
               </p>
               <p className="auth-resend">
                 <button
@@ -77,12 +76,12 @@ export default function MotDePasseOubliePage() {
                   disabled={cooldown > 0 || status === "loading"}
                 >
                   {cooldown > 0
-                    ? `Renvoyer le lien (${cooldown} s)`
-                    : "Renvoyer le lien"}
+                    ? t("resetpwd.resendCooldown").replace("{n}", String(cooldown))
+                    : t("resetpwd.resendBtn")}
                 </button>
               </p>
               <Link href="/connexion" className="auth-back-link">
-                Retour à la connexion
+                {t("resetpwd.backToLogin")}
               </Link>
             </>
           ) : (
@@ -91,21 +90,20 @@ export default function MotDePasseOubliePage() {
                 <FaLock />
               </div>
               <p className="auth-subtitle-v2">
-                Indiquez votre email : nous vous envoyons un lien pour choisir un nouveau
-                mot de passe.
+                {t("resetpwd.forgotInstructions")}
               </p>
 
               <form onSubmit={handleSubmit} noValidate>
                 <div className={`lfield${fieldError ? " has-error" : ""}`}>
                   <label htmlFor="forgot-email" className="lfield-label">
-                    Email
+                    {t("resetpwd.emailLabel")}
                   </label>
                   <input
                     id="forgot-email"
                     name="email"
                     type="email"
                     autoComplete="email"
-                    placeholder="nom@exemple.com"
+                    placeholder={t("resetpwd.emailPlaceholder")}
                     autoFocus
                     onInput={() => setFieldError("")}
                     onBlur={(event) => setFieldError(validerEmail(event.currentTarget.value))}
@@ -115,7 +113,7 @@ export default function MotDePasseOubliePage() {
                 </div>
 
                 <button type="submit" className="auth-btn" disabled={status === "loading"}>
-                  {status === "loading" ? "Envoi…" : "Envoyer le lien"}
+                  {status === "loading" ? t("resetpwd.sendingBtn") : t("resetpwd.sendBtn")}
                   {status !== "loading" && (
                     <FaArrowRight className="auth-btn-arrow" aria-hidden="true" />
                   )}
@@ -123,7 +121,7 @@ export default function MotDePasseOubliePage() {
               </form>
 
               <Link href="/connexion" className="auth-back-link">
-                Retour à la connexion
+                {t("resetpwd.backToLogin")}
               </Link>
             </>
           )}

@@ -1,21 +1,24 @@
+"use client";
+
 import Link from "next/link";
 import { FaFacebookF, FaInstagram, FaWhatsapp, FaXTwitter } from "react-icons/fa6";
+import { useApp } from "@/components/providers/app-provider";
 import { NewsletterForm } from "./newsletter-form";
 
 const QUICK_LINKS = [
-  { href: "/", label: "Accueil" },
-  { href: "/logements", label: "Chambres" },
-  { href: "/a-propos", label: "À propos" },
-  { href: "/services", label: "Nos services" },
-  { href: "/equipements", label: "Nos équipements" },
-  { href: "/blog", label: "Blog" },
-  { href: "/contact", label: "Contact" },
+  { href: "/", key: "nav.accueil" as const },
+  { href: "/logements", key: "nav.chambres" as const },
+  { href: "/a-propos", key: "nav.aPropos" as const },
+  { href: "/services", key: "footer.nosServices" as const },
+  { href: "/equipements", key: "footer.nosEquipements" as const },
+  { href: "/blog", key: "footer.blog" as const },
+  { href: "/contact", key: "nav.contact" as const },
 ];
 
 const LEGAL_LINKS = [
-  { href: "/mentions-legales", label: "Mentions légales" },
-  { href: "/politique-confidentialite", label: "Politique de confidentialité" },
-  { href: "/cgv", label: "CGV" },
+  { href: "/mentions-legales", key: "footer.mentionsLegales" as const },
+  { href: "/politique-confidentialite", key: "footer.politiqueConfidentialite" as const },
+  { href: "/cgv", key: "footer.cgv" as const },
 ];
 
 const SOCIALS = [
@@ -27,23 +30,21 @@ const SOCIALS = [
 
 export function Footer() {
   const year = new Date().getFullYear();
+  const { t } = useApp();
 
   return (
     <footer className="border-t border-border-subtle bg-bg-card">
-      {/* Pleine largeur : le fond court sur toute la largeur de l'écran,
-          seul le contenu reste aligné au conteneur du site */}
       <div className="mx-auto max-w-[1300px] px-4 py-10 sm:px-6 lg:py-14">
         <section
           aria-label="Informations et newsletter"
           className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4"
         >
           <div className="text-center sm:text-left">
-            <p className="heading-display text-lg">Caba Résidence</p>
+            <p className="heading-display text-lg">{t("nav.maison")}</p>
             <p className="mt-3">
-              Complexe résidentiel proposant des chambres, studios, suites et villas à
-              louer pour tous types de séjours.
+              {t("footer.description")}
             </p>
-            <address className="mt-3 not-italic">Cotonou, Bénin</address>
+            <address className="mt-3 not-italic">{t("footer.address")}</address>
             <ul className="mt-3 flex justify-center gap-3 sm:justify-start">
               {SOCIALS.map(({ href, label, Icon }) => (
                 <li key={label}>
@@ -60,7 +61,7 @@ export function Footer() {
           </div>
 
           <nav aria-label="Pages rapides" className="text-center sm:text-left">
-            <h3 className="heading-display text-base">Navigation</h3>
+            <h3 className="heading-display text-base">{t("footer.navigation")}</h3>
             <ul className="mt-3 space-y-2">
               {QUICK_LINKS.map((link) => (
                 <li key={link.href}>
@@ -68,7 +69,7 @@ export function Footer() {
                     href={link.href}
                     className="text-text-secondary transition-colors duration-200 hover:text-accent-secondary"
                   >
-                    {link.label}
+                    {t(link.key)}
                   </Link>
                 </li>
               ))}
@@ -76,7 +77,7 @@ export function Footer() {
           </nav>
 
           <nav aria-label="Pages légales" className="text-center sm:text-left">
-            <h3 className="heading-display text-base">Légal</h3>
+            <h3 className="heading-display text-base">{t("footer.legal")}</h3>
             <ul className="mt-3 space-y-2">
               {LEGAL_LINKS.map((link) => (
                 <li key={link.href}>
@@ -84,7 +85,7 @@ export function Footer() {
                     href={link.href}
                     className="text-text-secondary transition-colors duration-200 hover:text-accent-secondary"
                   >
-                    {link.label}
+                    {t(link.key)}
                   </Link>
                 </li>
               ))}
@@ -92,10 +93,9 @@ export function Footer() {
           </nav>
 
           <div className="text-center sm:text-left">
-            <h3 className="heading-display text-base">Restons en contact</h3>
+            <h3 className="heading-display text-base">{t("footer.resteEnContact")}</h3>
             <p className="mt-3">
-              Recevez nos meilleures offres et soyez informé de l&apos;arrivée de
-              nouveaux logements.
+              {t("footer.newsletterDesc")}
             </p>
             <div className="mt-3">
               <NewsletterForm />
@@ -104,10 +104,9 @@ export function Footer() {
         </section>
       </div>
 
-      {/* Pied de page : copyright seul, séparé par un trait fin */}
       <div className="border-t border-border-subtle">
         <p className="mx-auto max-w-[1300px] px-4 py-5 text-center text-sm text-text-secondary sm:px-6">
-          © {year} Caba Résidence. Tous droits réservés.
+          © {year} {t("nav.maison")}. {t("footer.tousDroitsReserves")}
         </p>
       </div>
     </footer>

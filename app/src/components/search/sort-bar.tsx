@@ -2,13 +2,16 @@
 
 import { FaSliders } from "react-icons/fa6";
 import { Select } from "@/components/ui/select";
+import { useApp } from "@/components/providers/app-provider";
 
-const SORT_OPTIONS = [
-  { value: "pertinence", label: "Pertinence" },
-  { value: "prix_croissant", label: "Prix croissant" },
-  { value: "prix_decroissant", label: "Prix décroissant" },
-  { value: "note", label: "Note" },
-];
+const SORT_VALUES = ["pertinence", "prix_croissant", "prix_decroissant", "note"];
+
+const SORT_LABEL_KEYS: Record<string, string> = {
+  pertinence: "logements.sortRelevance",
+  prix_croissant: "logements.sortPriceAsc",
+  prix_decroissant: "logements.sortPriceDesc",
+  note: "logements.sortRating",
+};
 
 interface SortBarProps {
   total: number;
@@ -18,6 +21,7 @@ interface SortBarProps {
 }
 
 export function SortBar({ total, tri, onTriChange, onOpenFilters }: SortBarProps) {
+  const { t } = useApp();
   return (
     <div className="sort-bar">
       <div className="sort-bar-left">
@@ -25,22 +29,28 @@ export function SortBar({ total, tri, onTriChange, onOpenFilters }: SortBarProps
           type="button"
           className="sort-bar-filter-btn"
           onClick={onOpenFilters}
-          aria-label="Ouvrir les filtres"
+          aria-label={t("logements.openFilters")}
         >
           <FaSliders aria-hidden="true" size={14} />
-          <span>Filtres</span>
+          <span>{t("logements.filters")}</span>
         </button>
         <p className="sort-bar-count">
-          <strong>{total}</strong> résultat{total !== 1 ? "s" : ""} trouvé{total !== 1 ? "s" : ""}
+          <strong>{total}</strong>{" "}
+          {t("logements.resultsCount")
+            .replace("{n}", String(total))
+            .replace(/\{s\}/g, total !== 1 ? "s" : "")}
         </p>
       </div>
       <div className="sort-bar-right">
-        <span className="sort-bar-tri-label">Tri :</span>
+        <span className="sort-bar-tri-label">{t("logements.sortLabel")}</span>
         <Select
-          options={SORT_OPTIONS}
+          options={SORT_VALUES.map((value) => ({
+            value,
+            label: t(SORT_LABEL_KEYS[value]),
+          }))}
           value={tri}
           onChange={onTriChange}
-          ariaLabel="Trier les résultats"
+          ariaLabel={t("logements.sortAria")}
           variant="field"
           className="sort-bar-select"
         />

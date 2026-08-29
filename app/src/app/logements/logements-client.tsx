@@ -9,6 +9,7 @@ import { FilterPanel, type FilterState } from "@/components/search/filter-panel"
 import { SortBar } from "@/components/search/sort-bar";
 import { Pagination } from "@/components/search/pagination";
 import { SkeletonCard } from "@/components/search/skeleton-card";
+import { useApp } from "@/components/providers/app-provider";
 
 const LIMIT = 12;
 
@@ -39,10 +40,16 @@ export function LogementsClient({
   initialTri,
   initialPage,
 }: LogementsClientProps) {
+  const { t } = useApp();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const gridRef = useRef<HTMLDivElement>(null);
+  const tRef = useRef(t);
+
+  useEffect(() => {
+    tRef.current = t;
+  }, [t]);
 
   const [results, setResults] = useState<SearchResultItem[]>([]);
   const [total, setTotal] = useState(0);
@@ -117,7 +124,7 @@ export function LogementsClient({
       setTotal(data.total);
       setTotalPages(data.totalPages);
     } catch {
-      setError("Une erreur est survenue lors de la recherche. Veuillez réessayer.");
+      setError(tRef.current("logements.error"));
     } finally {
       setLoading(false);
     }
@@ -183,7 +190,7 @@ export function LogementsClient({
   };
 
   return (
-    <section className="logements-page" aria-label="Recherche de logements">
+    <section className="logements-page" aria-label={t("search.formAriaLabel")}>
       <div className="logements-search-wrap">
         <SearchBarCompact
           initialArrivee={initialArrivee}
@@ -223,14 +230,14 @@ export function LogementsClient({
               <div className="logements-error">
                 <p>{error}</p>
                 <button type="button" className="logements-retry" onClick={doSearch}>
-                  Réessayer
+                  {t("logements.retry")}
                 </button>
               </div>
             ) : results.length === 0 ? (
               <div className="logements-empty">
-                <p className="logements-empty-title">Aucun logement trouvé</p>
+                <p className="logements-empty-title">{t("logements.emptyTitle")}</p>
                 <p className="logements-empty-desc">
-                  Essayez de modifier vos critères de recherche ou vos filtres.
+                  {t("logements.emptyDesc")}
                 </p>
               </div>
             ) : (

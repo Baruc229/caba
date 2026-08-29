@@ -3,27 +3,28 @@
 import { useState, useRef, useEffect } from "react";
 import { FaCalendarDays, FaClock, FaUserGroup, FaChevronDown } from "react-icons/fa6";
 import { Select } from "@/components/ui/select";
+import { useApp } from "@/components/providers/app-provider";
 
-const SEJOUR_TYPES = [
-  { value: "nuee", label: "Nuitée(s)" },
-  { value: "journee", label: "Journée" },
-  { value: "vingt_quatre_heures", label: "24 heures" },
-  { value: "demi_journee", label: "Demi-journée" },
-  { value: "plusieurs_heures", label: "Quelques heures" },
+const SEJOUR_ENTRIES: [string, string][] = [
+  ["nuee", "sejourNuee"],
+  ["journee", "sejourJournee"],
+  ["vingt_quatre_heures", "sejourVingtQuatreHeures"],
+  ["demi_journee", "sejourDemiJournee"],
+  ["plusieurs_heures", "sejourPlusieursHeures"],
 ];
 
 const NEEDS_HOURS = new Set(["vingt_quatre_heures", "plusieurs_heures"]);
 
-const TYPE_OPTIONS = [
-  { value: "", label: "Tous les types" },
-  { value: "chambre", label: "Chambre" },
-  { value: "chambre_avec_salon", label: "Chambre avec salon" },
-  { value: "studio", label: "Studio" },
-  { value: "appartement_meuble", label: "Appartement meublé" },
-  { value: "suite", label: "Suite" },
-  { value: "villa", label: "Villa" },
-  { value: "duplex", label: "Duplex" },
-  { value: "maison_entiere", label: "Maison entière" },
+const TYPE_ENTRIES: [string, string][] = [
+  ["", "allTypes"],
+  ["chambre", "typeChambre"],
+  ["chambre_avec_salon", "typeChambreAvecSalon"],
+  ["studio", "typeStudio"],
+  ["appartement_meuble", "typeAppartementMeuble"],
+  ["suite", "typeSuite"],
+  ["villa", "typeVilla"],
+  ["duplex", "typeDuplex"],
+  ["maison_entiere", "typeMaisonEntiere"],
 ];
 
 function todayISO(): string {
@@ -53,6 +54,7 @@ export function SearchBarCompact({
   initialHeureArrivee = "08:00",
   initialHeureDepart = "18:00",
 }: SearchBarCompactProps) {
+  const { t } = useApp();
   const [arrivee, setArrivee] = useState(initialArrivee);
   const [depart, setDepart] = useState(initialDepart);
   const [adultes, setAdultes] = useState(initialAdultes);
@@ -91,9 +93,9 @@ export function SearchBarCompact({
   }, [voyageursOpen]);
 
   const guestsSummary = [
-    `${adultes} ${adultes > 1 ? "adultes" : "adulte"}`,
-    enfants > 0 ? `${enfants} ${enfants > 1 ? "enfants" : "enfant"}` : null,
-    bebes > 0 ? `${bebes} ${bebes > 1 ? "bébés" : "bébé"}` : null,
+    `${adultes} ${t(adultes > 1 ? "home.guestAdultesPlural" : "home.guestAdultesSingular")}`,
+    enfants > 0 ? `${enfants} ${t(enfants > 1 ? "home.guestEnfantsPlural" : "home.guestEnfantsSingular")}` : null,
+    bebes > 0 ? `${bebes} ${t(bebes > 1 ? "home.guestBebesPlural" : "home.guestBebesSingular")}` : null,
   ]
     .filter(Boolean)
     .join(", ");
@@ -101,6 +103,12 @@ export function SearchBarCompact({
   const changeGuest = (setter: (v: number) => void, min: number, delta: number, current: number) => {
     setter(Math.max(min, Math.min(9, current + delta)));
   };
+
+  const guestFields = [
+    { nameKey: "home.guestAdultesName", partitiveKey: "home.guestAdultesPartitive", min: 1, value: adultes, setter: setAdultes },
+    { nameKey: "home.guestEnfantsName", partitiveKey: "home.guestEnfantsPartitive", min: 0, value: enfants, setter: setEnfants },
+    { nameKey: "home.guestBebesName", partitiveKey: "home.guestBebesPartitive", min: 0, value: bebes, setter: setBebes },
+  ];
 
   const buildUrl = () => {
     const params = new URLSearchParams();
@@ -119,12 +127,12 @@ export function SearchBarCompact({
   };
 
   return (
-    <form className="search-bar-compact" action={buildUrl()} method="get">
+    <form className="search-bar-compact" action={buildUrl()} method="get" aria-label={t("search.formAriaLabel")}>
       <div className="search-bar-compact-fields">
         <div className="search-bar-compact-field">
           <label htmlFor="sb-arrivee" className="search-bar-compact-label">
             <FaCalendarDays aria-hidden="true" size={13} />
-            Arrivée
+            {t("calendar.arrival")}
           </label>
           <input
             id="sb-arrivee"
@@ -140,7 +148,7 @@ export function SearchBarCompact({
         <div className="search-bar-compact-field">
           <label htmlFor="sb-depart" className="search-bar-compact-label">
             <FaCalendarDays aria-hidden="true" size={13} />
-            Départ
+            {t("calendar.departure")}
           </label>
           <input
             id="sb-depart"
@@ -158,7 +166,7 @@ export function SearchBarCompact({
             <div className="search-bar-compact-field">
               <label htmlFor="sb-heure-arrivee" className="search-bar-compact-label">
                 <FaClock aria-hidden="true" size={13} />
-                Heure arrivée
+                {t("home.arrivalTimeLabel")}
               </label>
               <input
                 id="sb-heure-arrivee"
@@ -172,7 +180,7 @@ export function SearchBarCompact({
             <div className="search-bar-compact-field">
               <label htmlFor="sb-heure-depart" className="search-bar-compact-label">
                 <FaClock aria-hidden="true" size={13} />
-                Heure départ
+                {t("home.departureTimeLabel")}
               </label>
               {is24h ? (
                 <>
@@ -196,7 +204,7 @@ export function SearchBarCompact({
         <div className="search-bar-compact-field">
           <label className="search-bar-compact-label">
             <FaUserGroup aria-hidden="true" size={13} />
-            Voyageurs
+            {t("home.guestsLabel")}
           </label>
           <div ref={voyageursRef} className="search-bar-compact-voyageurs-wrap">
             <button
@@ -209,20 +217,16 @@ export function SearchBarCompact({
             </button>
             {voyageursOpen && (
               <div className="search-bar-compact-voyageurs-popover">
-                {[
-                  { label: "Adultes", min: 1, value: adultes, setter: setAdultes },
-                  { label: "Enfants", min: 0, value: enfants, setter: setEnfants },
-                  { label: "Bébés", min: 0, value: bebes, setter: setBebes },
-                ].map((g) => (
-                  <div key={g.label} className="sb-guest-row">
-                    <span className="sb-guest-label">{g.label}</span>
+                {guestFields.map((g) => (
+                  <div key={g.nameKey} className="sb-guest-row">
+                    <span className="sb-guest-label">{t(g.nameKey)}</span>
                     <div className="sb-guest-stepper">
                       <button
                         type="button"
                         className="sb-guest-btn"
                         disabled={g.value <= g.min}
                         onClick={() => changeGuest(g.setter, g.min, -1, g.value)}
-                        aria-label={`Moins de ${g.label.toLowerCase()}`}
+                        aria-label={`${t("home.stepperReduce")} ${t(g.partitiveKey)}`}
                       >
                         −
                       </button>
@@ -232,7 +236,7 @@ export function SearchBarCompact({
                         className="sb-guest-btn"
                         disabled={g.value >= 9}
                         onClick={() => changeGuest(g.setter, g.min, 1, g.value)}
-                        aria-label={`Plus de ${g.label.toLowerCase()}`}
+                        aria-label={`${t("home.stepperIncrease")} ${t(g.partitiveKey)}`}
                       >
                         +
                       </button>
@@ -248,24 +252,24 @@ export function SearchBarCompact({
         </div>
 
         <div className="search-bar-compact-field">
-          <label className="search-bar-compact-label">Séjour</label>
+          <label className="search-bar-compact-label">{t("home.stayTypeLabel")}</label>
           <Select
             variant="field"
-            ariaLabel="Type de séjour"
+            ariaLabel={t("home.stayTypeAria")}
             name="typeReservation"
-            options={SEJOUR_TYPES}
+            options={SEJOUR_ENTRIES.map(([value, key]) => ({ value, label: t(`home.${key}`) }))}
             value={typeReservation}
             onChange={setTypeReservation}
           />
         </div>
 
         <div className="search-bar-compact-field">
-          <label className="search-bar-compact-label">Type</label>
+          <label className="search-bar-compact-label">{t("search.propertyTypeShort")}</label>
           <Select
             variant="field"
-            ariaLabel="Type de logement"
+            ariaLabel={t("home.propertyTypeAria")}
             name="type"
-            options={TYPE_OPTIONS}
+            options={TYPE_ENTRIES.map(([value, key]) => ({ value, label: t(`home.${key}`) }))}
             value={type}
             onChange={setType}
           />
@@ -273,7 +277,7 @@ export function SearchBarCompact({
       </div>
 
       <button type="submit" className="search-bar-compact-submit">
-        Rechercher
+        {t("home.searchButton")}
       </button>
     </form>
   );

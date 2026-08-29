@@ -21,10 +21,10 @@ import {
 import { useApp } from "@/components/providers/app-provider";
 
 const NAV_LINKS = [
-  { href: "/", label: "Accueil" },
-  { href: "/logements", label: "Chambres" },
-  { href: "/a-propos", label: "À propos" },
-  { href: "/contact", label: "Contact" },
+  { href: "/", key: "nav.accueil" as const },
+  { href: "/logements", key: "nav.chambres" as const },
+  { href: "/a-propos", key: "nav.aPropos" as const },
+  { href: "/contact", key: "nav.contact" as const },
 ];
 
 export function Header({
@@ -39,7 +39,7 @@ export function Header({
 }) {
   const pathname = usePathname();
   const { data: session } = useSession();
-  const { lang, setLang, currency, setCurrency } = useApp();
+  const { lang, setLang, currency, setCurrency, t } = useApp();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
 
@@ -93,7 +93,7 @@ export function Header({
       <div className="mx-auto flex h-[72px] max-w-[1300px] items-center justify-between gap-1 px-3 sm:gap-6 sm:px-6 lg:px-8">
         <div className="flex items-center gap-3 lg:gap-6">
           <Link href="/" className="heading-display whitespace-nowrap text-base lg:text-2xl">
-            Caba Résidence
+            {t("nav.maison")}
           </Link>
 
           <nav
@@ -111,7 +111,7 @@ export function Header({
                     : "text-text-secondary hover:bg-bg-primary hover:text-text-primary"
                 }`}
               >
-                {link.label}
+                {t(link.key)}
               </Link>
             ))}
           </nav>
@@ -134,18 +134,18 @@ export function Header({
               href="/admin"
               className="rounded-full px-4 py-2 text-sm font-medium text-text-secondary transition-colors hover:text-accent-secondary"
             >
-              Back-office
+              {t("common.backOffice")}
             </Link>
           ) : (
             <Link
               href="/connexion"
               className="rounded-full px-4 py-2 text-sm font-medium text-text-secondary transition-colors hover:text-accent-secondary"
             >
-              Connexion
+              {t("common.connexion")}
             </Link>
           )}
           <Link href="/recherche" className="btn-pill btn-primary px-8">
-            Réserver
+            {t("common.reserver")}
           </Link>
           {langSwitch}
           <CurrencySwitcher currency={currency} onChange={setCurrency} />
@@ -198,7 +198,7 @@ export function Header({
         }`}
       >
         <div className="flex h-[72px] items-center justify-between border-b border-border-subtle px-6">
-          <span className="heading-display text-lg">Menu</span>
+          <span className="heading-display text-lg">{t("nav.menu")}</span>
           <button
             type="button"
             className="flex h-10 w-10 items-center justify-center text-xl text-text-primary"
@@ -222,7 +222,7 @@ export function Header({
               }`}
               onClick={closeDrawer}
             >
-              {link.label}
+              {t(link.key)}
             </Link>
           ))}
         </nav>
@@ -238,7 +238,7 @@ export function Header({
               className="btn-pill btn-primary w-full"
               onClick={closeDrawer}
             >
-              Connexion
+              {t("common.connexion")}
             </Link>
           ) : !isClient ? (
             <Link
@@ -246,7 +246,7 @@ export function Header({
               className="btn-pill btn-primary w-full"
               onClick={closeDrawer}
             >
-              Back-office
+              {t("common.backOffice")}
             </Link>
           ) : null}
         </div>

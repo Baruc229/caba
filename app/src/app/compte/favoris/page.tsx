@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth/config";
+import { FavorisSection } from "./favoris-content";
 
 export const metadata = {
   title: "Mes favoris — Caba Résidence",
@@ -15,13 +16,5 @@ export default async function FavorisPage() {
     redirect("/admin");
   }
 
-  return (
-    <div className="container-caba py-12">
-      <h1 className="heading-display text-2xl mb-4">Mes favoris</h1>
-      <p className="text-text-secondary">
-        Cette section sera bientôt disponible. Vous pourrez y consulter les
-        logements que vous avez ajoutés à vos favoris.
-      </p>
-    </div>
-  );
+  return <FavorisSection />;
 }

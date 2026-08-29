@@ -8,9 +8,11 @@ import {
   CriteriaList,
   StrengthMeter,
 } from "@/components/auth/password-strength";
+import { useApp } from "@/components/providers/app-provider";
 
 export function AccepterInvitationForm({ token }: { token: string }) {
   const router = useRouter();
+  const { t } = useApp();
 
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -32,12 +34,12 @@ export function AccepterInvitationForm({ token }: { token: string }) {
       !/[A-Z]/.test(newPassword) ||
       !/\d/.test(newPassword)
     ) {
-      setError("Le mot de passe ne respecte pas les critères indiqués.");
+      setError(t("invite.errMdpCriteria"));
       setStatus("idle");
       return;
     }
     if (newPassword !== confirm) {
-      setError("Les deux mots de passe ne correspondent pas.");
+      setError(t("invite.errMdpIdentiques"));
       setStatus("idle");
       return;
     }
@@ -50,7 +52,7 @@ export function AccepterInvitationForm({ token }: { token: string }) {
     const body = await response.json();
 
     if (!response.ok) {
-      setError(body.error ?? "Invitation invalide ou expiree.");
+      setError(body.error ?? t("invite.errInviteDefaut"));
       setStatus("idle");
       return;
     }
@@ -66,21 +68,20 @@ export function AccepterInvitationForm({ token }: { token: string }) {
           <FaCircleCheck aria-hidden="true" />
         </div>
         <h1 className="auth-title" style={{ marginBottom: 10 }}>
-          Votre accès est activé !
+          {t("invite.accesActive")}
         </h1>
         <p className="auth-subtitle" style={{ marginBottom: 22 }}>
-          Connectez-vous au back-office avec votre email et le mot de passe que vous
-          venez de définir.
+          {t("invite.connectezVousBackOffice")}
         </p>
         <button
           type="button"
           className="auth-submit"
           onClick={() => router.push("/connexion?next=/admin")}
         >
-          Se connecter au back-office
+          {t("invite.seConnecterBackOffice")}
         </button>
         <div className="auth-footer">
-          <Link href="/">Aller sur le site public</Link>
+          <Link href="/">{t("invite.allerSitePublic")}</Link>
         </div>
       </>
     );
@@ -89,10 +90,9 @@ export function AccepterInvitationForm({ token }: { token: string }) {
   if (!token) {
     return (
       <>
-        <h1 className="auth-title">Lien invalide</h1>
+        <h1 className="auth-title">{t("invite.lienInvalide")}</h1>
         <p className="auth-banner auth-banner--error">
-          Ce lien d&apos;invitation est incomplet. Demandez une nouvelle invitation à
-          l&apos;administrateur.
+          {t("invite.lienIncomplet")}
         </p>
       </>
     );
@@ -103,9 +103,9 @@ export function AccepterInvitationForm({ token }: { token: string }) {
       <p className="auth-brand" style={{ cursor: "default" }}>
         Caba Résidence
       </p>
-      <h1 className="auth-title">Définir mon mot de passe</h1>
+      <h1 className="auth-title">{t("invite.definirMotDePasse")}</h1>
       <p className="auth-subtitle" style={{ marginTop: -12, marginBottom: 20 }}>
-        Bienvenue dans l&apos;équipe ! Choisissez un mot de passe pour activer votre accès.
+        {t("invite.bienvenueEquipe")}
       </p>
 
       {error && (
@@ -117,7 +117,7 @@ export function AccepterInvitationForm({ token }: { token: string }) {
       <form onSubmit={handleSubmit} noValidate>
         <div className="auth-field">
           <label htmlFor="inv-password" className="auth-label">
-            Mot de passe
+            {t("invite.motDePasse")}
           </label>
           <div className="auth-input-wrap">
             <input
@@ -133,7 +133,7 @@ export function AccepterInvitationForm({ token }: { token: string }) {
             <button
               type="button"
               className="auth-eye"
-              aria-label={showPassword ? "Masquer" : "Afficher"}
+              aria-label={showPassword ? t("invite.masquer") : t("invite.afficher")}
               onClick={() => setShowPassword((value) => !value)}
             >
               {showPassword ? <FaEyeSlash aria-hidden="true" /> : <FaEye aria-hidden="true" />}
@@ -145,7 +145,7 @@ export function AccepterInvitationForm({ token }: { token: string }) {
 
         <div className="auth-field">
           <label htmlFor="inv-confirm" className="auth-label">
-            Confirmer le mot de passe
+            {t("invite.confirmerMotDePasse")}
           </label>
           <input
             id="inv-confirm"
@@ -158,7 +158,7 @@ export function AccepterInvitationForm({ token }: { token: string }) {
         </div>
 
         <button type="submit" className="auth-submit" disabled={status === "loading"}>
-          {status === "loading" ? "Activation…" : "Activer mon accès"}
+          {status === "loading" ? t("invite.activation") : t("invite.activerAcces")}
         </button>
       </form>
     </>

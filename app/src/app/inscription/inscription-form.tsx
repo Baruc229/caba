@@ -9,6 +9,7 @@ import {
   StrengthMeter,
   scorePassword,
 } from "@/components/auth/password-strength";
+import { useApp } from "@/components/providers/app-provider";
 
 interface InscriptionFormProps {
   prefillPrenom: string;
@@ -21,6 +22,7 @@ export function InscriptionForm({
   prefillNom,
   prefillTelephone,
 }: InscriptionFormProps) {
+  const { t } = useApp();
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [status, setStatus] = useState<"idle" | "loading">("idle");
@@ -33,20 +35,20 @@ export function InscriptionForm({
   function validateField(name: string, value: string): string {
     switch (name) {
       case "prenom":
-        return value.trim() ? "" : "Votre prénom nous est nécessaire pour vous accueillir.";
+        return value.trim() ? "" : t("auth.err.prenom");
       case "nom":
-        return value.trim() ? "" : "Votre nom est nécessaire pour réserver.";
+        return value.trim() ? "" : t("auth.err.nom");
       case "email":
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim())
           ? ""
-          : "L'adresse email doit contenir un @ suivi d'un domaine (ex : nom@exemple.com).";
+          : t("auth.err.emailFormat");
       case "password":
         if (scorePassword(value) < 2 || !/[A-Z]/.test(value)) {
-          return "Le mot de passe ne respecte pas encore les critères.";
+          return t("auth.err.password");
         }
         return "";
       case "confirm":
-        return value === password ? "" : "Les mots de passe ne correspondent pas.";
+        return value === password ? "" : t("auth.err.confirm");
       default:
         return "";
     }
@@ -80,7 +82,7 @@ export function InscriptionForm({
       email: validateField("email", values.email),
       password: validateField("password", values.password),
       confirm: validateField("confirm", values.confirm),
-      cgv: values.cgv ? "" : "Vous devez accepter les CGV pour continuer.",
+      cgv: values.cgv ? "" : t("auth.err.cgv"),
     };
 
     if (Object.values(errors).some(Boolean)) {
@@ -111,7 +113,7 @@ export function InscriptionForm({
 
     if (!response.ok) {
       const body = await response.json();
-      setError(body.error ?? "Erreur lors de la creation du compte.");
+      setError(body.error ?? t("auth.err.apiCreate"));
       setStatus("idle");
       return;
     }
@@ -133,16 +135,16 @@ export function InscriptionForm({
       <div className="auth-page-v2">
         <div className="auth-panel">
           <div className="auth-main">
-            <p className="auth-eyebrow">Déjà parmi nous ?</p>
-            <h1 className="auth-display">Profil existant</h1>
+            <p className="auth-eyebrow">{t("auth.exists.eyebrow")}</p>
+            <h1 className="auth-display">{t("auth.exists.title")}</h1>
             <p role="alert" className="auth-banner auth-banner--error">
-              Un profil existe déjà avec cet email.
+              {t("auth.exists.message")}
             </p>
             <p className="auth-subtitle-v2">
-              Connectez-vous directement — ou utilisez « Mot de passe oublié ? » si besoin.
+              {t("auth.exists.subtitle")}
             </p>
             <Link href="/connexion" className="auth-btn auth-btn--link">
-              Se connecter
+              {t("auth.exists.link")}
               <FaArrowRight className="auth-btn-arrow" aria-hidden="true" />
             </Link>
           </div>
@@ -160,40 +162,38 @@ export function InscriptionForm({
             <div className="auth-success-icon">
               <FaEnvelope aria-hidden="true" />
             </div>
-            <p className="auth-eyebrow">Vérification</p>
-            <h1 className="auth-display auth-display--sm">Vérifiez votre email</h1>
+            <p className="auth-eyebrow">{t("auth.verify.eyebrow")}</p>
+            <h1 className="auth-display auth-display--sm">{t("auth.verify.title")}</h1>
 
             {emailSent ? (
               <>
                 <p className="auth-subtitle-v2">
-                  Un email de vérification vous a été envoyé. Vérifiez votre boîte de réception
-                  et cliquez sur le lien pour activer votre compte.
+                  {t("auth.verify.sent")}
                 </p>
                 <p className="auth-subtitle-v2" style={{ marginTop: 12, fontSize: 13 }}>
-                  Vous n&apos;avez pas reçu l&apos;email ?{" "}
+                  {t("auth.verify.notReceived")}{" "}
                   <Link href={`/verification?resend=${encodeURIComponent(verifyUrl.split("token=")[1] || "")}`}>
-                    Renvoyer le lien
+                    {t("auth.verify.resend")}
                   </Link>
                 </p>
               </>
             ) : (
               <>
                 <p className="auth-subtitle-v2">
-                  L&apos;email n&apos;a pas pu être envoyé. Vous pouvez activer votre compte
-                  en cliquant directement sur le lien ci-dessous :
+                  {t("auth.verify.notSent")}
                 </p>
                 <a href={verifyUrl} className="auth-btn" style={{ marginTop: 16 }}>
                   <FaCircleCheck aria-hidden="true" />
-                  Activer mon compte
+                  {t("auth.verify.activate")}
                 </a>
                 <p className="auth-subtitle-v2" style={{ marginTop: 12, fontSize: 13 }}>
-                  Ce lien est valable 24 heures.
+                  {t("auth.verify.valid24")}
                 </p>
               </>
             )}
 
             <Link href="/connexion" className="auth-btn auth-btn--link" style={{ marginTop: 16 }}>
-              Retour à la connexion
+              {t("auth.verify.back")}
             </Link>
           </div>
           <PhotoAside />
@@ -206,10 +206,10 @@ export function InscriptionForm({
     <div className="auth-page-v2">
       <div className="auth-panel">
         <div className="auth-main">
-          <p className="auth-eyebrow">Bienvenue</p>
-          <h1 className="auth-display">Créez votre profil</h1>
+          <p className="auth-eyebrow">{t("auth.inscription.eyebrow")}</p>
+          <h1 className="auth-display">{t("auth.inscription.title")}</h1>
           <p className="auth-subtitle-v2">
-            Quelques informations, pour vous accueillir comme il se doit.
+            {t("auth.inscription.subtitle")}
           </p>
 
           {error && (
@@ -220,11 +220,11 @@ export function InscriptionForm({
 
           <form onSubmit={handleSubmit} noValidate>
             <section className="lsection">
-              <p className="lsection-title">Votre identité</p>
+              <p className="lsection-title">{t("auth.inscription.identite")}</p>
               <div className="lrow-2">
                 <div className={`lfield${fieldErrors.prenom ? " has-error" : ""}`}>
                   <label htmlFor="ins-prenom" className="lfield-label">
-                    Prénom *
+                    {t("auth.inscription.prenomLabel")}
                   </label>
                   <input
                     id="ins-prenom"
@@ -244,7 +244,7 @@ export function InscriptionForm({
 
                 <div className={`lfield${fieldErrors.nom ? " has-error" : ""}`}>
                   <label htmlFor="ins-nom" className="lfield-label">
-                    Nom *
+                    {t("auth.inscription.nomLabel")}
                   </label>
                   <input
                     id="ins-nom"
@@ -264,18 +264,18 @@ export function InscriptionForm({
             </section>
 
             <section className="lsection">
-              <p className="lsection-title">Comment vous joindre</p>
+              <p className="lsection-title">{t("auth.inscription.joindre")}</p>
               <div className="lrow-2">
                 <div className={`lfield${fieldErrors.email ? " has-error" : ""}`}>
                   <label htmlFor="ins-email" className="lfield-label">
-                    Email *
+                    {t("auth.inscription.emailLabel")}
                   </label>
                   <input
                     id="ins-email"
                     name="email"
                     type="email"
                     autoComplete="email"
-                    placeholder="nom@exemple.com"
+                    placeholder={t("auth.inscription.emailPlaceholder")}
                     onBlur={(event) => blurCheck("email", event.target.value)}
                     onInput={() => {
                       if (fieldErrors.email) blurCheck("email", "");
@@ -287,7 +287,7 @@ export function InscriptionForm({
 
                 <div className="lfield">
                   <label htmlFor="ins-telephone" className="lfield-label">
-                    Téléphone / WhatsApp
+                    {t("auth.inscription.telephoneLabel")}
                   </label>
                   <input
                     id="ins-telephone"
@@ -295,7 +295,7 @@ export function InscriptionForm({
                     type="tel"
                     autoComplete="tel"
                     defaultValue={prefillTelephone}
-                    placeholder="+229 XX XX XX XX"
+                    placeholder={t("auth.inscription.telephonePlaceholder")}
                     className="lfield-input"
                   />
                 </div>
@@ -303,10 +303,10 @@ export function InscriptionForm({
             </section>
 
             <section className="lsection">
-              <p className="lsection-title">Sécurité</p>
+              <p className="lsection-title">{t("auth.inscription.securite")}</p>
               <div className={`lfield${fieldErrors.password ? " has-error" : ""}`}>
                 <label htmlFor="ins-password" className="lfield-label">
-                  Mot de passe *
+                  {t("auth.inscription.passwordLabel")}
                 </label>
                 <div className="lfield-box">
                   <input
@@ -314,7 +314,7 @@ export function InscriptionForm({
                     name="password"
                     type={showPassword ? "text" : "password"}
                     autoComplete="new-password"
-                    placeholder={showPassword ? "Votre mot de passe" : "••••••••"}
+                    placeholder={showPassword ? t("auth.inscription.passwordPlaceholder") : "••••••••"}
                     value={password}
                     onChange={(event) => setPassword(event.target.value)}
                     onBlur={(event) => blurCheck("password", event.target.value)}
@@ -324,7 +324,7 @@ export function InscriptionForm({
                     type="button"
                     className="auth-eye"
                     aria-label={
-                      showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"
+                      showPassword ? t("auth.eyeHide") : t("auth.eyeShow")
                     }
                     onClick={() => setShowPassword((value) => !value)}
                   >
@@ -342,7 +342,7 @@ export function InscriptionForm({
 
               <div className={`lfield${fieldErrors.confirm ? " has-error" : ""}`}>
                 <label htmlFor="ins-confirm" className="lfield-label">
-                  Confirmer le mot de passe *
+                  {t("auth.inscription.confirmLabel")}
                 </label>
                 <input
                   id="ins-confirm"
@@ -363,20 +363,22 @@ export function InscriptionForm({
             <label className={`auth-check${fieldErrors.cgv ? " has-error" : ""}`}>
               <input id="ins-cgv" name="cgv" type="checkbox" />
               <span>
-                J&apos;accepte les{" "}
-                <a href="/pages/conditions-generales">conditions générales de vente</a> et la{" "}
-                <a href="/pages/politique-confidentialite">politique de confidentialité</a>. *
+                {t("auth.inscription.cgvPre")}{" "}
+                <a href="/pages/conditions-generales">{t("auth.inscription.cgvLink")}</a>{" "}
+                {t("auth.inscription.cgvMiddle")}{" "}
+                <a href="/pages/politique-confidentialite">{t("auth.inscription.cgvConfLink")}</a>
+                {t("auth.inscription.cgvPost")}
               </span>
             </label>
             {fieldError("cgv")}
 
             <label className="auth-check">
               <input name="marketing" type="checkbox" />
-              <span>Je souhaite recevoir les actualités et offres de Caba Résidence.</span>
+              <span>{t("auth.inscription.marketing")}</span>
             </label>
 
             <button type="submit" className="auth-btn" disabled={status === "loading"}>
-              {status === "loading" ? "Création…" : "Créer mon profil"}
+              {status === "loading" ? t("auth.inscription.submitting") : t("auth.inscription.submit")}
               {status !== "loading" && (
                 <FaArrowRight className="auth-btn-arrow" aria-hidden="true" />
               )}
@@ -384,12 +386,12 @@ export function InscriptionForm({
           </form>
 
           <div className="auth-footer">
-            Déjà un profil chez nous ?{" "}
+            {t("auth.inscription.footer")}{" "}
             <Link
               href="/connexion"
               onMouseDown={(e) => e.preventDefault()}
             >
-              Se connecter
+              {t("auth.inscription.footerLink")}
             </Link>
           </div>
         </div>

@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa6";
+import { useApp } from "@/components/providers/app-provider";
+import { MONTH_NAMES, WEEKDAYS_SHORT } from "@/lib/i18n/dictionaries";
 
 interface CalendarSlot {
   debut: string;
@@ -17,46 +19,29 @@ interface CalendarDay {
   libelle: string;
 }
 
-const WEEKDAYS = ["lu", "ma", "me", "je", "ve", "sa", "di"];
-
-const MONTH_NAMES = [
-  "janvier",
-  "février",
-  "mars",
-  "avril",
-  "mai",
-  "juin",
-  "juillet",
-  "août",
-  "septembre",
-  "octobre",
-  "novembre",
-  "décembre",
-];
-
-const LEGEND = [
-  { statut: "disponible", label: "Disponible" },
-  { statut: "reserve", label: "Réservé" },
-  { statut: "en_attente", label: "En attente" },
-  { statut: "bloque", label: "Bloqué" },
-  { statut: "maintenance", label: "Maintenance" },
+const LEGEND_KEYS = [
+  { statut: "disponible", tKey: "calendar.statutDisponible" },
+  { statut: "reserve", tKey: "calendar.statutReserve" },
+  { statut: "en_attente", tKey: "calendar.statutEnAttente" },
+  { statut: "bloque", tKey: "calendar.statutBloque" },
+  { statut: "maintenance", tKey: "calendar.statutMaintenance" },
 ] as const;
 
-function buildTooltip(day: CalendarDay): string {
+function buildTooltip(day: CalendarDay, t: (path: string) => string): string {
   const base = `${day.date} — ${day.libelle}`;
   if (day.creneaux.length === 0) return base;
   const slots = day.creneaux
     .map((c) => {
       const source =
         c.source === "ical"
-          ? "plateforme externe"
+          ? t("calendar.tooltipSourceIcal")
           : c.source === "maintenance"
-            ? "maintenance"
+            ? t("calendar.tooltipSourceMaintenance")
             : c.source === "whatsapp"
-              ? "WhatsApp"
+              ? t("calendar.tooltipSourceWhatsapp")
               : c.source === "booking"
-                ? "réservation"
-                : "administration";
+                ? t("calendar.tooltipSourceBooking")
+                : t("calendar.tooltipSourceAdministration");
       return `${c.debut}–${c.fin} (${source})`;
     })
     .join(", ");
@@ -69,6 +54,7 @@ function leadingBlanks(year: number, month: number): number {
 }
 
 export function AvailabilityCalendar({ propertyId }: { propertyId: string }) {
+  const { lang, t } = useApp();
   const now = new Date();
   const [year, setYear] = useState(now.getFullYear());
   const [month, setMonth] = useState(now.getMonth() + 1);
@@ -123,27 +109,27 @@ export function AvailabilityCalendar({ propertyId }: { propertyId: string }) {
   const blanks = leadingBlanks(year, month);
 
   return (
-    <div className="calendar" role="group" aria-label="Calendrier de disponibilité">
+    <div className="calendar" role="group" aria-label={t("calendar.availabilityCalendar")}>
       <div className="calendar-header">
         <button
           type="button"
           className="calendar-nav"
           onClick={goPrevious}
           disabled={minPeriod || loading}
-          aria-label="Mois précédent"
+          aria-label={t("calendar.prevMonth")}
         >
           <FaChevronLeft aria-hidden="true" size={12} />
         </button>
         <span className="calendar-title" aria-live="polite">
-          {MONTH_NAMES[month - 1]} {year}
+          {MONTH_NAMES[lang][month - 1]} {year}
         </span>
-        <button type="button" className="calendar-nav" onClick={goNext} aria-label="Mois suivant">
+        <button type="button" className="calendar-nav" onClick={goNext} aria-label={t("calendar.nextMonth")}>
           <FaChevronRight aria-hidden="true" size={12} />
         </button>
       </div>
 
       <div className="calendar-grid">
-        {WEEKDAYS.map((weekday) => (
+        {WEEKDAYS_SHORT[lang].map((weekday) => (
           <span key={weekday} className="calendar-weekday" aria-hidden="true">
             {weekday}
           </span>
@@ -157,7 +143,7 @@ export function AvailabilityCalendar({ propertyId }: { propertyId: string }) {
           <span
             key={day.date}
             className={`cal-day cal-day--${day.statut}${day.date === todayStr ? " cal-day--aujourdhui" : ""}`}
-            title={buildTooltip(day)}
+            title={buildTooltip(day, t)}
           >
             {Number(day.date.slice(-2))}
           </span>
@@ -165,10 +151,10 @@ export function AvailabilityCalendar({ propertyId }: { propertyId: string }) {
       </div>
 
       <div className="calendar-legend">
-        {LEGEND.map((item) => (
+        {LEGEND_KEYS.map((item) => (
           <span key={item.statut} className="legend-item">
             <span className={`legend-dot legend-dot--${item.statut}`} aria-hidden="true" />
-            {item.label}
+            {t(item.tKey)}
           </span>
         ))}
       </div>

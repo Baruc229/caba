@@ -11,8 +11,10 @@ import {
   FaArrowRight,
 } from "react-icons/fa6";
 import { PhotoAside } from "@/components/auth/photo-aside";
+import { useApp } from "@/components/providers/app-provider";
 
 export function VerificationContent() {
+  const { t } = useApp();
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
@@ -28,9 +30,9 @@ export function VerificationContent() {
   const redirected = useRef(false);
 
   const errorMessages: Record<string, string> = {
-    missing: "Aucun jeton de vérification fourni.",
-    invalid: "Ce lien de vérification est invalide ou a expiré.",
-    server: "Une erreur est survenue. Veuillez réessayer.",
+    missing: t("verify.errMissing"),
+    invalid: t("verify.errInvalid"),
+    server: t("verify.errServer"),
   };
 
   // Décompte du délai anti-spam avant un nouvel envoi
@@ -78,11 +80,9 @@ export function VerificationContent() {
             <div className="auth-success-icon">
               <FaCircleCheck aria-hidden="true" />
             </div>
-            <p className="auth-eyebrow">Compte activé</p>
-            <h1 className="auth-display auth-display--sm">C&apos;est fait !</h1>
-            <p className="auth-subtitle-v2">
-              Votre email est vérifié. Vous êtes redirigé vers votre espace…
-            </p>
+            <p className="auth-eyebrow">{t("verify.compteActive")}</p>
+            <h1 className="auth-display auth-display--sm">{t("verify.cEstFait")}</h1>
+            <p className="auth-subtitle-v2">{t("verify.emailVerifie")}</p>
           </div>
           <PhotoAside />
         </div>
@@ -99,17 +99,17 @@ export function VerificationContent() {
             <div className="auth-success-icon">
               <FaEnvelope aria-hidden="true" />
             </div>
-            <p className="auth-eyebrow">Vérification</p>
-            <h1 className="auth-display auth-display--sm">Vérifiez votre email</h1>
+            <p className="auth-eyebrow">{t("verify.eyebrow")}</p>
+            <h1 className="auth-display auth-display--sm">{t("verify.titre")}</h1>
 
             {sent ? (
               <div className="auth-banner auth-banner--success">
-                Un nouveau lien a été envoyé.
+                {t("verify.nouveauLienEnvoye")}
                 {sentVerifyUrl && (
                   <span style={{ display: "block", marginTop: 10 }}>
                     <a href={sentVerifyUrl} className="auth-btn" style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
                       <FaCircleCheck aria-hidden="true" />
-                      Activer mon compte
+                      {t("verify.activerMonCompte")}
                     </a>
                   </span>
                 )}
@@ -118,9 +118,9 @@ export function VerificationContent() {
               <>
                 {email && (
                   <p className="auth-subtitle-v2">
-                    Nous avons envoyé un lien de confirmation à{" "}
+                    {t("verify.emailSentPrefix")}{" "}
                     <strong style={{ color: "var(--color-text-primary)" }}>{email}</strong>.
-                    Cliquez sur le lien pour activer votre compte.
+                    {t("verify.emailSentSuffix")}
                   </p>
                 )}
                 <p className="auth-subtitle-v2" style={{ marginTop: 16, fontSize: 13 }}>
@@ -130,12 +130,16 @@ export function VerificationContent() {
                     onClick={handleResend}
                     disabled={loading || cooldown > 0}
                   >
-                    {loading ? "Envoi…" : cooldown > 0 ? `Renvoyer le lien (${cooldown} s)` : "Renvoyer le lien"}
+                    {loading
+                      ? t("verify.envoi")
+                      : cooldown > 0
+                        ? `${t("verify.renvoyerLien")} (${cooldown} s)`
+                        : t("verify.renvoyerLien")}
                   </button>
                 </p>
                 <p className="auth-resend" style={{ marginTop: 8 }}>
-                  Vous avez saisi une mauvaise adresse ?{" "}
-                  <Link href="/inscription">Changer d&apos;adresse email</Link>
+                  {t("verify.mauvaiseAdresse")}{" "}
+                  <Link href="/inscription">{t("common.changerAdresse")}</Link>
                 </p>
               </>
             )}
@@ -154,19 +158,19 @@ export function VerificationContent() {
           <div className="auth-icon-circle">
             <FaTriangleExclamation aria-hidden="true" />
           </div>
-          <h1 className="auth-display auth-display--sm">Lien invalide</h1>
+          <h1 className="auth-display auth-display--sm">{t("verify.lienInvalide")}</h1>
           <p className="auth-subtitle-v2">
-            {errorMessages[error ?? ""] ?? "Une erreur inconnue est survenue."}
+            {errorMessages[error ?? ""] ?? t("verify.erreurInconnue")}
           </p>
 
           {sent ? (
             <div className="auth-banner auth-banner--success" style={{ marginTop: 8 }}>
-              Un nouveau lien a été envoyé. Vérifiez votre boîte de réception.
+              {t("verify.nouveauLienEnvoyeBoite")}
               {sentVerifyUrl && (
                 <span style={{ display: "block", marginTop: 8 }}>
                   <a href={sentVerifyUrl} style={{ fontWeight: 600 }}>
                     <FaCircleCheck style={{ marginRight: 6 }} />
-                    Ou cliquez ici pour activer votre compte
+                    {t("verify.ouCliquezIci")}
                   </a>
                 </span>
               )}
@@ -174,18 +178,18 @@ export function VerificationContent() {
           ) : (
             <>
               <p className="auth-subtitle-v2" style={{ fontSize: 14 }}>
-                Vous pouvez demander un nouveau lien ci-dessous :
+                {t("verify.demanderNouveauLien")}
               </p>
               <div className="lfield" style={{ marginTop: 12 }}>
                 <label htmlFor="resend-email" className="lfield-label">
-                  Votre email
+                  {t("verify.votreEmail")}
                 </label>
                 <input
                   id="resend-email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="nom@exemple.com"
+                  placeholder={t("verify.emailPlaceholder")}
                   className="lfield-input"
                   onKeyDown={(e) => {
                     if (e.key === "Enter") handleResend();
@@ -199,14 +203,18 @@ export function VerificationContent() {
                 disabled={loading || cooldown > 0 || !email.trim()}
               >
                 <FaPaperPlane aria-hidden="true" />
-                {loading ? "Envoi..." : cooldown > 0 ? `Renvoyer (${cooldown} s)` : "Renvoyer le lien"}
+                {loading
+                  ? t("verify.envoi")
+                  : cooldown > 0
+                    ? `${t("verify.renvoyer")} (${cooldown} s)`
+                    : t("verify.renvoyerLien")}
               </button>
             </>
           )}
 
           <Link href="/connexion" className="auth-btn auth-btn--link" style={{ marginTop: 16 }}>
             <FaArrowRight className="auth-btn-arrow" aria-hidden="true" />
-            Retour à la connexion
+            {t("verify.retourConnexion")}
           </Link>
         </div>
         <PhotoAside />

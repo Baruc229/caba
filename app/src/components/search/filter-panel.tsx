@@ -2,16 +2,17 @@
 
 import { useState } from "react";
 import { FaXmark } from "react-icons/fa6";
+import { useApp } from "@/components/providers/app-provider";
 
-const TYPE_LABELS: Record<string, string> = {
-  chambre: "Chambre",
-  chambre_avec_salon: "Chambre avec salon",
-  studio: "Studio",
-  appartement_meuble: "Appartement meublé",
-  suite: "Suite",
-  villa: "Villa",
-  duplex: "Duplex",
-  maison_entiere: "Maison entière",
+const TYPE_LABEL_KEYS: Record<string, string> = {
+  chambre: "home.typeChambre",
+  chambre_avec_salon: "home.typeChambreAvecSalon",
+  studio: "home.typeStudio",
+  appartement_meuble: "home.typeAppartementMeuble",
+  suite: "home.typeSuite",
+  villa: "home.typeVilla",
+  duplex: "home.typeDuplex",
+  maison_entiere: "home.typeMaisonEntiere",
 };
 
 export interface FilterState {
@@ -32,20 +33,9 @@ interface FilterPanelProps {
   onCloseMobile: () => void;
 }
 
-const CHAMBRES_OPTIONS = [
-  { value: 0, label: "Toutes" },
-  { value: 1, label: "1+" },
-  { value: 2, label: "2+" },
-  { value: 3, label: "3+" },
-  { value: 4, label: "4+" },
-];
+const CHAMBRES_VALUES = [0, 1, 2, 3, 4];
 
-const LITS_OPTIONS = [
-  { value: 0, label: "Tous" },
-  { value: 1, label: "1+" },
-  { value: 2, label: "2+" },
-  { value: 3, label: "3+" },
-];
+const LITS_VALUES = [0, 1, 2, 3];
 
 export function FilterPanel({
   filters,
@@ -55,6 +45,7 @@ export function FilterPanel({
   mobileOpen,
   onCloseMobile,
 }: FilterPanelProps) {
+  const { t } = useApp();
   const [localPrixMin, setLocalPrixMin] = useState(filters.prixMin || "");
   const [localPrixMax, setLocalPrixMax] = useState(filters.prixMax || "");
 
@@ -99,11 +90,11 @@ export function FilterPanel({
   const panel = (
     <div className="filter-panel">
       <div className="filter-panel-header">
-        <h2 className="filter-panel-title">Filtres</h2>
+        <h2 className="filter-panel-title">{t("logements.filters")}</h2>
         <button
           type="button"
           className="filter-panel-close-mobile"
-          aria-label="Fermer les filtres"
+          aria-label={t("logements.closeFilters")}
           onClick={onCloseMobile}
         >
           <FaXmark aria-hidden="true" size={18} />
@@ -111,7 +102,7 @@ export function FilterPanel({
       </div>
 
       <div className="filter-section">
-        <h3 className="filter-section-title">Type de logement</h3>
+        <h3 className="filter-section-title">{t("home.propertyTypeLabel")}</h3>
         <div className="filter-checks">
           {availableTypes.map((type) => (
             <label key={type} className="filter-check">
@@ -122,49 +113,51 @@ export function FilterPanel({
                 className="filter-check-input"
               />
               <span className="filter-check-box" />
-              <span className="filter-check-label">{TYPE_LABELS[type] ?? type}</span>
+              <span className="filter-check-label">
+                {TYPE_LABEL_KEYS[type] ? t(TYPE_LABEL_KEYS[type]) : type}
+              </span>
             </label>
           ))}
         </div>
       </div>
 
       <div className="filter-section">
-        <h3 className="filter-section-title">Chambres</h3>
+        <h3 className="filter-section-title">{t("logements.bedroomLabel")}</h3>
         <div className="filter-chips">
-          {CHAMBRES_OPTIONS.map((opt) => (
+          {CHAMBRES_VALUES.map((value) => (
             <button
-              key={opt.value}
+              key={value}
               type="button"
-              className={`filter-chip ${filters.chambresMin === opt.value ? "filter-chip--active" : ""}`}
-              onClick={() => update({ chambresMin: opt.value })}
+              className={`filter-chip ${filters.chambresMin === value ? "filter-chip--active" : ""}`}
+              onClick={() => update({ chambresMin: value })}
             >
-              {opt.label}
+              {value === 0 ? t("logements.bedroomAll") : `${value}+`}
             </button>
           ))}
         </div>
       </div>
 
       <div className="filter-section">
-        <h3 className="filter-section-title">Lits</h3>
+        <h3 className="filter-section-title">{t("logements.bedLabel")}</h3>
         <div className="filter-chips">
-          {LITS_OPTIONS.map((opt) => (
+          {LITS_VALUES.map((value) => (
             <button
-              key={opt.value}
+              key={value}
               type="button"
-              className={`filter-chip ${filters.litsMin === opt.value ? "filter-chip--active" : ""}`}
-              onClick={() => update({ litsMin: opt.value })}
+              className={`filter-chip ${filters.litsMin === value ? "filter-chip--active" : ""}`}
+              onClick={() => update({ litsMin: value })}
             >
-              {opt.label}
+              {value === 0 ? t("logements.bedAll") : `${value}+`}
             </button>
           ))}
         </div>
       </div>
 
       <div className="filter-section">
-        <h3 className="filter-section-title">Fourchette de prix</h3>
+        <h3 className="filter-section-title">{t("logements.priceRange")}</h3>
         <div className="filter-price-range">
           <div className="filter-price-field">
-            <label className="filter-price-label" htmlFor="filter-prix-min">Min</label>
+            <label className="filter-price-label" htmlFor="filter-prix-min">{t("logements.priceMin")}</label>
             <input
               id="filter-prix-min"
               type="number"
@@ -179,7 +172,7 @@ export function FilterPanel({
           </div>
           <span className="filter-price-sep">—</span>
           <div className="filter-price-field">
-            <label className="filter-price-label" htmlFor="filter-prix-max">Max</label>
+            <label className="filter-price-label" htmlFor="filter-prix-max">{t("logements.priceMax")}</label>
             <input
               id="filter-prix-max"
               type="number"
@@ -197,7 +190,7 @@ export function FilterPanel({
 
       {availableEquipements.length > 0 && (
         <div className="filter-section">
-          <h3 className="filter-section-title">Équipements</h3>
+          <h3 className="filter-section-title">{t("logements.amenities")}</h3>
           <div className="filter-checks">
             {availableEquipements.map((eq) => (
               <label key={eq.id} className="filter-check">
@@ -216,7 +209,7 @@ export function FilterPanel({
       )}
 
       <button type="button" className="filter-reset" onClick={reset}>
-        Réinitialiser les filtres
+        {t("logements.resetFilters")}
       </button>
     </div>
   );
@@ -224,7 +217,7 @@ export function FilterPanel({
   return (
     <>
       {/* Desktop */}
-      <aside className="filter-panel-desktop" aria-label="Filtres">
+      <aside className="filter-panel-desktop" aria-label={t("logements.filters")}>
         {panel}
       </aside>
 
@@ -234,10 +227,10 @@ export function FilterPanel({
           <button
             type="button"
             className="filter-overlay"
-            aria-label="Fermer les filtres"
+            aria-label={t("logements.closeFilters")}
             onClick={onCloseMobile}
           />
-          <aside className="filter-panel-mobile" role="dialog" aria-modal="true" aria-label="Filtres">
+          <aside className="filter-panel-mobile" role="dialog" aria-modal="true" aria-label={t("logements.filters")}>
             {panel}
           </aside>
         </>

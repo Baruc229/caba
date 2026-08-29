@@ -1,25 +1,31 @@
 "use client";
 
 import type { SearchResultItem } from "@/lib/services/availability";
+import { useApp } from "@/components/providers/app-provider";
+import {
+  convertAmount,
+  formatAmount,
+} from "@/lib/i18n/currency";
 
-const TYPE_LABELS: Record<string, string> = {
-  chambre: "Chambre",
-  chambre_avec_salon: "Chambre avec salon",
-  studio: "Studio",
-  appartement_meuble: "Appartement meublé",
-  suite: "Suite",
-  villa: "Villa",
-  duplex: "Duplex",
-  maison_entiere: "Maison entière",
-  personnalise: "Personnalisé",
+const TYPE_LABELS: Record<string, { fr: string; en: string }> = {
+  chambre: { fr: "Chambre", en: "Room" },
+  chambre_avec_salon: { fr: "Chambre avec salon", en: "Room with living room" },
+  studio: { fr: "Studio", en: "Studio" },
+  appartement_meuble: { fr: "Appartement meublé", en: "Furnished apartment" },
+  suite: { fr: "Suite", en: "Suite" },
+  villa: { fr: "Villa", en: "Villa" },
+  duplex: { fr: "Duplex", en: "Duplex" },
+  maison_entiere: { fr: "Maison entière", en: "Whole house" },
+  personnalise: { fr: "Personnalisé", en: "Custom" },
 };
 
-function formatPrice(price: number, currency: string): string {
-  return new Intl.NumberFormat("fr-FR").format(price) + " " + currency;
-}
-
 export function PropertyCard({ item }: { item: SearchResultItem }) {
-  const typeLabel = TYPE_LABELS[item.type] ?? item.type;
+  const { lang, t, currency } = useApp();
+  const typeLabel = TYPE_LABELS[item.type]?.[lang] ?? item.type;
+  const formattedPrice =
+    item.prixTotal > 0
+      ? formatAmount(convertAmount(item.prixTotal, item.devise, currency), lang)
+      : "";
 
   return (
     <article className="property-card">
@@ -40,7 +46,7 @@ export function PropertyCard({ item }: { item: SearchResultItem }) {
         <button
           type="button"
           className="property-card-fav"
-          aria-label={`Ajouter ${item.nom} aux favoris`}
+          aria-label={`${t("common.ajouterFavoris")} ${item.nom}`}
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
@@ -59,7 +65,7 @@ export function PropertyCard({ item }: { item: SearchResultItem }) {
             <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
             <path d="M16 3.13a4 4 0 0 1 0 7.75" />
           </svg>
-          <span>{item.capaciteMaximale} voyageurs</span>
+          <span>{t("common.voyageurs").replace("{n}", String(item.capaciteMaximale))}</span>
         </div>
 
         {item.equipements.length > 0 && (
@@ -79,7 +85,7 @@ export function PropertyCard({ item }: { item: SearchResultItem }) {
               <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
             </svg>
             <span className="property-card-rating-value">{item.noteMoyenne}</span>
-            <span className="property-card-rating-count">({item.nombreAvis} avis)</span>
+            <span className="property-card-rating-count">{t("common.avis").replace("{n}", String(item.nombreAvis))}</span>
           </div>
         )}
 
@@ -90,33 +96,35 @@ export function PropertyCard({ item }: { item: SearchResultItem }) {
           <p className="property-card-price">
             {item.prixTotal > 0 ? (
               <>
-                à partir de{" "}
-                <strong>{formatPrice(item.prixTotal, item.devise)}</strong>
+                {t("common.aPartirDe")}{" "}
+                <strong>{formattedPrice} {currency}</strong>
                 {item.nuitsOuUnites > 1 && (
                   <span className="property-card-price-unit">
-                    {" "}pour {item.nuitsOuUnites} nuit{item.nuitsOuUnites > 1 ? "s" : ""}
+                    {" "}{t("common.pourNuits")
+                      .replace("{n}", String(item.nuitsOuUnites))
+                      .replace("{s}", item.nuitsOuUnites > 1 ? "s" : "")}
                   </span>
                 )}
                 {item.nuitsOuUnites === 1 && (
-                  <span className="property-card-price-unit"> /nuit</span>
+                  <span className="property-card-price-unit"> {t("common.parNuit")}</span>
                 )}
               </>
             ) : (
-              <span className="property-card-price-unavailable">Prix non disponible</span>
+              <span className="property-card-price-unavailable">{t("common.prixNonDisponible")}</span>
             )}
           </p>
         </div>
 
         <div className="property-card-actions">
           <a href={`/logements/${item.id}`} className="property-card-btn property-card-btn--secondary">
-            Voir le logement
+            {t("common.voirLogement")}
           </a>
           {item.prixTotal > 0 && (
             <a
               href={`/logements/${item.id}?action=reserver`}
               className="property-card-btn property-card-btn--primary"
             >
-              Réserver
+              {t("common.reserver")}
             </a>
           )}
         </div>

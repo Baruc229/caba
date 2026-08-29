@@ -9,9 +9,11 @@ import {
   StrengthMeter,
   scorePassword,
 } from "@/components/auth/password-strength";
+import { useApp } from "@/components/providers/app-provider";
 
 export function ResetForm({ token }: { token: string }) {
   const router = useRouter();
+  const { t } = useApp();
 
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -23,11 +25,11 @@ export function ResetForm({ token }: { token: string }) {
     switch (name) {
       case "password":
         if (scorePassword(value) < 2 || !/[A-Z]/.test(value)) {
-          return "Le mot de passe ne respecte pas encore les critères.";
+          return t("resetpwd.passwordTooShort");
         }
         return "";
       case "confirm":
-        return value === password ? "" : "Les mots de passe ne correspondent pas.";
+        return value === password ? "" : t("resetpwd.passwordMismatch");
       default:
         return "";
     }
@@ -63,13 +65,11 @@ export function ResetForm({ token }: { token: string }) {
 
     if (!response.ok) {
       const body = await response.json();
-      setError(body.error ?? "Lien invalide ou expiré. Faites une nouvelle demande.");
+      setError(body.error ?? t("resetpwd.apiErrorDefault"));
       setStatus("idle");
       return;
     }
 
-    // Redirection vers la connexion avec confirmation — sans connexion
-    // automatique : l'utilisateur vérifie lui-même son nouveau mot de passe.
     router.replace("/connexion?succes=1");
   }
 
@@ -81,10 +81,10 @@ export function ResetForm({ token }: { token: string }) {
 
   return (
     <>
-      <p className="auth-eyebrow">Dernière étape</p>
-      <h1 className="auth-display auth-display--sm">Nouveau mot de passe</h1>
+      <p className="auth-eyebrow">{t("resetpwd.resetEyebrow")}</p>
+      <h1 className="auth-display auth-display--sm">{t("resetpwd.resetTitle")}</h1>
       <p className="auth-subtitle-v2">
-        Choisissez un nouveau mot de passe — vous vous connecterez ensuite avec celui-ci.
+        {t("resetpwd.resetInstructions")}
       </p>
 
       {error && (
@@ -96,7 +96,7 @@ export function ResetForm({ token }: { token: string }) {
       <form onSubmit={handleSubmit} noValidate>
         <div className={`lfield${fieldErrors.password ? " has-error" : ""}`}>
           <label htmlFor="reset-new-password" className="lfield-label">
-            Nouveau mot de passe
+            {t("resetpwd.newPasswordLabel")}
           </label>
           <div className="lfield-box">
             <input
@@ -104,7 +104,7 @@ export function ResetForm({ token }: { token: string }) {
               name="password"
               type={showPassword ? "text" : "password"}
               autoComplete="new-password"
-              placeholder={showPassword ? "Votre nouveau mot de passe" : "••••••••"}
+              placeholder={showPassword ? t("resetpwd.newPasswordPlaceholder") : "••••••••"}
               autoFocus
               value={password}
               onChange={(event) => setPassword(event.target.value)}
@@ -116,7 +116,7 @@ export function ResetForm({ token }: { token: string }) {
               type="button"
               className="auth-eye"
               aria-label={
-                showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"
+                showPassword ? t("resetpwd.hidePassword") : t("resetpwd.showPassword")
               }
               onClick={() => setShowPassword((value) => !value)}
             >
@@ -134,7 +134,7 @@ export function ResetForm({ token }: { token: string }) {
 
         <div className={`lfield${fieldErrors.confirm ? " has-error" : ""}`}>
           <label htmlFor="reset-confirm-password" className="lfield-label">
-            Confirmer le mot de passe
+            {t("resetpwd.confirmPasswordLabel")}
           </label>
           <input
             id="reset-confirm-password"
@@ -153,7 +153,7 @@ export function ResetForm({ token }: { token: string }) {
         </div>
 
         <button type="submit" className="auth-btn" disabled={status === "loading"}>
-          {status === "loading" ? "Enregistrement…" : "Réinitialiser le mot de passe"}
+          {status === "loading" ? t("resetpwd.savingBtn") : t("resetpwd.resetBtn")}
           {status !== "loading" && (
             <FaArrowRight className="auth-btn-arrow" aria-hidden="true" />
           )}
@@ -161,7 +161,7 @@ export function ResetForm({ token }: { token: string }) {
       </form>
 
       <div className="auth-footer">
-        <Link href="/connexion">Retour à la connexion</Link>
+        <Link href="/connexion">{t("resetpwd.backToLogin")}</Link>
       </div>
     </>
   );

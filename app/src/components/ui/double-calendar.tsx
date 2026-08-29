@@ -14,23 +14,11 @@ import {
   FaChevronLeft,
   FaChevronRight,
 } from "react-icons/fa6";
-
-const WEEKDAYS = ["lu", "ma", "me", "je", "ve", "sa", "di"];
-
-const MONTH_NAMES = [
-  "janvier",
-  "février",
-  "mars",
-  "avril",
-  "mai",
-  "juin",
-  "juillet",
-  "août",
-  "septembre",
-  "octobre",
-  "novembre",
-  "décembre",
-];
+import { useApp } from "@/components/providers/app-provider";
+import {
+  MONTH_NAMES,
+  WEEKDAYS_SHORT,
+} from "@/lib/i18n/dictionaries";
 
 function todayISO(): string {
   return new Date().toISOString().slice(0, 10);
@@ -55,10 +43,10 @@ function parseISO(iso: string): { year: number; month: number; day: number } | n
   return { year: Number(m[1]), month: Number(m[2]), day: Number(m[3]) };
 }
 
-function formatShort(iso: string): string {
+function formatShort(lang: "fr" | "en", iso: string): string {
   const p = parseISO(iso);
   if (!p) return "";
-  return `${p.day} ${MONTH_NAMES[p.month - 1].slice(0, 3)}. ${p.year}`;
+  return `${p.day} ${MONTH_NAMES[lang][p.month - 1].slice(0, 3)}. ${p.year}`;
 }
 
 /* ─── Calendrier mensuel (memo pour éviter re-render inutile) ─── */
@@ -68,12 +56,14 @@ const MonthCalendar = memo(function MonthCalendar({
   minDate,
   selected,
   onSelect,
+  lang,
 }: {
   year: number;
   month: number;
   minDate: string;
   selected: string;
   onSelect: (iso: string) => void;
+  lang: "fr" | "en";
 }) {
   const blanks = leadingBlanks(year, month);
   const total = daysInMonth(year, month);
@@ -82,7 +72,7 @@ const MonthCalendar = memo(function MonthCalendar({
   return (
     <div className="dp-month">
       <div className="dp-month-grid">
-        {WEEKDAYS.map((wd) => (
+        {WEEKDAYS_SHORT[lang].map((wd) => (
           <span key={wd} className="dp-weekday" aria-hidden="true">
             {wd}
           </span>
@@ -110,7 +100,7 @@ const MonthCalendar = memo(function MonthCalendar({
               type="button"
               className={cls}
               disabled={isPast}
-              aria-label={`${day} ${MONTH_NAMES[month - 1]} ${year}`}
+              aria-label={`${day} ${MONTH_NAMES[lang][month - 1]} ${year}`}
               aria-current={isToday ? "date" : undefined}
               onClick={() => onSelect(iso)}
             >
@@ -138,6 +128,7 @@ const CalendarDropdown = forwardRef<HTMLDivElement, {
   { year, month, minDate, selected, onSelect, canPrevMonth, onPrev, onNext, label },
   ref,
 ) {
+  const { lang, t } = useApp();
   return (
     <div className="dp-dropdown" role="dialog" aria-label={label} ref={ref}>
       <div className="dp-header">
@@ -146,18 +137,18 @@ const CalendarDropdown = forwardRef<HTMLDivElement, {
           className="dp-nav"
           disabled={canPrevMonth(year, month)}
           onClick={(e) => { e.stopPropagation(); onPrev(); }}
-          aria-label="Mois précédent"
+          aria-label={t("calendar.prevMonth")}
         >
           <FaChevronLeft aria-hidden="true" size={12} />
         </button>
         <span className="dp-title">
-          {MONTH_NAMES[month - 1]} {year}
+          {MONTH_NAMES[lang][month - 1]} {year}
         </span>
         <button
           type="button"
           className="dp-nav"
           onClick={(e) => { e.stopPropagation(); onNext(); }}
-          aria-label="Mois suivant"
+          aria-label={t("calendar.nextMonth")}
         >
           <FaChevronRight aria-hidden="true" size={12} />
         </button>
@@ -168,6 +159,7 @@ const CalendarDropdown = forwardRef<HTMLDivElement, {
         minDate={minDate}
         selected={selected}
         onSelect={onSelect}
+        lang={lang}
       />
     </div>
   );
@@ -175,6 +167,7 @@ const CalendarDropdown = forwardRef<HTMLDivElement, {
 
 /* ─── DateRangeField : deux champs date dans le hero ─── */
 export function DateRangeField({ min }: { min?: string }) {
+  const { lang, t } = useApp();
   const [openArrival, setOpenArrival] = useState(false);
   const [openDeparture, setOpenDeparture] = useState(false);
   const [arrivalISO, setArrivalISO] = useState("");
@@ -293,7 +286,7 @@ export function DateRangeField({ min }: { min?: string }) {
     <div ref={containerRef} style={{ display: "contents" }}>
       {/* Champ arrivée */}
       <div className="search-field">
-        <span className="search-label">Arrivée</span>
+        <span className="search-label">{t("calendar.arrival")}</span>
         <button
           type="button"
           className="dp-trigger"
@@ -307,7 +300,7 @@ export function DateRangeField({ min }: { min?: string }) {
         >
           <FaCalendarDays aria-hidden="true" size={15} />
           <span className={`dp-trigger-text${arrivalISO ? "" : " dp-trigger-text--empty"}`}>
-            {arrivalISO ? formatShort(arrivalISO) : "Choisir la date d\u2019arrivée"}
+            {arrivalISO ? formatShort(lang, arrivalISO) : t("calendar.pickArrival")}
           </span>
         </button>
         {openArrival && (
@@ -321,7 +314,7 @@ export function DateRangeField({ min }: { min?: string }) {
             canPrevMonth={canPrevMonth}
             onPrev={() => goMonth(setArrYear, setArrMonth, -1)}
             onNext={() => goMonth(setArrYear, setArrMonth, 1)}
-            label="Choix de la date d'arrivée"
+            label={t("calendar.selectArrival")}
           />
         )}
         <input type="hidden" name="arrivee" value={arrivalISO} />
@@ -329,7 +322,7 @@ export function DateRangeField({ min }: { min?: string }) {
 
       {/* Champ départ */}
       <div className="search-field">
-        <span className="search-label">Départ</span>
+        <span className="search-label">{t("calendar.departure")}</span>
         <button
           type="button"
           className="dp-trigger"
@@ -343,7 +336,7 @@ export function DateRangeField({ min }: { min?: string }) {
         >
           <FaCalendarDays aria-hidden="true" size={15} />
           <span className={`dp-trigger-text${departureISO ? "" : " dp-trigger-text--empty"}`}>
-            {departureISO ? formatShort(departureISO) : "Choisir la date de départ"}
+            {departureISO ? formatShort(lang, departureISO) : t("calendar.pickDeparture")}
           </span>
         </button>
         {openDeparture && (
@@ -357,7 +350,7 @@ export function DateRangeField({ min }: { min?: string }) {
             canPrevMonth={canPrevMonth}
             onPrev={() => goMonth(setDepYear, setDepMonth, -1)}
             onNext={() => goMonth(setDepYear, setDepMonth, 1)}
-            label="Choix de la date de départ"
+            label={t("calendar.selectDeparture")}
           />
         )}
         <input type="hidden" name="depart" value={departureISO} />
