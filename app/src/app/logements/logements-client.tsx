@@ -26,6 +26,7 @@ interface LogementsClientProps {
   initialHeureDepart: string;
   initialTri: string;
   initialPage: number;
+  initialPublished: SearchResultItem[];
 }
 
 export function LogementsClient({
@@ -40,6 +41,7 @@ export function LogementsClient({
   initialHeureDepart,
   initialTri,
   initialPage,
+  initialPublished,
 }: LogementsClientProps) {
   const { t } = useApp();
   const router = useRouter();
@@ -52,10 +54,14 @@ export function LogementsClient({
     tRef.current = t;
   }, [t]);
 
-  const [results, setResults] = useState<SearchResultItem[]>([]);
-  const [total, setTotal] = useState(0);
-  const [totalPages, setTotalPages] = useState(1);
-  const [loading, setLoading] = useState(true);
+  const [results, setResults] = useState<SearchResultItem[]>(
+    initialPublished ?? []
+  );
+  const [total, setTotal] = useState(initialPublished?.length ?? 0);
+  const [totalPages, setTotalPages] = useState(
+    Math.max(1, Math.ceil((initialPublished?.length ?? 0) / LIMIT))
+  );
+  const [loading, setLoading] = useState((initialPublished?.length ?? 0) === 0);
   const [error, setError] = useState<string | null>(null);
 
   const [tri, setTri] = useState(initialTri);

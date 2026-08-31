@@ -1,4 +1,6 @@
 import { Suspense } from "react";
+import { prisma } from "@/lib/prisma";
+import type { SearchResultItem } from "@/lib/services/availability";
 import { LogementsClient } from "./logements-client";
 import "./logements.css";
 
@@ -10,6 +12,47 @@ export const metadata = {
 
 interface LogementsPageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
+}
+
+async function loadPublishedProperties(): Promise<SearchResultItem[]> {
+  const properties = await prisma.property.findMany({
+    where: { statut: "publie" },
+    orderBy: { createdAt: "desc" },
+    include: {
+      photos: { orderBy: { ordre: "asc" }, take: 1 },
+      tarifs: { where: { actif: true }, take: 1 },
+      avis: { where: { statut: "publique" }, select: { note: true } },
+      caracteristiques: { include: { caracteristique: true } },
+    },
+  });
+
+  return properties.map((p) => {
+    const notes = p.avis.map((a) => a.note);
+    const noteMoyenne =
+      notes.length > 0
+        ? Math.round((notes.reduce((s, n) => s + n, 0) / notes.length) * 10) / 10
+        : null;
+    return {
+      id: p.id,
+      nom: p.nom,
+      type: p.type,
+      capaciteMaximale: p.capaciteMaximale,
+      adultesMax: p.adultesMax,
+      enfantsMax: p.enfantsMax,
+      bebesMax: p.bebesMax,
+      nombreChambres: p.nombreChambres,
+      nombreLits: p.nombreLits,
+      photo: p.photos[0]?.url ?? null,
+      noteMoyenne,
+      nombreAvis: notes.length,
+      equipements: p.caracteristiques.slice(0, 4).map((e) => e.caracteristique.nom),
+      prixTotal: p.tarifs[0] ? Number(p.tarifs[0].prix) : 0,
+      prixBase: p.tarifs[0] ? Number(p.tarifs[0].prix) : 0,
+      nuitsOuUnites: 1,
+      devise: p.tarifs[0]?.devise ?? p.devise,
+      promotionAppliquee: null,
+    };
+  });
 }
 
 export default async function LogementsPage({ searchParams }: LogementsPageProps) {
@@ -32,6 +75,9 @@ export default async function LogementsPage({ searchParams }: LogementsPageProps
   const tri = get("tri", "pertinence");
   const page = parseInt(get("page", "1"), 10) || 1;
 
+  const hasSearch = Boolean(arrivee && depart);
+  const initialPublished = hasSearch ? [] : await loadPublishedProperties();
+
   return (
     <Suspense>
       <LogementsClient
@@ -46,6 +92,7 @@ export default async function LogementsPage({ searchParams }: LogementsPageProps
         initialHeureDepart={heureDepart}
         initialTri={tri}
         initialPage={page}
+        initialPublished={initialPublished}
       />
     </Suspense>
   );
