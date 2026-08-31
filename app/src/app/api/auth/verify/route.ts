@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { SignJWT } from "jose";
-
-const secret = new TextEncoder().encode(process.env.AUTH_SECRET);
+import { encode } from "@auth/core/jwt";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -33,29 +31,37 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    const jwt = await new SignJWT({
-      role: user.role,
-      id: user.id,
-      prenom: user.prenom,
-      nom: user.nom,
-    })
-      .setProtectedHeader({ alg: "HS256" })
-      .setIssuedAt()
-      .setExpirationTime("8h")
-      .sign(secret);
-
     const redirectUrl = user.role === "client" ? "/?verified=1" : "/admin?verified=1";
     const response = NextResponse.redirect(new URL(redirectUrl, request.url));
 
     const isProd = process.env.NODE_ENV === "production";
     const cookieName = isProd ? "__Secure-authjs.session-token" : "authjs.session-token";
+    const maxAge = Number(process.env.AUTH_SESSION_HEURES ?? 8) * 3600;
 
-    response.cookies.set(cookieName, jwt, {
+    // Encode le jeton dans le format chiffré attendu par NextAuth (JWE),
+    // avec le nom du cookie comme "salt" — seul format que auth()/getToken() reconaissent.
+    const sessionToken = await encode({
+      salt: cookieName,
+      secret: process.env.AUTH_SECRET!,
+      maxAge,
+      token: {
+        sub: user.id,
+        name: `${user.prenom} ${user.nom}`,
+        email: user.email,
+        picture: user.avatarUrl,
+        role: user.role,
+        id: user.id,
+        prenom: user.prenom,
+        nom: user.nom,
+      },
+    });
+
+    response.cookies.set(cookieName, sessionToken, {
       httpOnly: true,
       secure: isProd,
       sameSite: "lax",
       path: "/",
-      maxAge: 8 * 60 * 60,
+      maxAge,
     });
 
     return response;
