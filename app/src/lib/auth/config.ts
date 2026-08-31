@@ -13,6 +13,7 @@ declare module "next-auth" {
       role: string;
       prenom: string;
       nom: string;
+      emailConfirme: boolean;
       name?: string | null;
       email?: string | null;
       image?: string | null;
@@ -26,6 +27,7 @@ declare module "next-auth" {
     id?: string;
     prenom?: string;
     nom?: string;
+    emailConfirme?: boolean;
   }
 }
 
@@ -98,6 +100,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           email: user.email,
           name: `${user.prenom} ${user.nom}`,
           role: user.role,
+          emailConfirme: user.emailConfirme,
         };
       },
     }),
@@ -118,11 +121,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.id = user.id;
         const dbUser = await prisma.user.findUnique({
           where: { id: user.id },
-          select: { prenom: true, nom: true },
+          select: { prenom: true, nom: true, emailConfirme: true },
         });
         if (dbUser) {
           token.prenom = dbUser.prenom;
           token.nom = dbUser.nom;
+          token.emailConfirme = dbUser.emailConfirme;
         }
       }
       return token;
@@ -133,6 +137,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         session.user.id = token.id as string;
         session.user.prenom = (token.prenom as string) || "";
         session.user.nom = (token.nom as string) || "";
+        session.user.emailConfirme = token.emailConfirme as boolean;
       }
       return session;
     },

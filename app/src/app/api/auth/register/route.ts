@@ -73,7 +73,8 @@ export async function POST(request: NextRequest) {
     const { sent: emailSent } = await sendVerificationEmail(
       normalizedEmail,
       prenom,
-      verifyToken
+      verifyToken,
+      request.nextUrl.origin
     );
 
     console.log("[REGISTER]", normalizedEmail, "emailSent:", emailSent);

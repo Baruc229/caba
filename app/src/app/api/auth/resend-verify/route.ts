@@ -28,7 +28,12 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    const { sent: emailSent, verifyUrl } = await sendVerificationEmail(email, user.prenom, verifyToken);
+    const { sent: emailSent } = await sendVerificationEmail(
+      email,
+      user.prenom,
+      verifyToken,
+      request.nextUrl.origin
+    );
     console.log("[RESEND]", email, "emailSent:", emailSent);
 
     return NextResponse.json({

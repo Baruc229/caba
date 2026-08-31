@@ -332,6 +332,10 @@ export const dictionaries = {
         generic: "Une erreur est survenue. Veuillez réessayer.",
         echec:
           "Identifiants incorrects. Vérifiez votre email et votre mot de passe — ou réinitialisez-le via « Mot de passe oublié ? ».",
+        needsVerification:
+          "Votre email n'est pas encore vérifié. Vérifiez votre boîte de réception (et vos spams) puis cliquez sur le lien d'activation, ou renvoyez le lien ci-dessous.",
+        resendVerifyBtn: "Renvoyer le lien de vérification",
+        resendVerifySent: "Lien de vérification renvoyé. Vérifiez votre boîte de réception.",
       },
       eyeShow: "Afficher le mot de passe",
       eyeHide: "Masquer le mot de passe",
@@ -808,6 +812,10 @@ export const dictionaries = {
         generic: "An error occurred. Please try again.",
         echec:
           "Incorrect credentials. Check your email and password — or reset it via \"Forgot password?\".",
+        needsVerification:
+          "Your email is not verified yet. Check your inbox (and spam) and click the activation link, or resend the link below.",
+        resendVerifyBtn: "Resend the verification link",
+        resendVerifySent: "Verification link sent. Check your inbox.",
       },
       eyeShow: "Show password",
       eyeHide: "Hide password",

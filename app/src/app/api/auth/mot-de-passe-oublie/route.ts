@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createHash, randomBytes } from "crypto";
 import { prisma } from "@/lib/prisma";
-import { sendEmail, templateResetPassword } from "@/lib/services/email/brevo";
+import { sendResetPasswordEmail } from "@/lib/email";
 
 export async function POST(request: NextRequest) {
   try {
@@ -25,13 +25,10 @@ export async function POST(request: NextRequest) {
         });
 
         const origin = request.nextUrl.origin;
-        await sendEmail({
-          to: [{ email: user.email, name: `${user.prenom} ${user.nom}` }],
-          subject: "Réinitialisation de votre mot de passe — Caba Résidence",
-          htmlContent: templateResetPassword({
-            prenom: user.prenom,
-            lien: `${origin}/reinitialiser-mot-de-passe?token=${token}`,
-          }),
+        await sendResetPasswordEmail({
+          to: user.email,
+          prenom: user.prenom,
+          lien: `${origin}/reinitialiser-mot-de-passe?token=${token}`,
         });
       }
     }

@@ -51,10 +51,14 @@ export async function sendEmail({ to, subject, htmlContent, textContent }: SendE
 export async function sendVerificationEmail(
   email: string,
   prenom: string,
-  verifyToken: string
+  verifyToken: string,
+  baseUrl?: string
 ): Promise<{ sent: boolean; verifyUrl: string }> {
-  const baseUrl = process.env.NEXTAUTH_URL || "https://caba-five.vercel.app";
-  const verifyUrl = `${baseUrl}/api/auth/verify?token=${verifyToken}`;
+  const base = baseUrl || process.env.BASE_URL || process.env.NEXTAUTH_URL;
+  if (!base) {
+    throw new Error("URL de base manquante (BASE_URL / NEXTAUTH_URL / origin requis)");
+  }
+  const verifyUrl = `${base}/api/auth/verify?token=${verifyToken}`;
 
   const htmlContent = `<!DOCTYPE html>
 <html>
@@ -129,4 +133,81 @@ export async function sendVerificationEmail(
   const sent = await sendEmail({ to: email, subject: "Vérifiez votre email — Caba Résidence", htmlContent, textContent });
 
   return { sent, verifyUrl };
+}
+
+export async function sendResetPasswordEmail(params: {
+  to: string;
+  prenom: string;
+  lien: string;
+}): Promise<boolean> {
+  const htmlContent = `<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"></head>
+<body style="margin:0;padding:0;background:#f7f5f1;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f7f5f1;padding:32px 16px 24px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="480" cellpadding="0" cellspacing="0" style="width:100%;max-width:480px;background:#ffffff;border-radius:16px;border:1px solid #eae6de;overflow:hidden;">
+          <tr>
+            <td align="center" style="padding:34px 32px 0;">
+              <span style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:12px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:#d21034;">Caba Résidence</span>
+            </td>
+          </tr>
+          <tr>
+            <td align="center" style="padding:12px 32px 0;">
+              <h1 style="margin:0;font-family:'Arial Black','Helvetica Neue',Helvetica,Arial,sans-serif;font-size:26px;line-height:1.05;letter-spacing:.02em;text-transform:uppercase;font-style:italic;color:#1a1a1a;">Mot de passe<br/>oublié</h1>
+            </td>
+          </tr>
+          <tr>
+            <td align="center" style="padding:18px 32px 0;">
+              <p style="margin:0;font-size:15px;line-height:1.6;color:#6b6459;">
+                Bonjour ${params.prenom},<br/>
+                Vous avez demandé la réinitialisation de votre mot de passe.
+                Cliquez sur le bouton ci-dessous pour en choisir un nouveau.
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td align="center" style="padding:26px 32px 0;">
+              <a href="${params.lien}" style="display:inline-block;padding:15px 40px;border-radius:999px;background:#001489;color:#ffffff;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:15px;font-weight:600;text-decoration:none;letter-spacing:.01em;">Choisir un nouveau mot de passe</a>
+            </td>
+          </tr>
+          <tr>
+            <td align="center" style="padding:14px 32px 0;">
+              <p style="margin:0;font-size:12px;line-height:1.5;color:#a29a8c;">
+                Si le bouton ne fonctionne pas,
+                <a href="${params.lien}" style="color:#001489;text-decoration:underline;">cliquez ici</a>.
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td align="center" style="padding:22px 32px 0;">
+              <p style="margin:0;font-size:13px;line-height:1.55;color:#6b6459;">
+                Ce lien est valable <strong>1 heure</strong> et ne peut être utilisé qu'une seule fois.<br/>
+                Si vous n'êtes pas à l'origine de cette demande, ignorez cet email — votre mot de passe actuel reste inchangé.
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td align="center" style="padding:26px 32px 22px;background:#ffffff;">
+              <div style="width:100%;border-top:1px solid #eae6de;margin:0 0 18px;"></div>
+              <p style="margin:0 0 4px;font-size:13px;font-weight:600;color:#001489;">Caba Résidence</p>
+              <p style="margin:0;font-size:12px;color:#a29a8c;">Cotonou, Bénin — © ${new Date().getFullYear()}</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+
+  const textContent = `Bonjour ${params.prenom}\n\nRéinitialisez votre mot de passe en cliquant sur ce lien :\n${params.lien}\n\nCe lien est valable 1 heure et ne peut être utilisé qu'une seule fois.`;
+
+  return sendEmail({
+    to: params.to,
+    subject: "Réinitialisation de votre mot de passe — Caba Résidence",
+    htmlContent,
+    textContent,
+  });
 }

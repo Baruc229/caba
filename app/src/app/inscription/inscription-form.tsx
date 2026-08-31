@@ -175,7 +175,9 @@ export function InscriptionForm({
                 </p>
                 <p className="auth-subtitle-v2" style={{ marginTop: 12, fontSize: 13 }}>
                   {t("auth.verify.notReceived")}{" "}
-                  <Link href={`/verification?resend=${encodeURIComponent(verifyUrl.split("token=")[1] || "")}`}>
+                  <Link
+                    href={`/verification?email=${verifyUrl.split("email=")[1] || ""}`}
+                  >
                     {t("auth.verify.resend")}
                   </Link>
                 </p>

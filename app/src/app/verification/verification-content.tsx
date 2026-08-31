@@ -22,6 +22,8 @@ export function VerificationContent() {
   const emailParam = searchParams.get("email");
   const error = searchParams.get("error");
 
+  const activateUrl = token ? `/api/auth/verify?token=${encodeURIComponent(token)}` : null;
+
   const [email, setEmail] = useState(emailParam ?? "");
   const [sent, setSent] = useState(false);
   const [sentVerifyUrl, setSentVerifyUrl] = useState<string | null>(null);
@@ -125,6 +127,12 @@ export function VerificationContent() {
                     <strong style={{ color: "var(--color-text-primary)" }}>{email}</strong>.
                     {t("verify.emailSentSuffix")}
                   </p>
+                )}
+                {activateUrl && (
+                  <a href={activateUrl} className="auth-btn" style={{ marginTop: 12, display: "inline-flex", alignItems: "center", gap: 8 }}>
+                    <FaCircleCheck aria-hidden="true" />
+                    {t("verify.activerMonCompte")}
+                  </a>
                 )}
                 <p className="auth-subtitle-v2" style={{ marginTop: 16, fontSize: 13 }}>
                   <button

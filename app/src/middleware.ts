@@ -30,6 +30,11 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL(target, request.url));
   }
 
+  // Compte non vérifié : exiger la vérification d'email (sauf sur la page /verification)
+  if (token.emailConfirme === false && pathname !== "/verification") {
+    return NextResponse.redirect(new URL("/verification", request.url));
+  }
+
   // Client connecté : n'a pas d'accès au back-office
   if (token.role === "client" && pathname.startsWith("/admin")) {
     return NextResponse.redirect(new URL("/", request.url));
@@ -39,5 +44,12 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin", "/admin/:path*", "/connexion", "/inscription", "/mot-de-passe-oublie", "/reinitialiser-mot-de-passe"],
+  matcher: [
+    "/admin/:path*",
+    "/connexion",
+    "/inscription",
+    "/mot-de-passe-oublie",
+    "/reinitialiser-mot-de-passe",
+    "/compte/:path*",
+  ],
 };

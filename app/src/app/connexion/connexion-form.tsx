@@ -52,6 +52,9 @@ export function ConnexionForm({ echec, succes, emailVerifie }: ConnexionFormProp
   const [status, setStatus] = useState<"idle" | "loading">("idle");
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
+  const [needsVerification, setNeedsVerification] = useState(false);
+  const [resendStatus, setResendStatus] = useState<"idle" | "loading" | "sent">("idle");
+  const [lastEmail, setLastEmail] = useState("");
 
   async function handleLogin(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -80,6 +83,24 @@ export function ConnexionForm({ echec, succes, emailVerifie }: ConnexionFormProp
       });
 
       if (result?.error) {
+        setNeedsVerification(false);
+        setResendStatus("idle");
+        setLastEmail(email);
+        try {
+          const stateRes = await fetch("/api/auth/connexion-state", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email }),
+          });
+          const state = await stateRes.json();
+          if (state.exists && state.emailConfirme === false) {
+            setNeedsVerification(true);
+            setStatus("idle");
+            return;
+          }
+        } catch {
+          // ignore : on garde le message générique
+        }
         setError(
           result.error === "CredentialsSignin"
             ? t("auth.err.credentials")
@@ -97,6 +118,21 @@ export function ConnexionForm({ echec, succes, emailVerifie }: ConnexionFormProp
     } catch {
       setError(t("auth.err.generic"));
       setStatus("idle");
+    }
+  }
+
+  async function handleResend() {
+    if (!lastEmail) return;
+    setResendStatus("loading");
+    try {
+      await fetch("/api/auth/resend-verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: lastEmail }),
+      });
+      setResendStatus("sent");
+    } catch {
+      setResendStatus("idle");
     }
   }
 
@@ -133,6 +169,29 @@ export function ConnexionForm({ echec, succes, emailVerifie }: ConnexionFormProp
             <p role="alert" className="auth-banner auth-banner--error">
               {error}
             </p>
+          )}
+
+          {needsVerification && (
+            <div role="alert" className="auth-banner auth-banner--error">
+              <p style={{ margin: 0 }}>{t("auth.err.needsVerification")}</p>
+              {resendStatus === "sent" ? (
+                <p role="status" style={{ margin: "8px 0 0", fontWeight: 600 }}>
+                  {t("auth.err.resendVerifySent")}
+                </p>
+              ) : (
+                <button
+                  type="button"
+                  className="auth-btn--link"
+                  style={{ marginTop: 10, background: "none", border: "none", padding: 0, color: "var(--color-accent)", textDecoration: "underline", cursor: "pointer" }}
+                  onClick={handleResend}
+                  disabled={resendStatus === "loading"}
+                >
+                  {resendStatus === "loading"
+                    ? t("auth.err.resendVerifyBtn") + "…"
+                    : t("auth.err.resendVerifyBtn")}
+                </button>
+              )}
+            </div>
           )}
 
           <form onSubmit={handleLogin} noValidate>
