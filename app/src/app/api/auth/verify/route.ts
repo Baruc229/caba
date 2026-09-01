@@ -2,9 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { encode } from "@auth/core/jwt";
 
+// N'accepte qu'un chemin relatif interne pour éviter toute redirection ouverte.
+function safeNext(value: string | null): string | null {
+  if (value && value.startsWith("/") && !value.startsWith("//")) return value;
+  return null;
+}
+
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const token = searchParams.get("token");
+  const nextParam = safeNext(searchParams.get("next"));
 
   if (!token) {
     return NextResponse.redirect(new URL("/verification?error=missing", request.url));
@@ -31,8 +38,10 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    const redirectUrl = user.role === "client" ? "/?verified=1" : "/admin?verified=1";
-    const response = NextResponse.redirect(new URL(redirectUrl, request.url));
+    const baseRedirect =
+      nextParam ? `${nextParam}${nextParam.includes("?") ? "&" : "?"}verified=1`
+      : user.role === "client" ? "/?verified=1" : "/admin?verified=1";
+    const response = NextResponse.redirect(new URL(baseRedirect, request.url));
 
     const isProd = process.env.NODE_ENV === "production";
     const cookieName = isProd ? "__Secure-authjs.session-token" : "authjs.session-token";

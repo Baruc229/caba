@@ -211,3 +211,82 @@ export async function sendResetPasswordEmail(params: {
     textContent,
   });
 }
+
+export async function sendBookingConfirmationEmail(params: {
+  to: string;
+  prenom: string;
+  numero: string;
+  prixTotal: number;
+  devise: string;
+}): Promise<boolean> {
+  const htmlContent = `<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"></head>
+<body style="margin:0;padding:0;background:#f7f5f1;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f7f5f1;padding:32px 16px 24px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="480" cellpadding="0" cellspacing="0" style="width:100%;max-width:480px;background:#ffffff;border-radius:16px;border:1px solid #eae6de;overflow:hidden;">
+          <tr>
+            <td align="center" style="padding:34px 32px 0;">
+              <span style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:12px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:#d21034;">Caba Résidence</span>
+            </td>
+          </tr>
+          <tr>
+            <td align="center" style="padding:12px 32px 0;">
+              <h1 style="margin:0;font-family:'Arial Black','Helvetica Neue',Helvetica,Arial,sans-serif;font-size:26px;line-height:1.05;letter-spacing:.02em;text-transform:uppercase;font-style:italic;color:#1a1a1a;">Confirmation<br/>de réservation</h1>
+            </td>
+          </tr>
+          <tr>
+            <td align="center" style="padding:18px 32px 0;">
+              <p style="margin:0;font-size:15px;line-height:1.6;color:#6b6459;">
+                Bonjour ${params.prenom},<br/>
+                Votre réservation est confirmée et payée.
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td align="center" style="padding:22px 32px 0;">
+              <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;max-width:320px;background:#f7f5f1;border-radius:12px;">
+                <tr>
+                  <td style="padding:14px 20px;font-size:13px;color:#6b6459;">Référence</td>
+                  <td style="padding:14px 20px;font-size:13px;font-weight:600;color:#1a1a1a;text-align:right;">${params.numero}</td>
+                </tr>
+                <tr>
+                  <td style="padding:0 20px 14px;font-size:13px;color:#6b6459;">Total payé</td>
+                  <td style="padding:0 20px 14px;font-size:15px;font-weight:700;color:#001489;text-align:right;">${params.prixTotal} ${params.devise}</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td align="center" style="padding:22px 32px 0;">
+              <p style="margin:0;font-size:13px;line-height:1.55;color:#6b6459;">
+                Un récapitulatif détaillé est disponible dans votre espace client.<br/>
+                Merci de votre confiance.
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td align="center" style="padding:26px 32px 22px;background:#ffffff;">
+              <div style="width:100%;border-top:1px solid #eae6de;margin:0 0 18px;"></div>
+              <p style="margin:0 0 4px;font-size:13px;font-weight:600;color:#001489;">Caba Résidence</p>
+              <p style="margin:0;font-size:12px;color:#a29a8c;">Cotonou, Bénin — © ${new Date().getFullYear()}</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+
+  const textContent = `Bonjour ${params.prenom},\n\nVotre réservation ${params.numero} est confirmée et payée (${params.prixTotal} ${params.devise}).\n\nUn récapitulatif est disponible dans votre espace client.`;
+
+  return sendEmail({
+    to: params.to,
+    subject: `Confirmation de réservation ${params.numero} — Caba Résidence`,
+    htmlContent,
+    textContent,
+  });
+}

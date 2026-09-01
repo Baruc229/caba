@@ -47,10 +47,8 @@ export interface PropertyDetailData {
 
 export function PropertyDetailClient({
   property,
-  clientId,
 }: {
   property: PropertyDetailData;
-  clientId: string | undefined;
 }) {
   const { lang, t, currency } = useApp();
   const router = useRouter();
@@ -67,7 +65,6 @@ export function PropertyDetailClient({
   const [arrivee, setArrivee] = useState("");
   const [depart, setDepart] = useState("");
   const [adultes, setAdultes] = useState(2);
-  const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
   async function handleReserve(e: FormEvent) {
@@ -79,37 +76,15 @@ export function PropertyDetailClient({
       return;
     }
 
-    if (!clientId) {
-      router.push(`/connexion?next=${encodeURIComponent(`/logements/${property.id}?action=reserver`)}`);
-      return;
-    }
-
-    setSubmitting(true);
-    try {
-      const res = await fetch("/api/bookings", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          propertyId: property.id,
-          clientId,
-          startDate: arrivee,
-          endDate: depart,
-          typeReservation: "nuee",
-          adults: adultes,
-          source: "site_web",
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setMessage(data.error ?? t("logements.error"));
-        return;
-      }
-      router.push(`/compte/reservations`);
-    } catch {
-      setMessage(t("logements.error"));
-    } finally {
-      setSubmitting(false);
-    }
+    const params = new URLSearchParams({
+      arrivee,
+      depart,
+      heureArrivee: "14:00",
+      heureDepart: "11:00",
+      typeReservation: "nuee",
+      adultes: String(adultes),
+    });
+    router.push(`/logements/${property.id}/reserver?${params.toString()}`);
   }
 
   return (
@@ -256,8 +231,8 @@ export function PropertyDetailClient({
                   />
                 </label>
                 {message && <p className="detail-form-error">{message}</p>}
-                <button type="submit" className="detail-submit" disabled={submitting}>
-                  {submitting ? t("common.charger") : t("logementDetail.reserver")}
+                <button type="submit" className="detail-submit">
+                  {t("logementDetail.reserver")}
                 </button>
               </form>
             )}

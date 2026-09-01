@@ -1,7 +1,6 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { auth } from "@/lib/auth/config";
 import {
   PropertyDetailClient,
   type PropertyDetailData,
@@ -40,8 +39,6 @@ export default async function LogementDetailPage({ params }: DetailPageProps) {
       ? Math.round((notes.reduce((s, n) => s + n, 0) / notes.length) * 10) / 10
       : null;
 
-  const session = await auth();
-
   const data: PropertyDetailData = {
     id: property.id,
     nom: property.nom,
@@ -75,7 +72,7 @@ export default async function LogementDetailPage({ params }: DetailPageProps) {
 
   return (
     <Suspense>
-      <PropertyDetailClient property={data} clientId={session?.user?.id} />
+      <PropertyDetailClient property={data} />
     </Suspense>
   );
 }

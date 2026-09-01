@@ -7,6 +7,12 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const email = body.email?.toLowerCase().trim();
+    const nextParam =
+      typeof body.next === "string" &&
+      body.next.startsWith("/") &&
+      !body.next.startsWith("//")
+        ? body.next
+        : "";
 
     if (!email) {
       return NextResponse.json({ error: "Email requis" }, { status: 400 });
@@ -39,7 +45,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       message: "Si cet email existe, un lien a ete envoye.",
       emailSent,
-      verifyUrl: `/verification?token=${verifyToken}&email=${encodeURIComponent(email)}`,
+      verifyUrl: `/verification?token=${verifyToken}&email=${encodeURIComponent(email)}${nextParam ? `&next=${encodeURIComponent(nextParam)}` : ""}`,
     });
   } catch (error) {
     console.error("[RESEND] Error:", error);

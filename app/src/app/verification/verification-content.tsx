@@ -21,8 +21,11 @@ export function VerificationContent() {
   const token = searchParams.get("token");
   const emailParam = searchParams.get("email");
   const error = searchParams.get("error");
+  const nextParam = searchParams.get("next");
 
-  const activateUrl = token ? `/api/auth/verify?token=${encodeURIComponent(token)}` : null;
+  // Thread le retour au checkout après vérification si présent.
+  const returnQuery = nextParam ? `&next=${encodeURIComponent(nextParam)}` : "";
+  const activateUrl = token ? `/api/auth/verify?token=${encodeURIComponent(token)}${returnQuery}` : null;
 
   const [email, setEmail] = useState(emailParam ?? "");
   const [sent, setSent] = useState(false);
@@ -49,9 +52,10 @@ export function VerificationContent() {
   useEffect(() => {
     if (!success || redirected.current) return;
     redirected.current = true;
-    const timer = setTimeout(() => router.replace("/"), 1800);
+    const dest = nextParam && nextParam.startsWith("/") && !nextParam.startsWith("//") ? nextParam : "/";
+    const timer = setTimeout(() => router.replace(dest), 1800);
     return () => clearTimeout(timer);
-  }, [success, router]);
+  }, [success, router, nextParam]);
 
   async function handleResend() {
     if (!email.trim()) return;
@@ -60,7 +64,7 @@ export function VerificationContent() {
       const res = await fetch("/api/auth/resend-verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim() }),
+        body: JSON.stringify({ email: email.trim(), next: nextParam ?? "" }),
       });
       const data = await res.json();
       setSentVerifyUrl(data.verifyUrl ?? null);

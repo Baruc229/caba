@@ -12,6 +12,7 @@ interface ConnexionFormProps {
   echec: boolean;
   succes: boolean;
   emailVerifie?: boolean;
+  next?: string;
 }
 
 function validerEmail(valeur: string, t: (path: string) => string): string {
@@ -28,7 +29,16 @@ function validerMotDePasse(valeur: string, t: (path: string) => string): string 
   return "";
 }
 
-export function ConnexionForm({ echec, succes, emailVerifie }: ConnexionFormProps) {
+// Retourne la destination de retour après connexion en restant sûr :
+// n'accepte qu'un chemin relatif interne (aucune redirection ouverte possible).
+function destinationRetour(next?: string): string {
+  if (next && next.startsWith("/") && !next.startsWith("//")) {
+    return next;
+  }
+  return "/redirection";
+}
+
+export function ConnexionForm({ echec, succes, emailVerifie, next }: ConnexionFormProps) {
   const { t } = useApp();
   const [staffManquant, setStaffManquant] = useState(false);
 
@@ -78,7 +88,7 @@ export function ConnexionForm({ echec, succes, emailVerifie }: ConnexionFormProp
       const result = await signIn("credentials", {
         email,
         password,
-        callbackUrl: "/redirection",
+        callbackUrl: destinationRetour(next),
         redirect: false,
       });
 

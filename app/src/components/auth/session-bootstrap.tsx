@@ -16,7 +16,10 @@ export function SessionBootstrap() {
     const params = new URLSearchParams(window.location.search);
     if (params.get("verified") !== "1") return;
     done.current = true;
-    router.replace("/", { scroll: false });
+    const next = params.get("next");
+    const dest =
+      next && next.startsWith("/") && !next.startsWith("//") ? next : "/";
+    router.replace(dest, { scroll: false });
     router.refresh();
   }, [router]);
 
