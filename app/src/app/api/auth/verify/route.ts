@@ -38,6 +38,11 @@ export async function GET(request: NextRequest) {
       },
     });
 
+    const dbUser = await prisma.user.findUnique({
+      where: { id: user.id },
+      select: { id: true, prenom: true, nom: true, email: true, role: true, avatarUrl: true, emailConfirme: true },
+    });
+
     const baseRedirect =
       nextParam ? `${nextParam}${nextParam.includes("?") ? "&" : "?"}verified=1`
       : user.role === "client" ? "/?verified=1" : "/admin?verified=1";
@@ -47,21 +52,20 @@ export async function GET(request: NextRequest) {
     const cookieName = isProd ? "__Secure-authjs.session-token" : "authjs.session-token";
     const maxAge = Number(process.env.AUTH_SESSION_HEURES ?? 8) * 3600;
 
-    // Encode le jeton dans le format chiffré attendu par NextAuth (JWE),
-    // avec le nom du cookie comme "salt" — seul format que auth()/getToken() reconaissent.
     const sessionToken = await encode({
       salt: cookieName,
       secret: process.env.AUTH_SECRET!,
       maxAge,
       token: {
-        sub: user.id,
-        name: `${user.prenom} ${user.nom}`,
-        email: user.email,
-        picture: user.avatarUrl,
-        role: user.role,
-        id: user.id,
-        prenom: user.prenom,
-        nom: user.nom,
+        sub: dbUser!.id,
+        name: `${dbUser!.prenom} ${dbUser!.nom}`,
+        email: dbUser!.email,
+        picture: dbUser!.avatarUrl,
+        role: dbUser!.role,
+        id: dbUser!.id,
+        prenom: dbUser!.prenom,
+        nom: dbUser!.nom,
+        emailConfirme: dbUser!.emailConfirme,
       },
     });
 

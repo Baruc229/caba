@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useApp } from "@/components/providers/app-provider";
 import { convertAmount, formatAmount } from "@/lib/i18n/currency";
@@ -62,6 +63,7 @@ export function CheckoutClient({
 }) {
   const { lang, t, currency } = useApp();
   const router = useRouter();
+  const { data: sessionData } = useSession();
 
   const [dates] = useState<CheckoutDates>(defaultDates);
   const [price, setPrice] = useState<{
