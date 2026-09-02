@@ -1418,6 +1418,74 @@
   outline-offset: 2px;
 }
 
+.globe-btn {
+  padding: 0 10px;
+}
+
+.locale-popup {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 200;
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 14px;
+  box-shadow: var(--shadow-card);
+  padding: 10px 14px;
+  min-width: 160px;
+  animation: pop-in 180ms ease both;
+}
+
+.locale-popup-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 5px 0;
+}
+
+.locale-popup-row + .locale-popup-row {
+  border-top: 1px solid var(--color-border-subtle);
+}
+
+.locale-popup-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.locale-popup-seg {
+  display: flex;
+  background: var(--color-bg-primary);
+  border-radius: 999px;
+  padding: 2px;
+}
+
+.locale-seg-btn {
+  padding: 3px 9px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all 120ms ease;
+}
+
+.locale-seg-btn:hover {
+  color: var(--color-text-primary);
+}
+
+.locale-seg-btn.is-active {
+  background: var(--color-accent-secondary);
+  color: #fff;
+}
+
 /* ── Bottom sheet compact mobile (menu utilisateur) ── */
 .user-sheet-overlay {
   position: fixed;
