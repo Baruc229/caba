@@ -58,6 +58,8 @@ export interface PropertyDetailData {
   devise: string;
   noteMoyenne: number | null;
   nombreAvis: number;
+  defaultCheckIn: string;
+  defaultCheckOut: string;
 }
 
 export function PropertyDetailClient({
@@ -122,8 +124,8 @@ export function PropertyDetailClient({
     const params = new URLSearchParams({
       arrivee,
       depart,
-      heureArrivee: "14:00",
-      heureDepart: "11:00",
+      heureArrivee: property.defaultCheckIn,
+      heureDepart: property.defaultCheckOut,
       typeReservation: sejourType,
       adultes: String(adultes),
       enfants: String(enfants),

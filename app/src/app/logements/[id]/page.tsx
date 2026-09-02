@@ -27,6 +27,7 @@ export default async function LogementDetailPage({ params, searchParams }: Detai
       caracteristiques: { include: { caracteristique: true } },
       tarifs: { where: { actif: true }, orderBy: { createdAt: "desc" }, take: 1 },
       avis: { where: { statut: "publique" }, select: { note: true } },
+      regles: { where: { actif: true, typeRegle: { in: ["check_in", "check_out"] } } },
     },
   });
 
@@ -39,6 +40,11 @@ export default async function LogementDetailPage({ params, searchParams }: Detai
     notes.length > 0
       ? Math.round((notes.reduce((s, n) => s + n, 0) / notes.length) * 10) / 10
       : null;
+
+  const checkInRule = property.regles.find((r) => r.typeRegle === "check_in");
+  const checkOutRule = property.regles.find((r) => r.typeRegle === "check_out");
+  const defaultCheckIn = checkInRule?.valeur ?? "14:00";
+  const defaultCheckOut = checkOutRule?.valeur ?? "11:00";
 
   const data: PropertyDetailData = {
     id: property.id,
@@ -69,6 +75,8 @@ export default async function LogementDetailPage({ params, searchParams }: Detai
     devise: property.tarifs[0]?.devise ?? property.devise,
     noteMoyenne,
     nombreAvis: notes.length,
+    defaultCheckIn,
+    defaultCheckOut,
   };
 
   return (
