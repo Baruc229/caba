@@ -129,6 +129,25 @@ export function CheckoutClient({
     };
   }, [dates, property.id, validDates]);
 
+  // Aprè verification d'email dans un autre onglet : aller chercher le session courant
+  // pour savoir si l email a été vérifié depuis le chargement de la page.
+  useEffect(() => {
+    if (!needVerify) return;
+    let cancelled = false;
+    fetch("/api/auth/session")
+      .then((r) => r.json())
+      .then((data) => {
+        if (cancelled) return;
+        if (data.connected && data.emailConfirme) {
+          setNeedVerify(null);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [needVerify]);
+
   async function handleAccountSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
