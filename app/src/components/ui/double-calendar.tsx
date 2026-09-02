@@ -166,7 +166,13 @@ const CalendarDropdown = forwardRef<HTMLDivElement, {
 });
 
 /* ─── DateRangeField : deux champs date dans le hero ─── */
-export function DateRangeField({ min }: { min?: string }) {
+export function DateRangeField({
+  min,
+  onDatesChange,
+}: {
+  min?: string;
+  onDatesChange?: (arrivee: string, depart: string) => void;
+}) {
   const { lang, t } = useApp();
   const [openArrival, setOpenArrival] = useState(false);
   const [openDeparture, setOpenDeparture] = useState(false);
@@ -267,20 +273,24 @@ export function DateRangeField({ min }: { min?: string }) {
       setDepYear(d.getUTCFullYear());
       setDepMonth(d.getUTCMonth() + 1);
     }
-  }, []);
+    onDatesChange?.(iso, departureISO);
+  }, [departureISO, onDatesChange]);
 
   const selectDeparture = useCallback((iso: string) => {
+    const newArrival = arrivalISO;
     setArrivalISO((prev) => {
       if (prev !== "" && iso <= prev) {
         setDepartureISO("");
         setOpenDeparture(false);
+        onDatesChange?.(iso, "");
         return iso;
       }
+      onDatesChange?.(newArrival, iso);
       setDepartureISO(iso);
       setOpenDeparture(false);
       return prev;
     });
-  }, []);
+  }, [arrivalISO, onDatesChange]);
 
   return (
     <div ref={containerRef} style={{ display: "contents" }}>

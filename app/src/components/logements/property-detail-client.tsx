@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useApp } from "@/components/providers/app-provider";
 import { AvailabilityCalendar } from "@/components/logements/availability-calendar";
+import { DateRangeField } from "@/components/ui/double-calendar";
 import {
   convertAmount,
   formatAmount,
@@ -66,6 +67,11 @@ export function PropertyDetailClient({
   const [depart, setDepart] = useState("");
   const [adultes, setAdultes] = useState(2);
   const [message, setMessage] = useState<string | null>(null);
+
+  function handleDatesChange(a: string, d: string) {
+    setArrivee(a);
+    setDepart(d);
+  }
 
   async function handleReserve(e: FormEvent) {
     e.preventDefault();
@@ -209,27 +215,18 @@ export function PropertyDetailClient({
 
             {property.tarifBase != null && (
               <form onSubmit={handleReserve} className="detail-form">
-                <div className="detail-form-grid">
-                  <label className="detail-field">
-                    <span className="detail-field-label">Arrivée</span>
-                    <input type="date" value={arrivee} onChange={(e) => setArrivee(e.target.value)} className="detail-input" />
-                  </label>
-                  <label className="detail-field">
-                    <span className="detail-field-label">Départ</span>
-                    <input type="date" value={depart} onChange={(e) => setDepart(e.target.value)} className="detail-input" />
-                  </label>
-                </div>
-                <label className="detail-field">
-                  <span className="detail-field-label">{t("logementDetail.adultes")}</span>
-                  <input
-                    type="number"
-                    min={1}
-                    max={Math.max(1, property.adultesMax)}
-                    value={adultes}
-                    onChange={(e) => setAdultes(parseInt(e.target.value || "1", 10))}
-                    className="detail-input"
-                  />
-                </label>
+              <DateRangeField onDatesChange={handleDatesChange} />
+              <label className="detail-field">
+                <span className="detail-field-label">{t("logementDetail.adultes")}</span>
+                <input
+                  type="number"
+                  min={1}
+                  max={Math.max(1, property.adultesMax)}
+                  value={adultes}
+                  onChange={(e) => setAdultes(parseInt(e.target.value || "1", 10))}
+                  className="detail-input"
+                />
+              </label>
                 {message && <p className="detail-form-error">{message}</p>}
                 <button type="submit" className="detail-submit">
                   {t("logementDetail.reserver")}

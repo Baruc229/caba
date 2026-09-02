@@ -66,7 +66,7 @@ export function CheckoutClient({
   const [dates] = useState<CheckoutDates>(defaultDates);
   const [price, setPrice] = useState<{
     total: number;
-    devise: string;
+    currency: string;
     subtotal: number;
     cleaningFee: number;
     cityTax: number;
@@ -224,8 +224,9 @@ export function CheckoutClient({
     }
   }
 
-  // Écran « vérifiez votre email »
-  if (needVerify) {
+  // Écran « vérifiez votre email » — ne s'affiche que si l'utilisateur n'est
+  // pas déjà vérifié (état local perdu après une vérification dans un autre onglet).
+  if (needVerify && !(isConnected && isVerified)) {
     return (
       <section className="container-caba py-12">
         <div className="checkout-box">
@@ -308,35 +309,35 @@ export function CheckoutClient({
             <div className="checkout-price">
               <div className="checkout-price-row">
                 <span>{t("checkout.subtotal")}</span>
-                <strong>{formatAmount(convertAmount(price.subtotal, price.devise, currency), lang)}</strong>
+                <strong>{formatAmount(convertAmount(price.subtotal, price.currency, currency), lang)}</strong>
               </div>
               {price.cleaningFee > 0 && (
                 <div className="checkout-price-row">
                   <span>{t("checkout.cleaningFee")}</span>
-                  <strong>{formatAmount(convertAmount(price.cleaningFee, price.devise, currency), lang)}</strong>
+                  <strong>{formatAmount(convertAmount(price.cleaningFee, price.currency, currency), lang)}</strong>
                 </div>
               )}
               {price.cityTax > 0 && (
                 <div className="checkout-price-row">
                   <span>{t("checkout.cityTax")}</span>
-                  <strong>{formatAmount(convertAmount(price.cityTax, price.devise, currency), lang)}</strong>
+                  <strong>{formatAmount(convertAmount(price.cityTax, price.currency, currency), lang)}</strong>
                 </div>
               )}
               {price.supplements > 0 && (
                 <div className="checkout-price-row">
                   <span>{t("checkout.supplements")}</span>
-                  <strong>{formatAmount(convertAmount(price.supplements, price.devise, currency), lang)}</strong>
+                  <strong>{formatAmount(convertAmount(price.supplements, price.currency, currency), lang)}</strong>
                 </div>
               )}
               {price.discount > 0 && (
                 <div className="checkout-price-row checkout-price-row--discount">
                   <span>{t("checkout.discount")}</span>
-                  <strong>−{formatAmount(convertAmount(price.discount, price.devise, currency), lang)}</strong>
+                  <strong>−{formatAmount(convertAmount(price.discount, price.currency, currency), lang)}</strong>
                 </div>
               )}
               <div className="checkout-price-row checkout-price-row--total">
                 <span>{t("checkout.total")}</span>
-                <strong>{formatAmount(convertAmount(price.total, price.devise, currency), lang)} {currency}</strong>
+                <strong>{formatAmount(convertAmount(price.total, price.currency, currency), lang)} {currency}</strong>
               </div>
             </div>
           ) : (
