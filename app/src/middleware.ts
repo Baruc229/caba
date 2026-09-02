@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
+import { prisma } from "@/lib/prisma";
 
 export async function middleware(request: NextRequest) {
   const token = await getToken({
@@ -10,18 +11,53 @@ export async function middleware(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
 
+  let invalidReason: string | null = null;
+
+  if (token?.id) {
+    try {
+      const dbUser = await prisma.user.findUnique({
+        where: { id: token.id as string },
+        select: { id: true, actif: true },
+      });
+      if (!dbUser || !dbUser.actif) {
+        invalidReason = dbUser ? "account_deactivated" : "account_deleted";
+      }
+    } catch {
+      // DB error — don't block on it, let the request proceed
+    }
+  }
+
   // Routes d'authentification réservées aux NON-connectés
   const authPages = ["/connexion", "/inscription", "/mot-de-passe-oublie", "/reinitialiser-mot-de-passe"];
   const isAuthPage = authPages.some(
     (p) => pathname === p || pathname.startsWith(`${p}/`)
   );
 
-  // Non authentifié : seules les pages d'auth sont accessibles, le reste → /connexion
-  if (!token) {
-    if (isAuthPage) return NextResponse.next();
-    const url = new URL("/connexion", request.url);
-    url.searchParams.set("next", pathname);
-    return NextResponse.redirect(url);
+  // Non authentifié ou session invalidée : seules les pages d'auth sont accessibles
+  if (!token || invalidReason) {
+    const response = isAuthPage
+      ? NextResponse.next()
+      : NextResponse.redirect(new URL("/connexion", request.url));
+
+    if (invalidReason) {
+      response.cookies.set("session_invalidated", invalidReason, {
+        maxAge: 60,
+        path: "/",
+        sameSite: "lax",
+        httpOnly: false,
+      });
+      if (!isAuthPage) {
+        const redirectUrl = new URL("/connexion", request.url);
+        redirectUrl.searchParams.set("reason", invalidReason);
+        return NextResponse.redirect(redirectUrl);
+      }
+    } else if (!isAuthPage) {
+      const url = new URL("/connexion", request.url);
+      url.searchParams.set("next", pathname);
+      return NextResponse.redirect(url);
+    }
+
+    return response;
   }
 
   // Authentifié : interdire les pages d'auth, rediriger selon le rôle
