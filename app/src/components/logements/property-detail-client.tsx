@@ -1,15 +1,29 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { FaClock } from "react-icons/fa6";
 import { useApp } from "@/components/providers/app-provider";
 import { AvailabilityCalendar } from "@/components/logements/availability-calendar";
 import { DateRangeField } from "@/components/ui/double-calendar";
+import { GuestsField } from "@/components/ui/guests-field";
+import { Select } from "@/components/ui/select";
 import {
   convertAmount,
   formatAmount,
 } from "@/lib/i18n/currency";
+
+const SEJOUR_ENTRIES: [string, string][] = [
+  ["nuee", "sejourNuee"],
+  ["journee", "sejourJournee"],
+  ["vingt_quatre_heures", "sejourVingtQuatreHeures"],
+  ["demi_journee", "sejourDemiJournee"],
+  ["plusieurs_heures", "sejourPlusieursHeures"],
+  ["heure", "sejourHeure"],
+  ["semaine", "sejourSemaine"],
+  ["mois", "sejourMois"],
+];
 
 export interface PropertyDetailPhoto {
   id: string;
@@ -48,8 +62,10 @@ export interface PropertyDetailData {
 
 export function PropertyDetailClient({
   property,
+  action,
 }: {
   property: PropertyDetailData;
+  action?: string;
 }) {
   const { lang, t, currency } = useApp();
   const router = useRouter();
@@ -63,14 +79,35 @@ export function PropertyDetailClient({
       ? formatAmount(convertAmount(property.tarifBase, property.devise, currency), lang)
       : null;
 
+  const formRef = useRef<HTMLDivElement>(null);
+
+  // Scroll + focus vers le formulaire quand ?action=reserver est présent.
+  useEffect(() => {
+    if (action !== "reserver" || !formRef.current) return;
+    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    formRef.current.scrollIntoView({ behavior: prefersReduced ? "auto" : "smooth", block: "start" });
+    requestAnimationFrame(() => {
+      formRef.current?.focus();
+    });
+  }, [action]);
+
   const [arrivee, setArrivee] = useState("");
   const [depart, setDepart] = useState("");
+  const [sejourType, setSejourType] = useState("nuee");
   const [adultes, setAdultes] = useState(2);
+  const [enfants, setEnfants] = useState(0);
+  const [bebes, setBebes] = useState(0);
   const [message, setMessage] = useState<string | null>(null);
 
   function handleDatesChange(a: string, d: string) {
     setArrivee(a);
     setDepart(d);
+  }
+
+  function handleCountsChange(counts: { adultes: number; enfants: number; bebes: number }) {
+    setAdultes(counts.adultes);
+    setEnfants(counts.enfants);
+    setBebes(counts.bebes);
   }
 
   async function handleReserve(e: FormEvent) {
@@ -87,8 +124,10 @@ export function PropertyDetailClient({
       depart,
       heureArrivee: "14:00",
       heureDepart: "11:00",
-      typeReservation: "nuee",
+      typeReservation: sejourType,
       adultes: String(adultes),
+      enfants: String(enfants),
+      bebes: String(bebes),
     });
     router.push(`/logements/${property.id}/reserver?${params.toString()}`);
   }
@@ -190,7 +229,7 @@ export function PropertyDetailClient({
         </div>
 
         {/* Colonne réservation */}
-        <aside className="detail-side">
+        <aside className="detail-side" ref={formRef} tabIndex={-1}>
           <div className="detail-card">
             <div className="detail-card-price">
               <span className="detail-card-price-label">{t("logementDetail.tarifBase")}</span>
@@ -215,18 +254,32 @@ export function PropertyDetailClient({
 
             {property.tarifBase != null && (
               <form onSubmit={handleReserve} className="detail-form">
-              <DateRangeField onDatesChange={handleDatesChange} />
-              <label className="detail-field">
-                <span className="detail-field-label">{t("logementDetail.adultes")}</span>
-                <input
-                  type="number"
-                  min={1}
-                  max={Math.max(1, property.adultesMax)}
-                  value={adultes}
-                  onChange={(e) => setAdultes(parseInt(e.target.value || "1", 10))}
-                  className="detail-input"
+                <div className="search-field">
+                  <span className="search-label">{t("home.stayTypeLabel")}</span>
+                  <div className="search-value">
+                    <FaClock aria-hidden="true" size={15} />
+                    <Select
+                      variant="field"
+                      ariaLabel={t("home.stayTypeAria")}
+                      name="typeReservation"
+                      options={SEJOUR_ENTRIES.map(([value, key]) => ({
+                        value,
+                        label: t(`home.${key}`),
+                      }))}
+                      value={sejourType}
+                      onChange={(v) => setSejourType(v)}
+                    />
+                  </div>
+                </div>
+
+                <DateRangeField onDatesChange={handleDatesChange} />
+
+                <GuestsField
+                  maxes={{ adultes: property.adultesMax, enfants: property.enfantsMax, bebes: property.bebesMax }}
+                  initial={{ adultes: 2, enfants: 0, bebes: 0 }}
+                  onCountsChange={handleCountsChange}
                 />
-              </label>
+
                 {message && <p className="detail-form-error">{message}</p>}
                 <button type="submit" className="detail-submit">
                   {t("logementDetail.reserver")}

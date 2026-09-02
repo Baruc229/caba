@@ -11,9 +11,12 @@ const SEJOUR_ENTRIES: [string, string][] = [
   ["vingt_quatre_heures", "sejourVingtQuatreHeures"],
   ["demi_journee", "sejourDemiJournee"],
   ["plusieurs_heures", "sejourPlusieursHeures"],
+  ["heure", "sejourHeure"],
+  ["semaine", "sejourSemaine"],
+  ["mois", "sejourMois"],
 ];
 
-const NEEDS_HOURS = new Set(["vingt_quatre_heures", "plusieurs_heures"]);
+const NEEDS_HOURS = new Set(["vingt_quatre_heures", "plusieurs_heures", "heure"]);
 
 const TYPE_ENTRIES: [string, string][] = [
   ["", "allTypes"],

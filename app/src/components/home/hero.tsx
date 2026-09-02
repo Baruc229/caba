@@ -1,47 +1,28 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import {
   FaChevronDown,
   FaClock,
-  FaMinus,
-  FaPlus,
   FaStar,
-  FaUserGroup,
 } from "react-icons/fa6";
 import { Select } from "@/components/ui/select";
 import { DateRangeField } from "@/components/ui/double-calendar";
+import { GuestsField } from "@/components/ui/guests-field";
 import { useApp } from "@/components/providers/app-provider";
 import { DocumentTitle } from "@/components/seo/document-title";
 
 const TODAY = new Date().toISOString().slice(0, 10);
 
-const GUEST_TYPES = [
-  { key: "adultes" as const, min: 1 },
-  { key: "enfants" as const, min: 0 },
-  { key: "bebes" as const, min: 0 },
-];
-
-type GuestKey = (typeof GUEST_TYPES)[number]["key"];
-
-type GuestCounts = Record<GuestKey, number>;
-
-const MAX_GUESTS_PER_TYPE = 9;
-
 /* Types pour lesquels le client choisit réellement ses heures
-   (24h et quelques heures). Les autres infèrent du système. */
-const NEEDS_HOURS = new Set(["vingt_quatre_heures", "plusieurs_heures"]);
+   (24h, quelques heures et heure). Les autres infèrent du système. */
+const NEEDS_HOURS = new Set(["vingt_quatre_heures", "plusieurs_heures", "heure"]);
 
 const AVATARS = [
   { initials: "AK", background: "var(--color-accent-secondary)" },
   { initials: "FR", background: "var(--color-accent)" },
   { initials: "CM", background: "var(--color-accent-gold)", color: "#1a1a1a" },
 ];
-
-function guestT(t: (p: string) => string, key: GuestKey, field: string): string {
-  const cap = key.charAt(0).toUpperCase() + key.slice(1);
-  return t(`home.guest${cap}${field}`);
-}
 
 function ProofPill({ floating = false }: { floating?: boolean }) {
   const { t } = useApp();
@@ -76,125 +57,6 @@ function ProofPill({ floating = false }: { floating?: boolean }) {
   );
 }
 
-function GuestsField() {
-  const { t } = useApp();
-  const [open, setOpen] = useState(false);
-  const [dropUp, setDropUp] = useState(false);
-  const [counts, setCounts] = useState<GuestCounts>({
-    adultes: 2,
-    enfants: 0,
-    bebes: 0,
-  });
-  const wrapRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!open) return;
-    const onClick = (e: MouseEvent) => {
-      if (!wrapRef.current?.contains(e.target as Node)) setOpen(false);
-    };
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
-    };
-    window.addEventListener("click", onClick);
-    window.addEventListener("keydown", onKeyDown);
-    return () => {
-      window.removeEventListener("click", onClick);
-      window.removeEventListener("keydown", onKeyDown);
-    };
-  }, [open]);
-
-  const toggle = () => {
-    if (!open && wrapRef.current) {
-      const rect = wrapRef.current.getBoundingClientRect();
-      setDropUp(window.innerHeight - rect.bottom < 260 && rect.top > 260);
-    }
-    setOpen((value) => !value);
-  };
-
-  const change = (key: GuestKey, min: number, delta: number) => {
-    setCounts((current) => ({
-      ...current,
-      [key]: Math.max(min, Math.min(MAX_GUESTS_PER_TYPE, current[key] + delta)),
-    }));
-  };
-
-  const summary = GUEST_TYPES.map(({ key, min }) => {
-    const n = counts[key];
-    if (n === 0) return null;
-    const word = n > 1
-      ? guestT(t, key, "Plural")
-      : guestT(t, key, "Singular");
-    return `${n} ${word}`;
-  })
-    .filter(Boolean)
-    .join(" · ");
-
-  return (
-    <div className="search-field guests" ref={wrapRef}>
-      <span className="search-label">{t("home.guestsLabel")}</span>
-      <button
-        type="button"
-        className="guests-trigger"
-        aria-haspopup="dialog"
-        aria-expanded={open}
-        onClick={toggle}
-      >
-        <FaUserGroup aria-hidden="true" size={15} />
-        <span className="guests-summary">{summary}</span>
-        <FaChevronDown
-          aria-hidden="true"
-          size={11}
-          className={`guests-chevron${open ? " is-open" : ""}`}
-        />
-      </button>
-
-      {open && (
-        <div
-          className={`guests-popover${dropUp ? " guests-popover--up" : ""}`}
-          role="dialog"
-          aria-label={t("home.guestsAria")}
-        >
-          {GUEST_TYPES.map(({ key, min }) => (
-            <div key={key} className="guests-row">
-              <div className="guests-type">
-                <span className="guests-name">{guestT(t, key, "Name")}</span>
-                <span className="guests-hint">{guestT(t, key, "Hint")}</span>
-              </div>
-              <div className="stepper">
-                <button
-                  type="button"
-                  className="stepper-btn"
-                  aria-label={`${t("home.stepperReduce")} ${guestT(t, key, "Partitive")}`}
-                  disabled={counts[key] <= min}
-                  onClick={() => change(key, min, -1)}
-                >
-                  <FaMinus aria-hidden="true" size={10} />
-                </button>
-                <span className="stepper-value stepper-value--count" aria-live="polite">
-                  {counts[key]}
-                </span>
-                <button
-                  type="button"
-                  className="stepper-btn"
-                  aria-label={`${t("home.stepperIncrease")} ${guestT(t, key, "Partitive")}`}
-                  disabled={counts[key] >= MAX_GUESTS_PER_TYPE}
-                  onClick={() => change(key, min, 1)}
-                >
-                  <FaPlus aria-hidden="true" size={10} />
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      <input type="hidden" name="adultes" value={counts.adultes} />
-      <input type="hidden" name="enfants" value={counts.enfants} />
-      <input type="hidden" name="bebes" value={counts.bebes} />
-    </div>
-  );
-}
-
 const PROPERTY_TYPE_ENTRIES: [string, string][] = [
   ["chambre", "typeChambre"],
   ["chambre_avec_salon", "typeChambreAvecSalon"],
@@ -212,6 +74,9 @@ const SEJOUR_ENTRIES: [string, string][] = [
   ["vingt_quatre_heures", "sejourVingtQuatreHeures"],
   ["demi_journee", "sejourDemiJournee"],
   ["plusieurs_heures", "sejourPlusieursHeures"],
+  ["heure", "sejourHeure"],
+  ["semaine", "sejourSemaine"],
+  ["mois", "sejourMois"],
 ];
 
 export function Hero() {

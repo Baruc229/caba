@@ -14,10 +14,11 @@ export const metadata = {
 
 interface DetailPageProps {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ action?: string }>;
 }
 
-export default async function LogementDetailPage({ params }: DetailPageProps) {
-  const { id } = await params;
+export default async function LogementDetailPage({ params, searchParams }: DetailPageProps) {
+  const [{ id }, qs] = await Promise.all([params, searchParams]);
 
   const property = await prisma.property.findUnique({
     where: { id },
@@ -72,7 +73,7 @@ export default async function LogementDetailPage({ params }: DetailPageProps) {
 
   return (
     <Suspense>
-      <PropertyDetailClient property={data} />
+      <PropertyDetailClient property={data} action={qs.action} />
     </Suspense>
   );
 }
