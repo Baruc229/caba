@@ -18,6 +18,7 @@ import {
   MiniLangSwitcher,
   MiniCurrencySwitcher,
 } from "./mini-switches";
+import { LocaleSwitcher } from "./locale-switcher";
 import { useApp } from "@/components/providers/app-provider";
 
 const NAV_LINKS = [
@@ -153,8 +154,12 @@ export function Header({
 
         {/* ── Mobile right zone ── */}
         <div className="flex items-center gap-1.5 lg:hidden">
-          <MiniLangSwitcher lang={lang} onChange={setLang} />
-          <MiniCurrencySwitcher currency={currency} onChange={setCurrency} />
+          <LocaleSwitcher
+            lang={lang}
+            currency={currency}
+            onLangChange={setLang}
+            onCurrencyChange={setCurrency}
+          />
           <Link href="/logements" className="btn-pill btn-primary px-3 py-2 text-sm">
             {t("common.reserver")}
           </Link>
