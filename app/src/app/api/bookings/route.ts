@@ -1,7 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createBooking, confirmBooking, cancelBooking, modifyBooking } from "@/lib/services/booking";
+import { auth } from "@/lib/auth/config";
+
+async function requireAdmin() {
+  const session = await auth();
+  if (session?.user?.role !== "administrateur") {
+    return NextResponse.json({ error: "Accès réservé à l'administrateur" }, { status: 403 });
+  }
+  return null;
+}
 
 export async function GET(request: NextRequest) {
+  const forbidden = await requireAdmin();
+  if (forbidden) return forbidden;
   try {
     const { searchParams } = new URL(request.url);
     const propertyId = searchParams.get("propertyId");
@@ -47,6 +58,8 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const forbidden = await requireAdmin();
+  if (forbidden) return forbidden;
   try {
     const body = await request.json();
     const {
@@ -99,6 +112,8 @@ export async function POST(request: NextRequest) {
 }
 
 export async function PATCH(request: NextRequest) {
+  const forbidden = await requireAdmin();
+  if (forbidden) return forbidden;
   try {
     const body = await request.json();
     const { bookingId, action, ...updates } = body;

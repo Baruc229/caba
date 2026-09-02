@@ -144,7 +144,7 @@ export function Header({
               {t("common.connexion")}
             </Link>
           )}
-          <Link href="/recherche" className="btn-pill btn-primary px-8">
+          <Link href="/logements" className="btn-pill btn-primary px-8">
             {t("common.reserver")}
           </Link>
           {langSwitch}
@@ -155,6 +155,9 @@ export function Header({
         <div className="flex items-center gap-1.5 lg:hidden">
           <MiniLangSwitcher lang={lang} onChange={setLang} />
           <MiniCurrencySwitcher currency={currency} onChange={setCurrency} />
+          <Link href="/logements" className="btn-pill btn-primary px-3 py-2 text-sm">
+            {t("common.reserver")}
+          </Link>
           {isClient && user ? (
             <UserMenuMobileTrigger
               user={{
