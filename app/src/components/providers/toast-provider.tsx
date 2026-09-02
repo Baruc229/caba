@@ -5,7 +5,6 @@ import {
   useCallback,
   useContext,
   useEffect,
-  useRef,
   useState,
   type FC,
   type ReactNode,
@@ -33,7 +32,6 @@ const DISMISS_KEY = "toast_dismissed";
 
 export const ToastProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [toasts, setToasts] = useState<Toast[]>([]);
-  const dismissedRef = useRef<Set<string>>(new Set());
 
   const removeToast = useCallback((id: string) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
@@ -72,7 +70,10 @@ export const ToastProvider: FC<{ children: ReactNode }> = ({ children }) => {
       account_deactivated:
         "Votre compte a été désactivé. Veuillez contacter l'administrateur.",
     };
-    showToast(messages[reason] ?? "Votre session a été invalidée.", "error");
+    const timer = setTimeout(() => {
+      showToast(messages[reason] ?? "Votre session a été invalidée.", "error");
+    }, 0);
+    return () => clearTimeout(timer);
   }, [showToast]);
 
   return (

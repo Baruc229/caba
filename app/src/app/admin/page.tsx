@@ -6,7 +6,6 @@ import {
   FaCalendarCheck,
   FaArrowRightToBracket,
   FaArrowRightFromBracket,
-  FaHouse,
   FaHouseCircleCheck,
   FaWhatsapp,
   FaMoneyBillWave,
@@ -135,8 +134,6 @@ function formatDay(iso: string): string {
   return d.toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
 }
 
-const SHORT_MONTHS = ["jan", "fev", "mar", "avr", "mai", "jun", "jul", "aout", "sep", "oct", "nov", "dec"];
-
 const HBAR_COLORS = ["bo-hbar-fill--blue", "bo-hbar-fill--green", "bo-hbar-fill--orange", "bo-hbar-fill--red", "bo-hbar-fill--gray"];
 
 /* ─── Widget toggle (localStorage) ─── */
@@ -199,6 +196,26 @@ function ListSkeleton() {
         </div>
       ))}
     </div>
+  );
+}
+
+/* ─── Widget toggle button ─── */
+interface WidgetToggleProps {
+  isHidden: boolean;
+  onClick: () => void;
+}
+
+function WidgetToggle({ isHidden, onClick }: WidgetToggleProps) {
+  return (
+    <button
+      type="button"
+      className={`bo-widget-toggle ${isHidden ? "is-hidden" : ""}`}
+      onClick={onClick}
+      title={isHidden ? "Afficher ce widget" : "Masquer ce widget"}
+      aria-label={isHidden ? "Afficher le widget" : "Masquer le widget"}
+    >
+      {isHidden ? <FaEyeSlash size={14} /> : <FaEye size={14} />}
+    </button>
   );
 }
 
@@ -298,10 +315,14 @@ export default function TableauDeBordPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [period, setPeriod] = useState<Period>("mois");
-  const [hiddenWidgets, setHiddenWidgets] = useState<Set<string>>(new Set());
+  const [hiddenWidgets, setHiddenWidgets] = useState<Set<string>>(() => {
+    if (typeof window === "undefined") return new Set();
+    return readHiddenWidgets();
+  });
 
-  /* Load hidden widgets from localStorage */
+  /* Load hidden widgets from localStorage (sync with other tabs/windows) */
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setHiddenWidgets(readHiddenWidgets());
   }, []);
 
@@ -404,18 +425,6 @@ export default function TableauDeBordPage() {
   }
 
   /* ─── KPI section ─── */
-  const WidgetToggle = ({ id }: { id: string }) => (
-    <button
-      type="button"
-      className={`bo-widget-toggle ${isHidden(id) ? "is-hidden" : ""}`}
-      onClick={() => toggleWidget(id)}
-      title={isHidden(id) ? "Afficher ce widget" : "Masquer ce widget"}
-      aria-label={isHidden(id) ? `Afficher ${id}` : `Masquer ${id}`}
-    >
-      {isHidden(id) ? <FaEyeSlash size={14} /> : <FaEye size={14} />}
-    </button>
-  );
-
   return (
     <div>
       <div className="bo-page-head">
@@ -449,7 +458,7 @@ export default function TableauDeBordPage() {
                   <div className="bo-kpi-value">{data!.kpis.reservationsJour}</div>
                   <div className="bo-kpi-hint">activees aujourd&apos;hui</div>
                 </div>
-                <WidgetToggle id="kpis" />
+                <WidgetToggle isHidden={isHidden("kpis")} onClick={() => toggleWidget("kpis")} />
               </div>
               <div className="bo-kpi">
                 <div className="bo-kpi-icon bo-kpi-icon--green"><FaArrowRightToBracket /></div>
@@ -458,7 +467,7 @@ export default function TableauDeBordPage() {
                   <div className="bo-kpi-value">{data!.kpis.arriveesJour}</div>
                   <div className="bo-kpi-hint">clients attendus</div>
                 </div>
-                <WidgetToggle id="kpis" />
+                <WidgetToggle isHidden={isHidden("kpis")} onClick={() => toggleWidget("kpis")} />
               </div>
               <div className="bo-kpi">
                 <div className="bo-kpi-icon bo-kpi-icon--orange"><FaArrowRightFromBracket /></div>
@@ -467,7 +476,7 @@ export default function TableauDeBordPage() {
                   <div className="bo-kpi-value">{data!.kpis.departsJour}</div>
                   <div className="bo-kpi-hint">check-outs a prevoir</div>
                 </div>
-                <WidgetToggle id="kpis" />
+                <WidgetToggle isHidden={isHidden("kpis")} onClick={() => toggleWidget("kpis")} />
               </div>
               <div className="bo-kpi">
                 <div className="bo-kpi-icon bo-kpi-icon--green"><FaHouseCircleCheck /></div>
@@ -476,7 +485,7 @@ export default function TableauDeBordPage() {
                   <div className="bo-kpi-value">{data!.kpis.logementsDisponibles}</div>
                   <div className="bo-kpi-hint">{data!.kpis.logementsOccupes} en maintenance</div>
                 </div>
-                <WidgetToggle id="kpis" />
+                <WidgetToggle isHidden={isHidden("kpis")} onClick={() => toggleWidget("kpis")} />
               </div>
               <div className="bo-kpi">
                 <div className="bo-kpi-icon bo-kpi-icon--orange"><FaWhatsapp /></div>
@@ -485,7 +494,7 @@ export default function TableauDeBordPage() {
                   <div className="bo-kpi-value">{data!.kpis.whatsappEnAttente}</div>
                   <div className="bo-kpi-hint">demandes non traitees</div>
                 </div>
-                <WidgetToggle id="kpis" />
+                <WidgetToggle isHidden={isHidden("kpis")} onClick={() => toggleWidget("kpis")} />
               </div>
               <div className="bo-kpi">
                 <div className="bo-kpi-icon bo-kpi-icon--blue"><FaMoneyBillWave /></div>
@@ -560,7 +569,7 @@ export default function TableauDeBordPage() {
               <div className="bo-chart-card">
                 <div className="bo-chart-header">
                   <h3 className="bo-chart-title">Repartition par type</h3>
-                  <WidgetToggle id="repartition" />
+                  <WidgetToggle isHidden={isHidden("repartition")} onClick={() => toggleWidget("repartition")} />
                 </div>
                 <div className="bo-chart-body">
                   {data!.repartitionType.length === 0 ? (
@@ -578,7 +587,7 @@ export default function TableauDeBordPage() {
               <div className="bo-chart-card">
                 <div className="bo-chart-header">
                   <h3 className="bo-chart-title">Sources de reservation</h3>
-                  <WidgetToggle id="repartition" />
+                  <WidgetToggle isHidden={isHidden("repartition")} onClick={() => toggleWidget("repartition")} />
                 </div>
                 <div className="bo-chart-body">
                   {data!.sourcesReservation.length === 0 ? (
