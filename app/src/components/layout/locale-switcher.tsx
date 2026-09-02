@@ -57,14 +57,14 @@ export const LocaleSwitcher: FC<LocaleSwitcherProps> = ({
               <button
                 type="button"
                 className={`locale-seg-btn${lang === "fr" ? " is-active" : ""}`}
-                onClick={() => { onLangChange("fr"); setOpen(false); }}
+                onClick={() => onLangChange("fr")}
               >
                 FR
               </button>
               <button
                 type="button"
                 className={`locale-seg-btn${lang === "en" ? " is-active" : ""}`}
-                onClick={() => { onLangChange("en"); setOpen(false); }}
+                onClick={() => onLangChange("en")}
               >
                 EN
               </button>
@@ -76,14 +76,14 @@ export const LocaleSwitcher: FC<LocaleSwitcherProps> = ({
               <button
                 type="button"
                 className={`locale-seg-btn${currency === "EUR" ? " is-active" : ""}`}
-                onClick={() => { onCurrencyChange("EUR"); setOpen(false); }}
+                onClick={() => onCurrencyChange("EUR")}
               >
                 EUR
               </button>
               <button
                 type="button"
                 className={`locale-seg-btn${currency === "FCFA" ? " is-active" : ""}`}
-                onClick={() => { onCurrencyChange("FCFA"); setOpen(false); }}
+                onClick={() => onCurrencyChange("FCFA")}
               >
                 FCFA
               </button>
