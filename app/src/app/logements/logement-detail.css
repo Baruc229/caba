@@ -306,6 +306,16 @@
   outline: none;
 }
 
+@media (max-width: 768px) {
+  .detail-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .detail-side {
+    position: static;
+  }
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .detail-side:focus-within .detail-card {
     animation: reservation-glow 1.5s ease-out forwards;
