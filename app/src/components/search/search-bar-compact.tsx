@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { FaCalendarDays, FaClock, FaUserGroup, FaChevronDown } from "react-icons/fa6";
 import { Select } from "@/components/ui/select";
+import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { useApp } from "@/components/providers/app-provider";
 
 const SEJOUR_ENTRIES: [string, string][] = [
@@ -69,6 +70,17 @@ export function SearchBarCompact({
   const [heureDepart, setHeureDepart] = useState(initialHeureDepart);
   const [voyageursOpen, setVoyageursOpen] = useState(false);
   const voyageursRef = useRef<HTMLDivElement>(null);
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return window.matchMedia("(max-width: 767px)").matches;
+  });
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 767px)");
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
 
   const needsHours = NEEDS_HOURS.has(typeReservation);
   const is24h = typeReservation === "vingt_quatre_heures";
@@ -132,37 +144,53 @@ export function SearchBarCompact({
   return (
     <form className="search-bar-compact" action={buildUrl()} method="get" aria-label={t("search.formAriaLabel")}>
       <div className="search-bar-compact-fields">
-        <div className="search-bar-compact-field">
-          <label htmlFor="sb-arrivee" className="search-bar-compact-label">
-            <FaCalendarDays aria-hidden="true" size={13} />
-            {t("calendar.arrival")}
-          </label>
-          <input
-            id="sb-arrivee"
-            name="arrivee"
-            type="date"
-            value={arrivee}
-            min={todayISO()}
-            onChange={(e) => setArrivee(e.target.value)}
-            className="search-bar-compact-input"
-          />
-        </div>
+        {isMobile ? (
+          <>
+            <div className="search-bar-compact-field">
+              <label htmlFor="sb-arrivee" className="search-bar-compact-label">
+                <FaCalendarDays aria-hidden="true" size={13} />
+                {t("calendar.arrival")}
+              </label>
+              <input
+                id="sb-arrivee"
+                name="arrivee"
+                type="date"
+                value={arrivee}
+                min={todayISO()}
+                onChange={(e) => setArrivee(e.target.value)}
+                className="search-bar-compact-input"
+                placeholder=" "
+              />
+            </div>
 
-        <div className="search-bar-compact-field">
-          <label htmlFor="sb-depart" className="search-bar-compact-label">
-            <FaCalendarDays aria-hidden="true" size={13} />
-            {t("calendar.departure")}
-          </label>
-          <input
-            id="sb-depart"
-            name="depart"
-            type="date"
-            value={depart}
-            min={arrivee || todayISO()}
-            onChange={(e) => setDepart(e.target.value)}
-            className="search-bar-compact-input"
-          />
-        </div>
+            <div className="search-bar-compact-field">
+              <label htmlFor="sb-depart" className="search-bar-compact-label">
+                <FaCalendarDays aria-hidden="true" size={13} />
+                {t("calendar.departure")}
+              </label>
+              <input
+                id="sb-depart"
+                name="depart"
+                type="date"
+                value={depart}
+                min={arrivee || todayISO()}
+                onChange={(e) => setDepart(e.target.value)}
+                className="search-bar-compact-input"
+                placeholder=" "
+              />
+            </div>
+          </>
+        ) : (
+          <div className="search-bar-compact-field search-bar-compact-field--dates">
+            <DateRangePicker
+              arrivee={arrivee}
+              depart={depart}
+              onArriveeChange={setArrivee}
+              onDepartChange={setDepart}
+              minDate={todayISO()}
+            />
+          </div>
+        )}
 
         {needsHours && (
           <>
