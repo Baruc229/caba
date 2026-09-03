@@ -22,9 +22,9 @@ const TYPE_LABELS: Record<string, { fr: string; en: string }> = {
 export function PropertyCard({ item }: { item: SearchResultItem }) {
   const { lang, t, currency } = useApp();
   const typeLabel = TYPE_LABELS[item.type]?.[lang] ?? item.type;
-  const formattedPrice =
-    item.prixTotal > 0
-      ? formatAmount(convertAmount(item.prixTotal, item.devise, currency), lang)
+  const formattedPrixParNuit =
+    item.prixParNuit > 0
+      ? formatAmount(convertAmount(item.prixParNuit, item.devise, currency), lang)
       : "";
 
   return (
@@ -94,20 +94,11 @@ export function PropertyCard({ item }: { item: SearchResultItem }) {
             <span className="property-card-price-promo-label">{item.promotionAppliquee}</span>
           )}
           <p className="property-card-price">
-            {item.prixTotal > 0 ? (
+            {item.prixParNuit > 0 ? (
               <>
                 {t("common.aPartirDe")}{" "}
-                <strong>{formattedPrice} {currency}</strong>
-                {item.nuitsOuUnites > 1 && (
-                  <span className="property-card-price-unit">
-                    {" "}{t("common.pourNuits")
-                      .replace("{n}", String(item.nuitsOuUnites))
-                      .replace("{s}", item.nuitsOuUnites > 1 ? "s" : "")}
-                  </span>
-                )}
-                {item.nuitsOuUnites === 1 && (
-                  <span className="property-card-price-unit"> {t("common.parNuit")}</span>
-                )}
+                <strong>{formattedPrixParNuit} {currency}</strong>
+                <span className="property-card-price-unit"> / {t("common.parNuit")}</span>
               </>
             ) : (
               <span className="property-card-price-unavailable">{t("common.prixNonDisponible")}</span>

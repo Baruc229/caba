@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { SearchResult, SearchResultItem } from "@/lib/services/availability";
 import { SearchBarCompact } from "@/components/search/search-bar-compact";
+import { SearchSummaryBar } from "@/components/search/search-summary-bar";
 import { PropertyCard } from "@/components/search/property-card";
 import { FilterPanel, type FilterState } from "@/components/search/filter-panel";
 import { SortBar } from "@/components/search/sort-bar";
@@ -200,7 +201,7 @@ export function LogementsClient({
     <section className="logements-page" aria-label={t("search.formAriaLabel")}>
       <DocumentTitle titleKey="meta.logementsTitle" descKey="meta.logementsDesc" />
       <div className="logements-search-wrap">
-        <SearchBarCompact
+        <SearchSummaryBar
           initialArrivee={initialArrivee}
           initialDepart={initialDepart}
           initialAdultes={initialAdultes}

@@ -48,6 +48,7 @@ async function loadPublishedProperties(): Promise<SearchResultItem[]> {
       equipements: p.caracteristiques.slice(0, 4).map((e) => e.caracteristique.nom),
       prixTotal: p.tarifs[0] ? Number(p.tarifs[0].prix) : 0,
       prixBase: p.tarifs[0] ? Number(p.tarifs[0].prix) : 0,
+      prixParNuit: p.tarifs[0] ? Number(p.tarifs[0].prix) : 0,
       nuitsOuUnites: 1,
       devise: p.tarifs[0]?.devise ?? p.devise,
       promotionAppliquee: null,

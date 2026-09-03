@@ -512,6 +512,7 @@ export function PropertiesManager({ initialRows }: { initialRows: PropertyRow[] 
               <th>Type</th>
               <th>Statut</th>
               <th>Capacité</th>
+              <th>Ch.</th>
               <th>Ville</th>
               <th>Tarif</th>
               <th>Note</th>
@@ -522,34 +523,28 @@ export function PropertiesManager({ initialRows }: { initialRows: PropertyRow[] 
             {rows.map((row) => (
               <tr key={row.id}>
                 <td>
-                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <div className="bo-table-cell-photo">
                     {row.photo ? (
-                      <img
-                        src={row.photo}
-                        alt={row.nom}
-                        style={{ width: 44, height: 36, objectFit: "cover", borderRadius: 6 }}
-                      />
+                      <div className="bo-table-photo-wrap">
+                        <img
+                          src={row.photo}
+                          alt={row.nom}
+                          className="bo-table-photo"
+                          loading="lazy"
+                        />
+                      </div>
                     ) : (
-                      <span
-                        style={{
-                          width: 44,
-                          height: 36,
-                          borderRadius: 6,
-                          display: "grid",
-                          placeItems: "center",
-                          background: "var(--bo-bg)",
-                          color: "var(--bo-muted)",
-                        }}
-                      >
+                      <div className="bo-table-photo-placeholder">
                         <FaImage aria-hidden="true" />
-                      </span>
+                      </div>
                     )}
-                    <strong>{row.nom}</strong>
+                    <strong className="bo-table-property-name">{row.nom}</strong>
                   </div>
                 </td>
                 <td>{typeLabel(row.type)}</td>
                 <td><StatusBadge status={row.statut} /></td>
                 <td>{row.capaciteMaximale} p.</td>
+                <td>{row.nombreChambres > 0 ? row.nombreChambres : "—"}</td>
                 <td>{row.ville}</td>
                 <td>
                   {row.tarifBase != null
@@ -558,7 +553,7 @@ export function PropertiesManager({ initialRows }: { initialRows: PropertyRow[] 
                 </td>
                 <td>{row.note != null ? `${row.note} (${row.nombreAvis})` : "—"}</td>
                 <td>
-                  <div style={{ display: "flex", gap: 8 }}>
+                  <div className="bo-table-actions">
                     <button
                       type="button"
                       className="bo-btn bo-btn--secondary"
@@ -566,6 +561,7 @@ export function PropertiesManager({ initialRows }: { initialRows: PropertyRow[] 
                       aria-label={`Éditer ${row.nom}`}
                     >
                       <FaPencil aria-hidden="true" />
+                      <span className="bo-btn-label">Éditer</span>
                     </button>
                     <button
                       type="button"
@@ -574,6 +570,7 @@ export function PropertiesManager({ initialRows }: { initialRows: PropertyRow[] 
                       aria-label={`Supprimer ${row.nom}`}
                     >
                       <FaTrash aria-hidden="true" />
+                      <span className="bo-btn-label">Suppr.</span>
                     </button>
                   </div>
                 </td>

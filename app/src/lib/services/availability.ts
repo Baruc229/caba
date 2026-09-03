@@ -638,6 +638,7 @@ export interface SearchResultItem {
   equipements: string[];
   prixTotal: number;
   prixBase: number;
+  prixParNuit: number;
   nuitsOuUnites: number;
   devise: string;
   promotionAppliquee: string | null;
@@ -773,6 +774,7 @@ async function runSearch(params: SearchEngineParams): Promise<SearchResult> {
       equipements: property.caracteristiques.slice(0, 6).map((e) => e.caracteristique.nom),
       prixTotal: price.total,
       prixBase: price.baseRate,
+      prixParNuit: price.baseRate,
       nuitsOuUnites: price.nightsOrUnits,
       devise: price.currency,
       promotionAppliquee: price.promotionAppliquee,
