@@ -273,6 +273,7 @@ export const dictionaries = {
       carteLocalisation: "Carte de localisation",
       avis: "avis",
       photo: "photo",
+      nuit: "nuit",
     },
     verify: {
       compteActive: "Compte activé",
@@ -832,6 +833,7 @@ export const dictionaries = {
       carteLocalisation: "Location map",
       avis: "reviews",
       photo: "photo",
+      nuit: "night",
     },
     verify: {
       compteActive: "Account activated",

@@ -503,15 +503,28 @@
   letter-spacing: 0.05em;
 }
 
-.detail-card-price-value {
+.detail-card-price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.detail-card-price-from {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+.detail-card-price-amount {
   font-size: 1.75rem;
   font-weight: 700;
   color: var(--color-text-primary);
   line-height: 1.1;
 }
 
-.detail-card-price-unit {
-  font-size: 0.8rem;
+.detail-card-price-per {
+  font-size: 0.85rem;
   font-weight: 500;
   color: var(--color-text-secondary);
 }
@@ -595,7 +608,7 @@
   }
 
   .detail-side {
-    position: static;
+    display: none;
   }
 
   .detail-gallery-grid {
@@ -626,18 +639,20 @@
 
   .detail-mobile-bar-price {
     display: flex;
-    flex-direction: column;
+    align-items: baseline;
+    gap: 6px;
   }
 
-  .detail-mobile-bar-price strong {
+  .detail-mobile-bar-from {
+    font-size: 13px;
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+  }
+
+  .detail-mobile-bar-amount {
     font-size: 1.1rem;
     font-weight: 700;
     color: var(--color-text-primary);
-  }
-
-  .detail-mobile-bar-price span {
-    font-size: 12px;
-    color: var(--color-text-secondary);
   }
 
   .detail-mobile-bar-cta {

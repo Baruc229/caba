@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { FaClock, FaShareNodes, FaHeart, FaArrowLeft } from "react-icons/fa6";
+import { useSession } from "next-auth/react";
 import { useApp } from "@/components/providers/app-provider";
 import { AvailabilityCalendar } from "@/components/logements/availability-calendar";
 import { DateRangeField } from "@/components/ui/double-calendar";
@@ -71,6 +72,7 @@ export function PropertyDetailClient({
 }) {
   const { lang, t, currency } = useApp();
   const router = useRouter();
+  const { data: session } = useSession();
 
   const photos = property.photos.length > 0 ? property.photos : [{ id: "none", url: "", legende: null }];
   const [activePhotoIndex, setActivePhotoIndex] = useState(0);
@@ -161,6 +163,14 @@ export function PropertyDetailClient({
     } else {
       navigator.clipboard.writeText(window.location.href);
     }
+  };
+
+  const handleFavori = () => {
+    if (!session) {
+      router.push(`/connexion?redirect=${encodeURIComponent(window.location.pathname)}`);
+      return;
+    }
+    setFavori((v) => !v);
   };
 
   const activePhoto = photos[activePhotoIndex]?.url ?? "";
@@ -322,15 +332,16 @@ export function PropertyDetailClient({
         </div>
 
         {/* Colonne réservation */}
-        <aside className="detail-side" ref={formRef} tabIndex={-1}>
+        <aside id="reserver" className="detail-side" ref={formRef} tabIndex={-1}>
           <div className="detail-card">
             <div className="detail-card-price">
               <span className="detail-card-price-label">{t("logementDetail.tarifBase")}</span>
               {formattedPrice ? (
-                <strong className="detail-card-price-value">
-                  {formattedPrice}
-                  <span className="detail-card-price-unit"> {currency} {t("logementDetail.parNuitDepuis")}</span>
-                </strong>
+                <div className="detail-card-price-row">
+                  <span className="detail-card-price-from">{t("logementDetail.parNuitDepuis")}</span>
+                  <span className="detail-card-price-amount">{formattedPrice} {currency}</span>
+                  <span className="detail-card-price-per">/ {t("logementDetail.nuit")}</span>
+                </div>
               ) : (
                 <span>{t("common.prixNonDisponible")}</span>
               )}
@@ -387,8 +398,8 @@ export function PropertyDetailClient({
       {property.tarifBase != null && (
         <div className="detail-mobile-bar">
           <div className="detail-mobile-bar-price">
-            <strong>{formattedPrice}</strong>
-            <span>{t("logementDetail.parNuitDepuis")}</span>
+            <span className="detail-mobile-bar-from">{t("logementDetail.parNuitDepuis")}</span>
+            <strong className="detail-mobile-bar-amount">{formattedPrice} {currency}</strong>
           </div>
           <a href="#reserver" className="detail-mobile-bar-cta">
             {t("logementDetail.reserver")}
