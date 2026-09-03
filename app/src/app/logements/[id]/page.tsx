@@ -17,6 +17,32 @@ interface DetailPageProps {
   searchParams: Promise<{ action?: string }>;
 }
 
+async function geocode(
+  adresse: string | null,
+  ville: string,
+  pays: string
+): Promise<{ lat: number; lon: number } | null> {
+  const query = encodeURIComponent(
+    [adresse, ville, pays].filter(Boolean).join(", ")
+  );
+  try {
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/search?q=${query}&format=json&limit=1`,
+      {
+        headers: { "Accept-Language": "fr" },
+        next: { revalidate: 3600 },
+      }
+    );
+    const data = await res.json();
+    if (data?.[0]?.lat && data[0]?.lon) {
+      return { lat: parseFloat(data[0].lat), lon: parseFloat(data[0].lon) };
+    }
+  } catch {
+    // geocoding failed silently
+  }
+  return null;
+}
+
 export default async function LogementDetailPage({ params, searchParams }: DetailPageProps) {
   const [{ id }, qs] = await Promise.all([params, searchParams]);
 
@@ -45,6 +71,8 @@ export default async function LogementDetailPage({ params, searchParams }: Detai
   const checkOutRule = property.regles.find((r) => r.typeRegle === "check_out");
   const defaultCheckIn = checkInRule?.valeur ?? "14:00";
   const defaultCheckOut = checkOutRule?.valeur ?? "11:00";
+
+  const coords = await geocode(property.adresse, property.ville, property.pays);
 
   const data: PropertyDetailData = {
     id: property.id,
@@ -77,6 +105,8 @@ export default async function LogementDetailPage({ params, searchParams }: Detai
     nombreAvis: notes.length,
     defaultCheckIn,
     defaultCheckOut,
+    latitude: coords?.lat ?? null,
+    longitude: coords?.lon ?? null,
   };
 
   return (

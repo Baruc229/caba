@@ -61,6 +61,8 @@ export interface PropertyDetailData {
   nombreAvis: number;
   defaultCheckIn: string;
   defaultCheckOut: string;
+  latitude: number | null;
+  longitude: number | null;
 }
 
 export function PropertyDetailClient({
@@ -447,19 +449,28 @@ export function PropertyDetailClient({
                 {property.adresse}, {property.ville}, {property.pays}
               </p>
               <div className="detail-map">
-                <iframe
-                  title={
-                    t("logementDetail.carteLocalisation") ??
-                    "Carte de localisation"
-                  }
-                  src={`https://www.openstreetmap.org/export/embed.html?bbox=${encodeURIComponent(
-                    property.adresse + " " + property.ville
-                  )}&layer=mapnik&marker=${encodeURIComponent(
-                    property.adresse + " " + property.ville
-                  )}`}
-                  className="detail-map-iframe"
-                  loading="lazy"
-                />
+                {property.latitude != null && property.longitude != null ? (
+                  <iframe
+                    title={
+                      t("logementDetail.carteLocalisation") ??
+                      "Carte de localisation"
+                    }
+                    src={`https://www.openstreetmap.org/export/embed.html?bbox=${property.longitude - 0.01},${property.latitude - 0.005},${property.longitude + 0.01},${property.latitude + 0.005}&layer=mapnik&marker=${property.latitude},${property.longitude}`}
+                    className="detail-map-iframe"
+                    loading="lazy"
+                  />
+                ) : (
+                  <a
+                    href={`https://www.openstreetmap.org/search?query=${encodeURIComponent(
+                      `${property.adresse ?? ""} ${property.ville} ${property.pays}`.trim()
+                    )}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="detail-map-link"
+                  >
+                    {property.adresse ?? property.ville}, {property.pays}
+                  </a>
+                )}
               </div>
             </div>
           )}
