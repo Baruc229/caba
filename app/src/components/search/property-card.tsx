@@ -29,34 +29,26 @@ export function PropertyCard({ item }: { item: SearchResultItem }) {
 
   return (
     <article className="property-card">
-      <div className="property-card-photo-wrap">
-        {item.photo ? (
-          <img
-            src={item.photo}
-            alt={item.nom}
-            className="property-card-photo"
-            loading="lazy"
-          />
-        ) : (
-          <div className="property-card-photo-placeholder">
-            <span>{typeLabel}</span>
-          </div>
-        )}
-        <span className="property-card-badge">{typeLabel}</span>
-        <button
-          type="button"
-          className="property-card-fav"
-          aria-label={`${t("common.ajouterFavoris")} ${item.nom}`}
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-          </svg>
-        </button>
-      </div>
+      <a href={`/logements/${item.id}`} className="property-card-photo-link" aria-label={`${t("common.voirLogement")} ${item.nom}`}>
+        <div className="property-card-photo-wrap">
+          {item.photo ? (
+            <img
+              src={item.photo}
+              alt={item.nom}
+              className="property-card-photo"
+              loading="lazy"
+            />
+          ) : (
+            <div className="property-card-photo-placeholder">
+              <span>{typeLabel}</span>
+            </div>
+          )}
+          <span className="property-card-badge">{typeLabel}</span>
+        </div>
+      </a>
 
       <div className="property-card-body">
         <h3 className="property-card-name">{item.nom}</h3>
-        <p className="property-card-type">{typeLabel}</p>
 
         <div className="property-card-capacity">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
