@@ -4,6 +4,8 @@ import { useState, useRef, useEffect } from "react";
 import { FaCalendarDays, FaClock, FaUserGroup, FaChevronDown } from "react-icons/fa6";
 import { Select } from "@/components/ui/select";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
+import { Popover } from "@/components/ui/popover";
+import { PROPERTY_TYPES } from "@/lib/property-types";
 import { useApp } from "@/components/providers/app-provider";
 
 const SEJOUR_ENTRIES: [string, string][] = [
@@ -21,14 +23,7 @@ const NEEDS_HOURS = new Set(["vingt_quatre_heures", "plusieurs_heures", "heure"]
 
 const TYPE_ENTRIES: [string, string][] = [
   ["", "allTypes"],
-  ["chambre", "typeChambre"],
-  ["chambre_avec_salon", "typeChambreAvecSalon"],
-  ["studio", "typeStudio"],
-  ["appartement_meuble", "typeAppartementMeuble"],
-  ["suite", "typeSuite"],
-  ["villa", "typeVilla"],
-  ["duplex", "typeDuplex"],
-  ["maison_entiere", "typeMaisonEntiere"],
+  ...PROPERTY_TYPES.map((pt) => [pt.value, pt.labelKey] as [string, string]),
 ];
 
 function todayISO(): string {
@@ -90,22 +85,6 @@ export function SearchBarCompact({
     const next = (h + 24) % 24;
     return `${String(next).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
   })();
-
-  useEffect(() => {
-    if (!voyageursOpen) return;
-    const onClick = (e: MouseEvent) => {
-      if (!voyageursRef.current?.contains(e.target as Node)) setVoyageursOpen(false);
-    };
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setVoyageursOpen(false);
-    };
-    window.addEventListener("click", onClick);
-    window.addEventListener("keydown", onKey);
-    return () => {
-      window.removeEventListener("click", onClick);
-      window.removeEventListener("keydown", onKey);
-    };
-  }, [voyageursOpen]);
 
   const guestsSummary = [
     `${adultes} ${t(adultes > 1 ? "home.guestAdultesPlural" : "home.guestAdultesSingular")}`,
@@ -246,37 +225,43 @@ export function SearchBarCompact({
               <span>{guestsSummary}</span>
               <FaChevronDown aria-hidden="true" size={11} className={`search-bar-compact-chevron ${voyageursOpen ? "is-open" : ""}`} />
             </button>
-            {voyageursOpen && (
-              <div className="search-bar-compact-voyageurs-popover">
-                {guestFields.map((g) => (
-                  <div key={g.nameKey} className="sb-guest-row">
-                    <span className="sb-guest-label">{t(g.nameKey)}</span>
-                    <div className="sb-guest-stepper">
-                      <button
-                        type="button"
-                        className="sb-guest-btn"
-                        disabled={g.value <= g.min}
-                        onClick={() => changeGuest(g.setter, g.min, -1, g.value)}
-                        aria-label={`${t("home.stepperReduce")} ${t(g.partitiveKey)}`}
-                      >
-                        −
-                      </button>
-                      <span className="sb-guest-value">{g.value}</span>
-                      <button
-                        type="button"
-                        className="sb-guest-btn"
-                        disabled={g.value >= 9}
-                        onClick={() => changeGuest(g.setter, g.min, 1, g.value)}
-                        aria-label={`${t("home.stepperIncrease")} ${t(g.partitiveKey)}`}
-                      >
-                        +
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
+          <Popover
+            open={voyageursOpen}
+            onClose={() => setVoyageursOpen(false)}
+            anchorRef={voyageursRef}
+            align="end"
+            width={260}
+          >
+            <div className="search-bar-compact-voyageurs-popover">
+              {guestFields.map((g) => (
+                <div key={g.nameKey} className="sb-guest-row">
+                  <span className="sb-guest-label">{t(g.nameKey)}</span>
+                  <div className="sb-guest-stepper">
+                    <button
+                      type="button"
+                      className="sb-guest-btn"
+                      disabled={g.value <= g.min}
+                      onClick={() => changeGuest(g.setter, g.min, -1, g.value)}
+                      aria-label={`${t("home.stepperReduce")} ${t(g.partitiveKey)}`}
+                    >
+                      −
+                    </button>
+                    <span className="sb-guest-value">{g.value}</span>
+                    <button
+                      type="button"
+                      className="sb-guest-btn"
+                      disabled={g.value >= 9}
+                      onClick={() => changeGuest(g.setter, g.min, 1, g.value)}
+                      aria-label={`${t("home.stepperIncrease")} ${t(g.partitiveKey)}`}
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Popover>
           <input type="hidden" name="adultes" value={adultes} />
           <input type="hidden" name="enfants" value={enfants} />
           <input type="hidden" name="bebes" value={bebes} />
@@ -300,7 +285,7 @@ export function SearchBarCompact({
             variant="field"
             ariaLabel={t("home.propertyTypeAria")}
             name="type"
-            options={TYPE_ENTRIES.map(([value, key]) => ({ value, label: t(`home.${key}`) }))}
+            options={TYPE_ENTRIES.map(([value, key]) => ({ value, label: t(key) }))}
             value={type}
             onChange={setType}
           />

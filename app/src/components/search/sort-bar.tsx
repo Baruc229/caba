@@ -37,9 +37,7 @@ export function SortBar({ total, tri, onTriChange, onOpenFilters }: SortBarProps
         </button>
         <p className="sort-bar-count">
           <strong>{total}</strong>{" "}
-          {t("logements.resultsCount")
-            .replace("{n}", String(total))
-            .replace(/\{s\}/g, total !== 1 ? "s" : "")}
+          {t("logements.resultsCount").replace(/\{s\}/g, total !== 1 ? "s" : "")}
         </p>
       </div>
       <div className="sort-bar-right">

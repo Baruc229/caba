@@ -2,18 +2,8 @@
 
 import { useState } from "react";
 import { FaXmark } from "react-icons/fa6";
+import { PROPERTY_TYPE_MAP } from "@/lib/property-types";
 import { useApp } from "@/components/providers/app-provider";
-
-const TYPE_LABEL_KEYS: Record<string, string> = {
-  chambre: "home.typeChambre",
-  chambre_avec_salon: "home.typeChambreAvecSalon",
-  studio: "home.typeStudio",
-  appartement_meuble: "home.typeAppartementMeuble",
-  suite: "home.typeSuite",
-  villa: "home.typeVilla",
-  duplex: "home.typeDuplex",
-  maison_entiere: "home.typeMaisonEntiere",
-};
 
 export interface FilterState {
   types: string[];
@@ -114,7 +104,7 @@ export function FilterPanel({
               />
               <span className="filter-check-box" />
               <span className="filter-check-label">
-                {TYPE_LABEL_KEYS[type] ? t(TYPE_LABEL_KEYS[type]) : type}
+                {t(PROPERTY_TYPE_MAP[type] ?? type)}
               </span>
             </label>
           ))}

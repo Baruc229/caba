@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import type { PropertyType } from "@/generated/prisma/client";
+import { PROPERTY_TYPES } from "@/lib/property-types";
 import {
   addDaysBenin,
   beninDateTime,
@@ -848,8 +849,14 @@ export async function getSearchFilterOptions() {
       }),
     ]);
 
+    const counts = new Map(typeCounts.map((tc) => [tc.type, tc._count._all]));
+
     return {
-      types: typeCounts.map((t) => ({ type: t.type, count: t._count._all })),
+      // Liste identique à celle du panneau "Modifier" (source unique).
+      types: PROPERTY_TYPES.map((pt) => ({
+        type: pt.value,
+        count: counts.get(pt.value as PropertyType) ?? 0,
+      })),
       equipements: caracteristiques,
     };
   });

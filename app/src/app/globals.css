@@ -664,6 +664,34 @@
     bottom: calc(100% + 6px);
   }
 
+  /* ─── Popover portail (fixed, createPortal) ───
+     Les menus/calendriers deviennent statiques dans le wrapper
+     .popover qui les positionne ; les usages non-portail
+     (double-calendar, fiche logement) gardent leur absolute. */
+  .popover > .dp-dropdown,
+  .popover > .select-menu,
+  .popover > .search-bar-compact-voyageurs-popover {
+    position: static;
+    top: auto;
+    right: auto;
+    bottom: auto;
+    left: auto;
+  }
+
+  .popover > .dp-dropdown {
+    width: 100%;
+  }
+
+  .popover > .select-menu {
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+  }
+
+  .popover > .search-bar-compact-voyageurs-popover {
+    width: 100%;
+  }
+
   .dp-header {
     display: flex;
     align-items: center;

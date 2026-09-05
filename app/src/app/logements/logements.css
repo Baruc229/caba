@@ -85,6 +85,9 @@
   position: fixed;
   inset: 0;
   z-index: 1001;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
 }
 
 .drawer-backdrop {
@@ -95,11 +98,10 @@
 }
 
 .drawer-panel {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  max-height: 92vh;
+  position: relative;
+  flex: 0 1 auto;
+  width: 100%;
+  max-height: 90vh;
   background: var(--color-bg-card);
   border-radius: 20px 20px 0 0;
   padding: 20px 20px 32px;
@@ -108,15 +110,25 @@
   box-shadow: 0 -12px 40px -12px rgba(0, 0, 0, 0.3);
 }
 
-/* Desktop: modal centre, remonte depuis le bas */
-@media (min-width: 640px) {
+/* Mobile: bottom-sheet (inchangé) */
+@media (max-width: 639px) {
   .drawer-panel {
-    left: 50%;
-    right: auto;
-    width: min(680px, calc(100vw - 48px));
-    transform: translateX(-50%);
+    max-height: 92vh;
+  }
+}
+
+/* Desktop: modal centré verticalement et horizontalement dans le viewport.
+   Le panneau tient à l'écran sans scroll interne (max-height 90vh,
+   overflow-y:auto n'intervient que si le contenu dépasse réellement). */
+@media (min-width: 640px) {
+  .drawer-root {
+    align-items: center;
+  }
+  .drawer-panel {
+    width: min(660px, calc(100vw - 48px));
     border-radius: 20px;
-    animation: drawerUpDesktop 250ms cubic-bezier(0.32, 0.72, 0, 1);
+    padding: 24px 24px 32px;
+    box-shadow: 0 24px 64px -24px rgba(0, 0, 0, 0.45);
   }
 }
 
@@ -128,11 +140,6 @@
 @keyframes drawerUp {
   from { transform: translateY(100%); }
   to { transform: translateY(0); }
-}
-
-@keyframes drawerUpDesktop {
-  from { bottom: -92vh; }
-  to { bottom: 0; }
 }
 
 .drawer-header {

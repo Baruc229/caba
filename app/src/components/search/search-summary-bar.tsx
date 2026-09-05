@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { FaCalendarDays, FaUserGroup, FaBed, FaSliders, FaX } from "react-icons/fa6";
 import { SearchBarCompact } from "@/components/search/search-bar-compact";
+import { PROPERTY_TYPES } from "@/lib/property-types";
 import { useApp } from "@/components/providers/app-provider";
 
 interface SearchSummaryBarProps {
@@ -24,18 +25,6 @@ const TYPE_SHORT: Record<string, string> = {
   semaine: "Semaine",
   mois: "Mois",
 };
-
-const TYPE_KEYS: [string, string][] = [
-  ["", "allTypes"],
-  ["chambre", "typeChambre"],
-  ["chambre_avec_salon", "typeChambreAvecSalon"],
-  ["studio", "typeStudio"],
-  ["appartement_meuble", "typeAppartementMeuble"],
-  ["suite", "typeSuite"],
-  ["villa", "typeVilla"],
-  ["duplex", "typeDuplex"],
-  ["maison_entiere", "typeMaisonEntiere"],
-];
 
 const MONTHS_FR = ["janv.", "fév.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."];
 const MONTHS_EN = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -105,8 +94,8 @@ export function SearchSummaryBar({
   }
   pills.push({ label: guestsLabel, icon: <FaUserGroup aria-hidden="true" size={13} /> });
   if (initialType) {
-    const pair = TYPE_KEYS.find(([value]) => value === initialType);
-    const label = pair ? t(`home.${pair[1]}`) : initialType;
+    const pair = PROPERTY_TYPES.find((pt) => pt.value === initialType);
+    const label = pair ? t(pair.labelKey) : initialType;
     pills.push({ label, icon: <FaBed aria-hidden="true" size={13} /> });
   }
   if (typeLabel && initialTypeReservation) {

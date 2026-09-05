@@ -1,15 +1,13 @@
 "use client";
 
 import {
-  forwardRef,
   memo,
   useCallback,
-  useEffect,
-  useLayoutEffect,
   useRef,
   useState,
 } from "react";
 import { FaCalendarDays, FaChevronLeft, FaChevronRight } from "react-icons/fa6";
+import { Popover } from "@/components/ui/popover";
 import { useApp } from "@/components/providers/app-provider";
 import { MONTH_NAMES, WEEKDAYS_SHORT } from "@/lib/i18n/dictionaries";
 
@@ -101,7 +99,17 @@ const MonthCalendar = memo(function MonthCalendar({
   );
 });
 
-const CalendarDropdown = forwardRef<HTMLDivElement, {
+function CalendarDropdown({
+  year,
+  month,
+  minDate,
+  selected,
+  onSelect,
+  canPrevMonth,
+  onPrev,
+  onNext,
+  label,
+}: {
   year: number;
   month: number;
   minDate: string;
@@ -111,26 +119,23 @@ const CalendarDropdown = forwardRef<HTMLDivElement, {
   onPrev: () => void;
   onNext: () => void;
   label: string;
-}>(function CalendarDropdown(
-  { year, month, minDate, selected, onSelect, canPrevMonth, onPrev, onNext, label },
-  ref,
-) {
+}) {
   const { lang, t } = useApp();
   return (
-    <div className="dp-dropdown" role="dialog" aria-label={label} ref={ref}>
+    <div className="dp-dropdown" role="dialog" aria-label={label}>
       <div className="dp-header">
-        <button type="button" className="dp-nav" disabled={canPrevMonth(year, month)} onClick={(e) => { e.stopPropagation(); onPrev(); }} aria-label={t("calendar.prevMonth")}>
+        <button type="button" className="dp-nav" disabled={canPrevMonth(year, month)} onClick={onPrev} aria-label={t("calendar.prevMonth")}>
           <FaChevronLeft aria-hidden="true" size={12} />
         </button>
         <span className="dp-title">{MONTH_NAMES[lang][month - 1]} {year}</span>
-        <button type="button" className="dp-nav" onClick={(e) => { e.stopPropagation(); onNext(); }} aria-label={t("calendar.nextMonth")}>
+        <button type="button" className="dp-nav" onClick={onNext} aria-label={t("calendar.nextMonth")}>
           <FaChevronRight aria-hidden="true" size={12} />
         </button>
       </div>
       <MonthCalendar year={year} month={month} minDate={minDate} selected={selected} onSelect={onSelect} lang={lang} />
     </div>
   );
-});
+}
 
 interface DateRangePickerProps {
   arrivee: string;
@@ -165,41 +170,10 @@ export function DateRangePicker({
     return d.getMonth() + 1;
   });
 
-  const containerRef = useRef<HTMLDivElement>(null);
-  const arrDropRef = useRef<HTMLDivElement>(null);
-  const depDropRef = useRef<HTMLDivElement>(null);
+  const arrTriggerRef = useRef<HTMLButtonElement>(null);
+  const depTriggerRef = useRef<HTMLButtonElement>(null);
 
   const minDate = minDateProp ?? todayISO();
-
-  useLayoutEffect(() => {
-    const ref = openArrival ? arrDropRef : openDeparture ? depDropRef : null;
-    if (!ref?.current) return;
-    ref.current.classList.remove("dp-dropdown--above");
-    const rect = ref.current.getBoundingClientRect();
-    if (rect.bottom > window.innerHeight - 8) ref.current.classList.add("dp-dropdown--above");
-  }, [openArrival, openDeparture]);
-
-  useEffect(() => {
-    if (!openArrival && !openDeparture) return;
-    const onClick = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setOpenArrival(false);
-        setOpenDeparture(false);
-      }
-    };
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") { setOpenArrival(false); setOpenDeparture(false); }
-    };
-    const id = setTimeout(() => {
-      window.addEventListener("click", onClick);
-      window.addEventListener("keydown", onKey);
-    }, 0);
-    return () => {
-      clearTimeout(id);
-      window.removeEventListener("click", onClick);
-      window.removeEventListener("keydown", onKey);
-    };
-  }, [openArrival, openDeparture]);
 
   const goMonth = useCallback((setY: React.Dispatch<React.SetStateAction<number>>, setM: React.Dispatch<React.SetStateAction<number>>, delta: number) => {
     setM((m) => {
@@ -240,23 +214,32 @@ export function DateRangePicker({
   }, [arrivee, onArriveeChange, onDepartChange, onDatesChange]);
 
   return (
-    <div ref={containerRef} className="sb-date-range">
+    <div className="sb-date-range">
       {/* Arrival trigger */}
       <button
+        ref={arrTriggerRef}
         type="button"
         className="sb-date-trigger"
         aria-haspopup="dialog"
         aria-expanded={openArrival}
-        onClick={(e) => { e.stopPropagation(); setOpenArrival((v) => !v); setOpenDeparture(false); }}
+        onClick={() => {
+          setOpenDeparture(false);
+          setOpenArrival((v) => !v);
+        }}
       >
         <FaCalendarDays aria-hidden="true" size={14} />
         <span className={`sb-date-trigger-text${arrivee ? "" : " is-empty"}`}>
           {arrivee ? formatShort(lang, arrivee) : t("calendar.arrival")}
         </span>
       </button>
-      {openArrival && (
+      <Popover
+        open={openArrival}
+        onClose={() => setOpenArrival(false)}
+        anchorRef={arrTriggerRef}
+        width={294}
+        align="start"
+      >
         <CalendarDropdown
-          ref={arrDropRef}
           year={arrYear}
           month={arrMonth}
           minDate={minDate}
@@ -267,24 +250,33 @@ export function DateRangePicker({
           onNext={() => goMonth(setArrYear, setArrMonth, 1)}
           label={t("calendar.selectArrival")}
         />
-      )}
+      </Popover>
 
       {/* Departure trigger */}
       <button
+        ref={depTriggerRef}
         type="button"
         className="sb-date-trigger"
         aria-haspopup="dialog"
         aria-expanded={openDeparture}
-        onClick={(e) => { e.stopPropagation(); setOpenDeparture((v) => !v); setOpenArrival(false); }}
+        onClick={() => {
+          setOpenArrival(false);
+          setOpenDeparture((v) => !v);
+        }}
       >
         <FaCalendarDays aria-hidden="true" size={14} />
         <span className={`sb-date-trigger-text${depart ? "" : " is-empty"}`}>
           {depart ? formatShort(lang, depart) : t("calendar.departure")}
         </span>
       </button>
-      {openDeparture && (
+      <Popover
+        open={openDeparture}
+        onClose={() => setOpenDeparture(false)}
+        anchorRef={depTriggerRef}
+        width={294}
+        align="start"
+      >
         <CalendarDropdown
-          ref={depDropRef}
           year={depYear}
           month={depMonth}
           minDate={minDate}
@@ -295,7 +287,7 @@ export function DateRangePicker({
           onNext={() => goMonth(setDepYear, setDepMonth, 1)}
           label={t("calendar.selectDeparture")}
         />
-      )}
+      </Popover>
     </div>
   );
 }
