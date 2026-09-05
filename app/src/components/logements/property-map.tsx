@@ -27,7 +27,10 @@ export function PropertyMap({ lat, lon }: PropertyMapProps) {
 
   useEffect(() => {
     if (!containerRef.current) return;
-    const instance = L.map(containerRef.current, { scrollWheelZoom: false });
+    const instance = L.map(containerRef.current, {
+      scrollWheelZoom: true,
+      zoomControl: true,
+    });
 
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       maxZoom: 19,

@@ -75,6 +75,73 @@
     line-height: 1.05;
   }
 
+  /* ─── Page header — fil d'ariane réutilisable ─── */
+  .page-header {
+    padding: 1.4rem 2rem;
+    border-radius: 40px;
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border-subtle);
+    margin-bottom: 1.5rem;
+  }
+
+  .page-header-crumb {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    padding: 0.6rem 1.25rem;
+    border-radius: 999px;
+    background: var(--color-bg-primary);
+    border: 1px solid var(--color-border-subtle);
+  }
+
+  .page-header-crumb-group {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .page-header-crumb-link {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    transition: color 150ms ease;
+  }
+
+  .page-header-crumb-link:hover {
+    color: var(--color-accent-secondary);
+  }
+
+  .page-header-crumb-static {
+    cursor: default;
+  }
+
+  .page-header-crumb-sep {
+    display: inline-flex;
+    align-items: center;
+    margin: 0 0.6rem;
+    color: #a29a8c;
+  }
+
+  .page-header-crumb-current {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+  }
+
+  @media (max-width: 639px) {
+    .page-header {
+      padding: 1rem 1.25rem;
+      border-radius: 20px;
+      margin-bottom: 1rem;
+    }
+
+    .page-header-crumb {
+      padding: 0.5rem 0.9rem;
+    }
+  }
+
   /* Conteneur 1400px */
   .container-caba {
     width: 100%;

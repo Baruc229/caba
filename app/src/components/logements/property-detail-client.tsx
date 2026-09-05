@@ -10,6 +10,7 @@ import { DoubleMonthCalendar } from "@/components/logements/double-month-calenda
 import { PropertyMap } from "@/components/logements/property-map";
 import { GuestsField } from "@/components/ui/guests-field";
 import { Select } from "@/components/ui/select";
+import { PageHeader } from "@/components/layout/page-header";
 import { nightsBetween } from "@/lib/calendar-utils";
 import { convertAmount, formatAmount } from "@/lib/i18n/currency";
 import type { IconType } from "react-icons";
@@ -390,21 +391,13 @@ export function PropertyDetailClient({
   return (
     <section className="detail-page">
       {/* ─── Fil d'ariane ─── */}
-      <nav className="detail-breadcrumb" aria-label={t("logementDetail.breadcrumbChambres")}>
-        <Link href="/" className="detail-breadcrumb-link">
-          {t("logementDetail.breadcrumbAccueil")}
-        </Link>
-        <span className="detail-breadcrumb-sep" aria-hidden="true">
-          ›
-        </span>
-        <Link href="/logements" className="detail-breadcrumb-link">
-          {t("logementDetail.breadcrumbChambres")}
-        </Link>
-        <span className="detail-breadcrumb-sep" aria-hidden="true">
-          ›
-        </span>
-        <span className="detail-breadcrumb-current">{property.nom}</span>
-      </nav>
+      <PageHeader
+        crumbs={[
+          { labelKey: "logementDetail.breadcrumbAccueil", href: "/" },
+          { labelKey: "logementDetail.breadcrumbChambres", href: "/logements" },
+          { label: property.nom },
+        ]}
+      />
 
       {/* ─── Galerie ─── */}
       <div className="detail-gallery">
@@ -711,32 +704,31 @@ export function PropertyDetailClient({
                   </div>
                 </div>
 
-                <div className="detail-dates-summary">
-                  <span className="detail-dates-summary-label">
-                    {t("logementDetail.vosDates") ?? "Vos dates"}
-                  </span>
-                  {hasDates ? (
-                    <div className="detail-dates-summary-value">
-                      <span>
-                        {formatFullDate(arrivee)} → {formatFullDate(depart)}
-                      </span>
-                      <button
-                        type="button"
-                        className="detail-dates-summary-link"
-                        onClick={scrollToCalendar}
-                      >
-                        {t("logementDetail.modifier") ?? "Modifier"}
-                      </button>
-                    </div>
-                  ) : (
-                    <button
-                      type="button"
-                      className="detail-dates-summary-link"
-                      onClick={scrollToCalendar}
-                    >
-                      {t("logementDetail.visualiserDates")}
-                    </button>
-                  )}
+                <div className="detail-dates-fields">
+                  <button
+                    type="button"
+                    className={`detail-date-field ${hasDates ? "detail-date-field--filled" : ""}`}
+                    onClick={scrollToCalendar}
+                  >
+                    <span className="detail-date-field-label">
+                      {t("logementDetail.arrivee")}
+                    </span>
+                    <span className="detail-date-field-value">
+                      {hasDates ? formatFullDate(arrivee) : t("logementDetail.choisirDates")}
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    className={`detail-date-field ${hasDates ? "detail-date-field--filled" : ""}`}
+                    onClick={scrollToCalendar}
+                  >
+                    <span className="detail-date-field-label">
+                      {t("logementDetail.depart")}
+                    </span>
+                    <span className="detail-date-field-value">
+                      {hasDates ? formatFullDate(depart) : t("logementDetail.choisirDates")}
+                    </span>
+                  </button>
                 </div>
 
                 <GuestsField

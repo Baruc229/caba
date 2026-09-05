@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth/config";
+import { computePriceFromData } from "@/lib/services/pricing";
 import { CheckoutClient } from "./checkout-client";
 import "../../logement-detail.css";
 import "../../checkout.css";
@@ -37,7 +38,8 @@ export default async function ReserverPage({ params, searchParams }: ReserverPag
     where: { id },
     include: {
       photos: { orderBy: { ordre: "asc" } },
-      tarifs: { where: { actif: true }, orderBy: { createdAt: "desc" }, take: 1 },
+      tarifs: { where: { actif: true } },
+      promotions: { where: { actif: true } },
       avis: { where: { statut: "publique" }, select: { note: true } },
     },
   });
@@ -54,6 +56,27 @@ export default async function ReserverPage({ params, searchParams }: ReserverPag
 
   const sessionUser = session?.user;
 
+  const nominalStart = new Date();
+  // eslint-disable-next-line react-hooks/purity
+  const nominalEnd = new Date(Date.now() + 24 * 60 * 60 * 1000);
+  const nominalPricing = computePriceFromData({
+    tarifs: property.tarifs,
+    promotions: property.promotions,
+    devise: property.devise,
+    startDate: nominalStart,
+    endDate: nominalEnd,
+    typeReservation: "nuee",
+    adults: 2,
+    children: 0,
+    babies: 0,
+  });
+  const tarifBase =
+    Number.isFinite(nominalPricing.baseRate) && nominalPricing.baseRate > 0
+      ? Number(nominalPricing.baseRate.toFixed(2))
+      : property.tarifs.length > 0
+        ? Number(property.tarifs[0].prix)
+        : null;
+
   return (
     <Suspense>
       <CheckoutClient
@@ -64,7 +87,7 @@ export default async function ReserverPage({ params, searchParams }: ReserverPag
           ville: property.ville,
           pays: property.pays,
           photo: property.photos[0]?.url ?? null,
-          tarifBase: property.tarifs[0] ? Number(property.tarifs[0].prix) : null,
+          tarifBase,
           devise: property.tarifs[0]?.devise ?? property.devise,
           noteMoyenne,
           nombreAvis: notes.length,

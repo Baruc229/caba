@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useApp } from "@/components/providers/app-provider";
+import { PageHeader } from "@/components/layout/page-header";
 import { convertAmount, formatAmount } from "@/lib/i18n/currency";
 
 export interface CheckoutProperty {
@@ -277,6 +278,16 @@ export function CheckoutClient({
 
   return (
     <section className="container-caba py-12">
+      <div className="max-w-[1080px] mx-auto">
+        <PageHeader
+          crumbs={[
+            { labelKey: "logementDetail.breadcrumbAccueil", href: "/" },
+            { labelKey: "logementDetail.breadcrumbChambres", href: "/logements" },
+            { label: property.nom, href: `/logements/${property.id}` },
+            { labelKey: "checkout.title" },
+          ]}
+        />
+      </div>
       <div className="checkout-grid">
         {/* Récapitulatif logement */}
         <div className="checkout-recap">

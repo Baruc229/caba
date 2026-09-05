@@ -8,47 +8,6 @@
   padding: 0 0 7rem;
 }
 
-/* ── Fil d'ariane ── */
-.detail-breadcrumb {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 4px 8px;
-  margin: 16px 20px 0;
-  padding: 10px 16px;
-  background: var(--color-bg-card);
-  border: 1px solid var(--color-border-subtle);
-  border-radius: 16px;
-}
-
-.detail-breadcrumb-link {
-  color: var(--color-accent-secondary);
-  font-size: 13px;
-  font-weight: 600;
-  text-decoration: none;
-  transition: color 150ms;
-}
-
-.detail-breadcrumb-link:hover {
-  color: var(--color-accent);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-.detail-breadcrumb-sep {
-  color: var(--color-text-secondary);
-  font-size: 13px;
-}
-
-.detail-breadcrumb-current {
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--color-text-primary);
-  font-family: var(--font-heading), sans-serif;
-  letter-spacing: 0.01em;
-  text-transform: uppercase;
-}
-
 /* ── Galerie ── */
 .detail-gallery {
   position: relative;
@@ -491,9 +450,9 @@
 
 .detail-map {
   position: relative;
-  border-radius: 12px;
+  border-radius: 16px;
   overflow: hidden;
-  aspect-ratio: 16 / 9;
+  height: 280px;
   border: 1px solid var(--color-border-subtle);
   background: var(--color-bg-primary);
 }
@@ -663,43 +622,50 @@
 }
 
 /* ── Résumé des dates dans le panneau ── */
-.detail-dates-summary {
+.detail-dates-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.detail-date-field {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  padding: 12px 14px;
+  align-items: flex-start;
+  gap: 2px;
+  width: 100%;
+  padding: 10px 12px;
   background: var(--color-bg-primary);
   border: 1px solid var(--color-border-subtle);
   border-radius: 12px;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
 }
 
-.detail-dates-summary-label {
-  font-size: 11px;
+.detail-date-field:hover,
+.detail-date-field--filled {
+  border-color: var(--color-accent-secondary);
+  box-shadow: 0 0 0 3px rgba(0, 20, 137, 0.08);
+}
+
+.detail-date-field-label {
+  font-size: 10px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
   color: var(--color-text-secondary);
 }
 
-.detail-dates-summary-value {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  font-size: 14px;
+.detail-date-field-value {
+  font-size: 13px;
   font-weight: 600;
-  color: var(--color-text-primary);
+  color: var(--color-accent-secondary);
 }
 
-.detail-dates-summary-link {
-  border: none;
-  background: none;
-  padding: 0;
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--color-accent-secondary);
-  cursor: pointer;
-  text-align: left;
+.detail-date-field--filled .detail-date-field-value {
+  color: var(--color-text-primary);
 }
 
 .detail-cal-selection {
@@ -917,37 +883,38 @@
   }
 }
 
-/* ── Calendrier double-mois ── */
+/* ── Calendrier double-mois : deux cartes distinctes ── */
 .cal-double {
-  display: block;
-}
-
-.cal-double-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 10px;
-}
-
-.cal-double-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  align-items: start;
+  gap: 16px;
 }
 
-.cal-panel {
+.cal-card {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 16px;
+  padding: 14px;
   min-width: 0;
 }
 
-.cal-panel-title {
+.cal-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.cal-card-title {
   display: block;
+  flex: 1;
   text-align: center;
   font-size: 14px;
   font-weight: 700;
   text-transform: capitalize;
   color: var(--color-text-primary);
-  margin-bottom: 8px;
+  letter-spacing: 0.01em;
 }
 
 .cal-panel-grid {
@@ -1019,9 +986,14 @@
   background: var(--color-accent-secondary);
 }
 
+.cal-double .calendar-legend {
+  grid-column: 1 / -1;
+  justify-content: center;
+}
+
 @media (max-width: 639px) {
-  .cal-double-grid {
+  .cal-double {
     grid-template-columns: 1fr;
-    gap: 16px;
+    gap: 12px;
   }
 }

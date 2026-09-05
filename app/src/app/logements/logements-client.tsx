@@ -9,6 +9,7 @@ import { FilterPanel, type FilterState } from "@/components/search/filter-panel"
 import { SortBar } from "@/components/search/sort-bar";
 import { Pagination } from "@/components/search/pagination";
 import { SkeletonCard } from "@/components/search/skeleton-card";
+import { PageHeader } from "@/components/layout/page-header";
 import { useApp } from "@/components/providers/app-provider";
 import { DocumentTitle } from "@/components/seo/document-title";
 
@@ -294,6 +295,15 @@ export function LogementsClient({
   return (
     <section className="logements-page" aria-label={t("search.formAriaLabel")}>
       <DocumentTitle titleKey="meta.logementsTitle" descKey="meta.logementsDesc" />
+
+      <div className="logements-crumb">
+        <PageHeader
+          crumbs={[
+            { labelKey: "logementDetail.breadcrumbAccueil", href: "/" },
+            { labelKey: "logementDetail.breadcrumbChambres" },
+          ]}
+        />
+      </div>
 
       <div className="logements-search-wrap">
         <SearchSummaryBar

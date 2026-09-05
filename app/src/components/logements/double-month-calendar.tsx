@@ -164,47 +164,52 @@ export function DoubleMonthCalendar({
     }
 
     return (
-      <div className="cal-panel">
-        <span className="cal-panel-title" aria-hidden="true">
-          {MONTH_NAMES[lang][ref.month - 1]} {ref.year}
-        </span>
-        <div className="cal-panel-grid">
-          {WEEKDAYS_SHORT[lang].map((weekday) => (
-            <span key={weekday} className="cal-panel-weekday" aria-hidden="true">
-              {weekday}
-            </span>
-          ))}
-          {cells}
-        </div>
+      <div className="cal-panel-grid">
+        {WEEKDAYS_SHORT[lang].map((weekday) => (
+          <span key={weekday} className="cal-panel-weekday" aria-hidden="true">
+            {weekday}
+          </span>
+        ))}
+        {cells}
       </div>
     );
   }
 
   return (
     <div className="cal-double" role="group" aria-label={t("calendar.availabilityCalendar")}>
-      <div className="cal-double-header">
-        <button
-          type="button"
-          className="calendar-nav"
-          onClick={() => changeAnchor(-1)}
-          disabled={!canGoPrev || loading}
-          aria-label={t("calendar.prevMonth")}
-        >
-          <FaChevronLeft aria-hidden="true" size={12} />
-        </button>
-        <button
-          type="button"
-          className="calendar-nav"
-          onClick={() => changeAnchor(1)}
-          disabled={loading}
-          aria-label={t("calendar.nextMonth")}
-        >
-          <FaChevronRight aria-hidden="true" size={12} />
-        </button>
+      <div className="cal-card">
+        <div className="cal-card-header">
+          <button
+            type="button"
+            className="calendar-nav"
+            onClick={() => changeAnchor(-1)}
+            disabled={!canGoPrev || loading}
+            aria-label={t("calendar.prevMonth")}
+          >
+            <FaChevronLeft aria-hidden="true" size={12} />
+          </button>
+          <span className="cal-card-title" aria-hidden="true">
+            {MONTH_NAMES[lang][visible.first.month - 1]} {visible.first.year}
+          </span>
+        </div>
+        {renderPanel(visible.first)}
       </div>
 
-      <div className="cal-double-grid">
-        {renderPanel(visible.first)}
+      <div className="cal-card">
+        <div className="cal-card-header">
+          <span className="cal-card-title" aria-hidden="true">
+            {MONTH_NAMES[lang][visible.second.month - 1]} {visible.second.year}
+          </span>
+          <button
+            type="button"
+            className="calendar-nav"
+            onClick={() => changeAnchor(1)}
+            disabled={loading}
+            aria-label={t("calendar.nextMonth")}
+          >
+            <FaChevronRight aria-hidden="true" size={12} />
+          </button>
+        </div>
         {renderPanel(visible.second)}
       </div>
 
