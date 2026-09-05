@@ -1181,7 +1181,7 @@
   .sort-bar-right {
     justify-content: flex-end;
     flex: 1;
-    min-width: 0;
+    min-width: max-content;
   }
   .sort-bar-select {
     flex: none;
