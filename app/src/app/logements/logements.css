@@ -177,10 +177,6 @@
 }
 
 @media (max-width: 639px) {
-  .search-summary-bar {
-    flex-direction: column;
-    align-items: stretch;
-  }
   .search-summary-pills {
     overflow-x: auto;
     flex-wrap: nowrap;
@@ -188,6 +184,9 @@
   }
   .search-summary-pills::-webkit-scrollbar {
     display: none;
+  }
+  .search-summary-edit-btn {
+    padding: 0 12px;
   }
 }
 
@@ -1128,12 +1127,29 @@
 
 @media (max-width: 639px) {
   .sort-bar {
-    flex-direction: column;
-    align-items: stretch;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px 12px;
+  }
+  .sort-bar-left {
     gap: 10px;
+  }
+  .sort-bar-count {
+    font-size: 13px;
+    white-space: nowrap;
+  }
+  .sort-bar-tri-label {
+    display: none;
   }
   .sort-bar-right {
     justify-content: flex-end;
+    flex: 1;
+    min-width: 0;
+  }
+  .sort-bar-select {
+    width: auto;
+    flex: 1;
+    min-width: 0;
   }
 }
 
