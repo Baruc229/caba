@@ -1166,13 +1166,18 @@
   .sort-bar {
     flex-direction: row;
     flex-wrap: wrap;
-    gap: 8px 12px;
+    gap: 8px;
   }
   .sort-bar-left {
-    gap: 10px;
+    gap: 8px;
+  }
+  .sort-bar-filter-btn {
+    padding: 0 12px;
+    font-size: 13px;
+    height: 34px;
   }
   .sort-bar-count {
-    font-size: 13px;
+    font-size: 12px;
     white-space: nowrap;
   }
   .sort-bar-tri-label {
@@ -1180,11 +1185,10 @@
   }
   .sort-bar-right {
     justify-content: flex-end;
-    flex: 1;
-    min-width: max-content;
+    flex: none;
   }
   .sort-bar-select {
-    flex: none;
+    width: auto;
   }
 }
 

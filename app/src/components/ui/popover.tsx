@@ -49,7 +49,7 @@ export function Popover({
 
       const a = anchor.getBoundingClientRect();
       const desiredW =
-        width ?? (matchWidth ? a.width : Math.max(root.offsetWidth, minWidth));
+        width ?? (matchWidth ? Math.max(a.width, minWidth) : Math.max(root.offsetWidth, minWidth));
       const clampedW = Math.max(8, Math.min(desiredW, window.innerWidth - 16));
 
       root.style.width = `${clampedW}px`;
