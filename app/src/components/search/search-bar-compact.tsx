@@ -30,6 +30,17 @@ function todayISO(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
+function formatDateShort(iso: string, lang: string): string {
+  if (!iso) return "";
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
+  if (!m) return iso;
+  const date = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+  return date.toLocaleDateString(lang === "en" ? "en-US" : "fr-FR", {
+    day: "numeric",
+    month: "short",
+  });
+}
+
 interface SearchBarCompactProps {
   initialArrivee: string;
   initialDepart: string;
@@ -53,7 +64,7 @@ export function SearchBarCompact({
   initialHeureArrivee = "08:00",
   initialHeureDepart = "18:00",
 }: SearchBarCompactProps) {
-  const { t } = useApp();
+  const { t, lang } = useApp();
   const [arrivee, setArrivee] = useState(initialArrivee);
   const [depart, setDepart] = useState(initialDepart);
   const [adultes, setAdultes] = useState(initialAdultes);
@@ -65,10 +76,20 @@ export function SearchBarCompact({
   const [heureDepart, setHeureDepart] = useState(initialHeureDepart);
   const [voyageursOpen, setVoyageursOpen] = useState(false);
   const voyageursRef = useRef<HTMLDivElement>(null);
+  const arrInputRef = useRef<HTMLInputElement>(null);
+  const depInputRef = useRef<HTMLInputElement>(null);
   const [isMobile, setIsMobile] = useState(() => {
     if (typeof window === "undefined") return false;
     return window.matchMedia("(max-width: 767px)").matches;
   });
+
+  const openNativePicker = (ref: React.RefObject<HTMLInputElement | null>) => {
+    try {
+      ref.current?.showPicker?.();
+    } catch {
+      ref.current?.focus();
+    }
+  };
 
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 767px)");
@@ -130,16 +151,29 @@ export function SearchBarCompact({
                 <FaCalendarDays aria-hidden="true" size={13} />
                 {t("calendar.arrival")}
               </label>
-              <input
-                id="sb-arrivee"
-                name="arrivee"
-                type="date"
-                value={arrivee}
-                min={todayISO()}
-                onChange={(e) => setArrivee(e.target.value)}
-                className="search-bar-compact-input"
-                placeholder=" "
-              />
+              <div className="search-bar-compact-date-styled">
+                <input
+                  id="sb-arrivee"
+                  type="text"
+                  readOnly
+                  value={arrivee ? formatDateShort(arrivee, lang) : ""}
+                  placeholder={t("calendar.arrival")}
+                  aria-label={t("calendar.arrival")}
+                  onClick={() => openNativePicker(arrInputRef)}
+                  className="search-bar-compact-input search-bar-compact-date-display"
+                />
+                <input
+                  ref={arrInputRef}
+                  name="arrivee"
+                  type="date"
+                  value={arrivee}
+                  min={todayISO()}
+                  onChange={(e) => setArrivee(e.target.value)}
+                  className="search-bar-compact-native-date"
+                  tabIndex={-1}
+                  aria-hidden="true"
+                />
+              </div>
             </div>
 
             <div className="search-bar-compact-field">
@@ -147,16 +181,29 @@ export function SearchBarCompact({
                 <FaCalendarDays aria-hidden="true" size={13} />
                 {t("calendar.departure")}
               </label>
-              <input
-                id="sb-depart"
-                name="depart"
-                type="date"
-                value={depart}
-                min={arrivee || todayISO()}
-                onChange={(e) => setDepart(e.target.value)}
-                className="search-bar-compact-input"
-                placeholder=" "
-              />
+              <div className="search-bar-compact-date-styled">
+                <input
+                  id="sb-depart"
+                  type="text"
+                  readOnly
+                  value={depart ? formatDateShort(depart, lang) : ""}
+                  placeholder={t("calendar.departure")}
+                  aria-label={t("calendar.departure")}
+                  onClick={() => openNativePicker(depInputRef)}
+                  className="search-bar-compact-input search-bar-compact-date-display"
+                />
+                <input
+                  ref={depInputRef}
+                  name="depart"
+                  type="date"
+                  value={depart}
+                  min={arrivee || todayISO()}
+                  onChange={(e) => setDepart(e.target.value)}
+                  className="search-bar-compact-native-date"
+                  tabIndex={-1}
+                  aria-hidden="true"
+                />
+              </div>
             </div>
           </>
         ) : (
@@ -270,9 +317,10 @@ export function SearchBarCompact({
         <div className="search-bar-compact-field">
           <label className="search-bar-compact-label">{t("home.stayTypeLabel")}</label>
           <Select
-            variant="field"
+            variant="boxed"
             ariaLabel={t("home.stayTypeAria")}
             name="typeReservation"
+            placeholder={t("home.stayTypePlaceholder")}
             options={SEJOUR_ENTRIES.map(([value, key]) => ({ value, label: t(`home.${key}`) }))}
             value={typeReservation}
             onChange={setTypeReservation}
@@ -282,9 +330,10 @@ export function SearchBarCompact({
         <div className="search-bar-compact-field">
           <label className="search-bar-compact-label">{t("search.propertyTypeShort")}</label>
           <Select
-            variant="field"
+            variant="boxed"
             ariaLabel={t("home.propertyTypeAria")}
             name="type"
+            placeholder={t("home.allTypes")}
             options={TYPE_ENTRIES.map(([value, key]) => ({ value, label: t(key) }))}
             value={type}
             onChange={setType}

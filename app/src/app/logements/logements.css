@@ -298,6 +298,38 @@
   border-color: var(--color-accent-secondary);
 }
 
+/* Champs date mobiles : affichage texte + picker natif invisible */
+.search-bar-compact-date-styled {
+  position: relative;
+}
+
+.search-bar-compact-date-display {
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+.search-bar-compact-date-display::placeholder {
+  color: var(--color-text-secondary);
+}
+
+.search-bar-compact-native-date {
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* Selects boxed du panneau : même hauteur/rayon que les champs */
+.search-bar-compact-field .select--boxed .select-trigger {
+  height: 44px;
+  padding: 0 12px;
+  border-radius: 10px;
+}
+
 .search-bar-compact-submit {
   height: 44px;
   padding: 0 28px;
@@ -1122,7 +1154,12 @@
 }
 
 .sort-bar-select {
-  width: 180px;
+  width: auto;
+}
+
+.sort-bar-select .select-trigger {
+  justify-content: flex-start;
+  gap: 8px;
 }
 
 @media (max-width: 639px) {
@@ -1147,9 +1184,7 @@
     min-width: 0;
   }
   .sort-bar-select {
-    width: auto;
-    flex: 1;
-    min-width: 0;
+    flex: none;
   }
 }
 

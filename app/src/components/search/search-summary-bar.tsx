@@ -79,6 +79,8 @@ export function SearchSummaryBar({
 
   const guests = Math.max(1, initialAdultes) + initialEnfants + initialBebes;
   const hasDates = Boolean(initialArrivee && initialDepart);
+  const searchDone = hasDates;
+  const ctaLabel = searchDone ? t("logements.editSearch") : t("home.searchButton");
   const guestsLabel =
     guests > 1
       ? `${guests} ${t(guests > 1 ? "home.guestAdultesPlural" : "home.guestAdultesSingular")}`
@@ -113,7 +115,11 @@ export function SearchSummaryBar({
           aria-label={t("logements.editSearch") ?? "Modifier la recherche"}
         >
           <div className="drawer-header">
-            <h2 className="drawer-title">{t("logements.editSearch") ?? "Modifier la recherche"}</h2>
+            <h2 className="drawer-title">
+              {searchDone
+                ? t("logements.editSearch") ?? "Modifier la recherche"
+                : t("home.searchButton") ?? "Rechercher"}
+            </h2>
             <button
               type="button"
               className="drawer-close"
@@ -159,10 +165,10 @@ export function SearchSummaryBar({
           type="button"
           className="search-summary-edit-btn"
           onClick={() => setDrawerOpen(true)}
-          aria-label={t("logements.editSearch") ?? "Modifier la recherche"}
+          aria-label={ctaLabel}
         >
           <FaSliders aria-hidden="true" size={13} />
-          {t("logements.editSearch") ?? "Modifier"}
+          {ctaLabel}
         </button>
       </div>
 
