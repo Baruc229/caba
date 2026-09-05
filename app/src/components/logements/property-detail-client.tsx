@@ -6,14 +6,32 @@ import Link from "next/link";
 import { FaClock, FaShareNodes, FaHeart, FaArrowLeft } from "react-icons/fa6";
 import { useSession } from "next-auth/react";
 import { useApp } from "@/components/providers/app-provider";
-import { AvailabilityCalendar } from "@/components/logements/availability-calendar";
-import { DateRangeField } from "@/components/ui/double-calendar";
+import { DoubleMonthCalendar } from "@/components/logements/double-month-calendar";
+import { PropertyMap } from "@/components/logements/property-map";
 import { GuestsField } from "@/components/ui/guests-field";
 import { Select } from "@/components/ui/select";
+import { nightsBetween } from "@/lib/calendar-utils";
+import { convertAmount, formatAmount } from "@/lib/i18n/currency";
+import type { IconType } from "react-icons";
 import {
-  convertAmount,
-  formatAmount,
-} from "@/lib/i18n/currency";
+  FaBath,
+  FaBed,
+  FaCar,
+  FaCircleCheck,
+  FaCube,
+  FaFireBurner,
+  FaKitchenSet,
+  FaPersonSwimming,
+  FaPlug,
+  FaPumpSoap,
+  FaShower,
+  FaSnowflake,
+  FaSquareParking,
+  FaTv,
+  FaUtensils,
+  FaWater,
+  FaWifi,
+} from "react-icons/fa6";
 
 const SEJOUR_ENTRIES: [string, string][] = [
   ["nuee", "sejourNuee"],
@@ -26,6 +44,65 @@ const SEJOUR_ENTRIES: [string, string][] = [
   ["mois", "sejourMois"],
 ];
 
+const EQUIPMENT_ICONS: Record<string, IconType> = {
+  faa: FaCube,
+  baignoire: FaBath,
+  bed: FaBed,
+  "chauffage climatisation": FaSnowflake,
+  chauffe_eau: FaFireBurner,
+  climatisation: FaSnowflake,
+  coffre_fort: FaCube,
+  cuisine: FaKitchenSet,
+  "cuisine equipee": FaKitchenSet,
+  douche: FaShower,
+  fauteuil: FaCube,
+  fibre: FaWifi,
+  humidificateur: FaWater,
+  internet: FaWifi,
+  jardin: FaCube,
+  lit: FaBed,
+  lit_parasol: FaBed,
+  machine_a_laver: FaPumpSoap,
+  matelas: FaBed,
+  parking: FaSquareParking,
+  piscine: FaPersonSwimming,
+  piscine_privee: FaPersonSwimming,
+  pizza: FaUtensils,
+  placard: FaCube,
+  plage: FaWater,
+  prise: FaPlug,
+  salle_de_bain: FaBath,
+  seche_cheveux: FaFireBurner,
+  seche_linge: FaPumpSoap,
+  service: FaCircleCheck,
+  table: FaUtensils,
+  television: FaTv,
+  tv: FaTv,
+  tv_satellite: FaTv,
+  "vaisselle-cuisine": FaKitchenSet,
+  ventilateur: FaSnowflake,
+  voiture: FaCar,
+  wifi: FaWifi,
+};
+
+function normalizeEquipmentKey(value: string): string {
+  return value
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]/g, "_");
+}
+
+function resolveEquipmentIcon(icone: string | null, nom: string): IconType {
+  if (icone) {
+    const direct = EQUIPMENT_ICONS[icone.toLowerCase()];
+    if (direct) return direct;
+    const normalized = EQUIPMENT_ICONS[normalizeEquipmentKey(icone)];
+    if (normalized) return normalized;
+  }
+  return EQUIPMENT_ICONS[normalizeEquipmentKey(nom)] ?? FaCircleCheck;
+}
+
 export interface PropertyDetailPhoto {
   id: string;
   url: string;
@@ -34,6 +111,7 @@ export interface PropertyDetailPhoto {
 
 export interface PropertyDetailFeature {
   nom: string;
+  icone: string | null;
 }
 
 export interface PropertyDetailData {
@@ -63,6 +141,19 @@ export interface PropertyDetailData {
   defaultCheckOut: string;
   latitude: number | null;
   longitude: number | null;
+}
+
+interface PriceQuote {
+  baseRate: number;
+  unitPrice: number;
+  subtotal: number;
+  cleaningFee: number;
+  cityTax: number;
+  supplements: number;
+  discount: number;
+  total: number;
+  currency: string;
+  promotionAppliquee: string | null;
 }
 
 export function PropertyDetailClient({
@@ -118,11 +209,56 @@ export function PropertyDetailClient({
   const [enfants, setEnfants] = useState(0);
   const [bebes, setBebes] = useState(0);
   const [message, setMessage] = useState<string | null>(null);
+  const [quote, setQuote] = useState<PriceQuote | null>(null);
+  const [quoteLoading, setQuoteLoading] = useState(false);
 
   function handleDatesChange(a: string, d: string) {
     setArrivee(a);
     setDepart(d);
   }
+
+  useEffect(() => {
+    if (!arrivee || !depart) return;
+    const controller = new AbortController();
+    let cancelled = false;
+    queueMicrotask(() => setQuoteLoading(true));
+    fetch("/api/pricing", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        propertyId: property.id,
+        startDate: arrivee,
+        endDate: depart,
+        typeReservation: sejourType,
+        adults: adultes,
+        children: enfants,
+        babies: bebes,
+      }),
+      signal: controller.signal,
+    })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data: PriceQuote | null) => setQuote(data))
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setQuoteLoading(false);
+      });
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
+  }, [property.id, arrivee, depart, sejourType, adultes, enfants, bebes]);
+
+  const hasDates = Boolean(arrivee && depart);
+  const nights = hasDates ? nightsBetween(arrivee, depart) : 0;
+
+  const formatFullDate = (iso: string) => {
+    if (!iso) return "";
+    const date = new Date(`${iso}T12:00:00Z`);
+    return date.toLocaleDateString(
+      lang === "fr" ? "fr-FR" : "en-GB",
+      { weekday: "short", day: "numeric", month: "short", year: "numeric" }
+    );
+  };
 
   function handleCountsChange(counts: {
     adultes: number;
@@ -134,12 +270,12 @@ export function PropertyDetailClient({
     setBebes(counts.bebes);
   }
 
-  async function handleReserve(e: FormEvent) {
-    e.preventDefault();
+  function attemptReserve() {
     setMessage(null);
 
     if (!arrivee || !depart) {
       setMessage(t("logements.emptyDesc"));
+      if (window.innerWidth <= 900) scrollToCalendar();
       return;
     }
 
@@ -156,7 +292,33 @@ export function PropertyDetailClient({
     router.push(`/logements/${property.id}/reserver?${params.toString()}`);
   }
 
-  const capacityParts = [
+  function handleReserve(e: FormEvent) {
+    e.preventDefault();
+    attemptReserve();
+  }
+
+  const scrollToCalendar = () => {
+    document
+      .getElementById("disponibilite")
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  const composedH1 = [
+    typeLabel,
+    property.nombreChambres > 0
+      ? `${property.nombreChambres} ${t("logementDetail.chambres").toLowerCase()}`
+      : null,
+    property.nombreSallesDeBains > 0
+      ? `${property.nombreSallesDeBains} sdb`
+      : null,
+    `jusqu'à ${property.capaciteMaximale} ${t("logementDetail.pers").toLowerCase()}`,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+
+  const infoParts = [
+    typeLabel,
+    `${property.ville}, ${property.pays}`,
     `${property.capaciteMaximale} ${t("logementDetail.voyageurs")}`,
     property.nombreChambres > 0
       ? `${property.nombreChambres} ${t("logementDetail.chambres")}`
@@ -167,19 +329,7 @@ export function PropertyDetailClient({
     property.nombreSallesDeBains > 0
       ? `${property.nombreSallesDeBains} sdb`
       : null,
-  ].filter(Boolean);
-
-  const shortCapacity = capacityParts.join(" · ");
-
-  const h1Parts = [typeLabel];
-  if (property.nombreChambres > 0)
-    h1Parts.push(
-      `${property.nombreChambres} ${t("logementDetail.chambres").toLowerCase()}`
-    );
-  if (property.nombreSallesDeBains > 0)
-    h1Parts.push(`${property.nombreSallesDeBains} sdb`);
-  h1Parts.push(`jusqu'à ${property.capaciteMaximale} pers.`);
-  const h1Subtitle = h1Parts.join(" · ");
+  ].filter(Boolean) as string[];
 
   const VISIBLE_EQUIPMENTS = 5;
   const visibleEquipments = equipmentOpen
@@ -239,6 +389,23 @@ export function PropertyDetailClient({
 
   return (
     <section className="detail-page">
+      {/* ─── Fil d'ariane ─── */}
+      <nav className="detail-breadcrumb" aria-label={t("logementDetail.breadcrumbChambres")}>
+        <Link href="/" className="detail-breadcrumb-link">
+          {t("logementDetail.breadcrumbAccueil")}
+        </Link>
+        <span className="detail-breadcrumb-sep" aria-hidden="true">
+          ›
+        </span>
+        <Link href="/logements" className="detail-breadcrumb-link">
+          {t("logementDetail.breadcrumbChambres")}
+        </Link>
+        <span className="detail-breadcrumb-sep" aria-hidden="true">
+          ›
+        </span>
+        <span className="detail-breadcrumb-current">{property.nom}</span>
+      </nav>
+
       {/* ─── Galerie ─── */}
       <div className="detail-gallery">
         {/* Overlay flottant */}
@@ -273,7 +440,7 @@ export function PropertyDetailClient({
           </div>
         </div>
 
-        {/* Desktop: grande image + vignettes en dessous */}
+        {/* Desktop: grande photo à gauche + grille de vignettes à droite */}
         <div className="detail-gallery-desktop">
           <div
             className="detail-gallery-main"
@@ -294,7 +461,7 @@ export function PropertyDetailClient({
             )}
           </div>
           {property.photos.length > 1 && (
-            <div className="detail-gallery-thumbs">
+            <div className="detail-gallery-side">
               {property.photos.slice(0, 5).map((p, i) => (
                 <button
                   key={p.id}
@@ -310,6 +477,7 @@ export function PropertyDetailClient({
                     src={p.url}
                     alt={`${property.nom} — ${i + 1}`}
                     loading="lazy"
+                    decoding="async"
                   />
                 </button>
               ))}
@@ -327,6 +495,7 @@ export function PropertyDetailClient({
                     src={property.photos[5].url}
                     alt=""
                     loading="lazy"
+                    decoding="async"
                   />
                   <span className="detail-gallery-more-overlay">
                     +{property.photos.length - 5}
@@ -363,19 +532,22 @@ export function PropertyDetailClient({
 
       {/* ─── Hero ─── */}
       <div className="detail-hero">
-        <h1 className="heading-display detail-title">{property.nom}</h1>
-        <p className="detail-title-sub">{h1Subtitle}</p>
+        <p className="detail-title-eyebrow">{property.nom}</p>
+        <h1 className="heading-display detail-title">{composedH1}</h1>
+        <div className="detail-info-chips">
+          {infoParts.map((part) => (
+            <span key={part} className="detail-info-chip">
+              {part}
+            </span>
+          ))}
+        </div>
         <div className="detail-meta">
-          <span className="detail-meta-location">
-            {property.ville}, {property.pays}
-          </span>
           {property.noteMoyenne !== null && (
             <span className="detail-meta-rating">
               <span className="detail-meta-stars">★</span>
               <strong>{property.noteMoyenne}</strong>
               <span className="detail-meta-reviews">
-                ({property.nombreAvis}{" "}
-                {t("logementDetail.avis")})
+                ({property.nombreAvis} {t("logementDetail.avis")})
               </span>
             </span>
           )}
@@ -397,14 +569,6 @@ export function PropertyDetailClient({
             </p>
           </div>
 
-          {/* Capacité */}
-          <div className="detail-block">
-            <h2 className="detail-block-title">
-              {t("logementDetail.capacite")}
-            </h2>
-            <p className="detail-capacity-line">{shortCapacity}</p>
-          </div>
-
           {/* Équipements */}
           {property.caracteristiques.length > 0 && (
             <div className="detail-block">
@@ -412,11 +576,19 @@ export function PropertyDetailClient({
                 {t("logementDetail.equipements")}
               </h2>
               <div className="detail-features">
-                {visibleEquipments.map((c) => (
-                  <span key={c.nom} className="detail-feature-tag">
-                    {c.nom}
-                  </span>
-                ))}
+                {visibleEquipments.map((c) => {
+                  const Icon = resolveEquipmentIcon(c.icone, c.nom);
+                  return (
+                    <span key={c.nom} className="detail-feature-tag">
+                      <Icon
+                        aria-hidden="true"
+                        className="detail-feature-icon"
+                        size={13}
+                      />
+                      {c.nom}
+                    </span>
+                  );
+                })}
               </div>
               {extraEquipments > 0 && !equipmentOpen && (
                 <button
@@ -432,46 +604,52 @@ export function PropertyDetailClient({
           )}
 
           {/* Disponibilité */}
-          <div className="detail-block">
+          <div className="detail-block" id="disponibilite">
             <h2 className="detail-block-title">
               {t("logementDetail.disponibilite")}
             </h2>
-            <AvailabilityCalendar propertyId={property.id} />
+            <DoubleMonthCalendar
+              propertyId={property.id}
+              arrivee={arrivee}
+              depart={depart}
+              onChange={handleDatesChange}
+            />
+            {hasDates && (
+              <p className="detail-cal-selection" aria-live="polite">
+                <strong>{formatFullDate(arrivee)}</strong>
+                <span aria-hidden="true"> → </span>
+                <strong>{formatFullDate(depart)}</strong>
+                <span className="detail-cal-selection-nights">
+                  · {nights} {nights > 1 ? t("logementDetail.nuits") : t("logementDetail.nuit")}
+                </span>
+              </p>
+            )}
           </div>
 
           {/* Localisation */}
-          {property.adresse && (
+          {property.ville && (
             <div className="detail-block">
               <h2 className="detail-block-title">
                 {t("logementDetail.localisation") ?? "Localisation"}
               </h2>
               <p className="detail-address">
-                {property.adresse}, {property.ville}, {property.pays}
+                {property.adresse ? `${property.adresse}, ` : ""}
+                {property.ville}, {property.pays}
               </p>
-              <div className="detail-map">
-                {property.latitude != null && property.longitude != null ? (
-                  <iframe
-                    title={
-                      t("logementDetail.carteLocalisation") ??
-                      "Carte de localisation"
-                    }
-                    src={`https://www.openstreetmap.org/export/embed.html?bbox=${property.longitude - 0.01},${property.latitude - 0.005},${property.longitude + 0.01},${property.latitude + 0.005}&layer=mapnik&marker=${property.latitude},${property.longitude}`}
-                    className="detail-map-iframe"
-                    loading="lazy"
-                  />
-                ) : (
-                  <a
-                    href={`https://www.openstreetmap.org/search?query=${encodeURIComponent(
-                      `${property.adresse ?? ""} ${property.ville} ${property.pays}`.trim()
-                    )}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="detail-map-link"
-                  >
-                    {property.adresse ?? property.ville}, {property.pays}
-                  </a>
-                )}
-              </div>
+              {property.latitude != null && property.longitude != null ? (
+                <PropertyMap lat={property.latitude} lon={property.longitude} />
+              ) : (
+                <a
+                  href={`https://www.openstreetmap.org/search?query=${encodeURIComponent(
+                    `${property.adresse ?? ""} ${property.ville} ${property.pays}`.trim()
+                  )}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="detail-map-link"
+                >
+                  {property.ville}, {property.pays}
+                </a>
+              )}
             </div>
           )}
         </div>
@@ -533,7 +711,33 @@ export function PropertyDetailClient({
                   </div>
                 </div>
 
-                <DateRangeField onDatesChange={handleDatesChange} />
+                <div className="detail-dates-summary">
+                  <span className="detail-dates-summary-label">
+                    {t("logementDetail.vosDates") ?? "Vos dates"}
+                  </span>
+                  {hasDates ? (
+                    <div className="detail-dates-summary-value">
+                      <span>
+                        {formatFullDate(arrivee)} → {formatFullDate(depart)}
+                      </span>
+                      <button
+                        type="button"
+                        className="detail-dates-summary-link"
+                        onClick={scrollToCalendar}
+                      >
+                        {t("logementDetail.modifier") ?? "Modifier"}
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      className="detail-dates-summary-link"
+                      onClick={scrollToCalendar}
+                    >
+                      {t("logementDetail.visualiserDates")}
+                    </button>
+                  )}
+                </div>
 
                 <GuestsField
                   maxes={{
@@ -544,6 +748,59 @@ export function PropertyDetailClient({
                   initial={{ adultes: 2, enfants: 0, bebes: 0 }}
                   onCountsChange={handleCountsChange}
                 />
+
+                {hasDates && quoteLoading && <p className="detail-quote-loading" aria-hidden="true" />}
+
+                {hasDates && quote && !quoteLoading && (
+                  <div className="detail-quote">
+                    <div className="detail-quote-line">
+                      <span>
+                        {nights}{" "}
+                        {nights > 1
+                          ? t("logementDetail.nuits")
+                          : t("logementDetail.nuit")}{" "}
+                        ×{" "}
+                        {formatAmount(
+                          convertAmount(quote.unitPrice, quote.currency, currency),
+                          lang
+                        )}{" "}
+                        {currency}
+                      </span>
+                      <span>
+                        {formatAmount(
+                          convertAmount(quote.subtotal, quote.currency, currency),
+                          lang
+                        )}{" "}
+                        {currency}
+                      </span>
+                    </div>
+                    {quote.discount > 0 && (
+                      <div className="detail-quote-line detail-quote-promo">
+                        <span>
+                          {quote.promotionAppliquee ?? t("common.promo")}
+                        </span>
+                        <span>
+                          −
+                          {formatAmount(
+                            convertAmount(quote.discount, quote.currency, currency),
+                            lang
+                          )}{" "}
+                          {currency}
+                        </span>
+                      </div>
+                    )}
+                    <div className="detail-quote-line detail-quote-total">
+                      <span>{t("logementDetail.total") ?? "Total"}</span>
+                      <span>
+                        {formatAmount(
+                          convertAmount(quote.total, quote.currency, currency),
+                          lang
+                        )}{" "}
+                        {currency}
+                      </span>
+                    </div>
+                  </div>
+                )}
 
                 {message && (
                   <p className="detail-form-error">{message}</p>
@@ -568,9 +825,13 @@ export function PropertyDetailClient({
               {formattedPrice} {currency}
             </strong>
           </div>
-          <a href="#reserver" className="detail-mobile-bar-cta">
+          <button
+            type="button"
+            onClick={attemptReserve}
+            className="detail-mobile-bar-cta"
+          >
             {t("logementDetail.reserver")}
-          </a>
+          </button>
         </div>
       )}
 

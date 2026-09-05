@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { computePriceFromData } from "@/lib/services/pricing";
 import {
   PropertyDetailClient,
   type PropertyDetailData,
@@ -51,7 +52,8 @@ export default async function LogementDetailPage({ params, searchParams }: Detai
     include: {
       photos: { orderBy: { ordre: "asc" } },
       caracteristiques: { include: { caracteristique: true } },
-      tarifs: { where: { actif: true }, orderBy: { createdAt: "desc" }, take: 1 },
+      tarifs: { where: { actif: true } },
+      promotions: { where: { actif: true } },
       avis: { where: { statut: "publique" }, select: { note: true } },
       regles: { where: { actif: true, typeRegle: { in: ["check_in", "check_out"] } } },
     },
@@ -72,7 +74,31 @@ export default async function LogementDetailPage({ params, searchParams }: Detai
   const defaultCheckIn = checkInRule?.valeur ?? "14:00";
   const defaultCheckOut = checkOutRule?.valeur ?? "11:00";
 
-  const coords = await geocode(property.adresse, property.ville, property.pays);
+  const nominalStart = new Date();
+  // eslint-disable-next-line react-hooks/purity
+  const nominalEnd = new Date(Date.now() + 24 * 60 * 60 * 1000);
+  const nominalPricing = computePriceFromData({
+    tarifs: property.tarifs,
+    promotions: property.promotions,
+    devise: property.devise,
+    startDate: nominalStart,
+    endDate: nominalEnd,
+    typeReservation: "nuee",
+    adults: 2,
+    children: 0,
+    babies: 0,
+  });
+  const tarifBase =
+    Number(nominalPricing.baseRate) && Number.isFinite(nominalPricing.baseRate)
+      ? nominalPricing.baseRate
+      : property.tarifs.length > 0
+        ? Number(property.tarifs[0].prix)
+        : null;
+
+  const coords =
+    property.latitude !== null && property.longitude !== null
+      ? { lat: Number(property.latitude), lon: Number(property.longitude) }
+      : await geocode(property.adresse, property.ville, property.pays);
 
   const data: PropertyDetailData = {
     id: property.id,
@@ -98,8 +124,9 @@ export default async function LogementDetailPage({ params, searchParams }: Detai
     })),
     caracteristiques: property.caracteristiques.map((e) => ({
       nom: e.caracteristique.nom,
+      icone: e.caracteristique.icone,
     })),
-    tarifBase: property.tarifs[0] ? Number(property.tarifs[0].prix) : null,
+    tarifBase: tarifBase !== null ? Number(tarifBase.toFixed(2)) : null,
     devise: property.tarifs[0]?.devise ?? property.devise,
     noteMoyenne,
     nombreAvis: notes.length,
