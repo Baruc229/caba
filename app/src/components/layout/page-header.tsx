@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { FaChevronRight } from "react-icons/fa6";
 import { useApp } from "@/components/providers/app-provider";
