@@ -4,13 +4,14 @@ import { FaSliders } from "react-icons/fa6";
 import { Select } from "@/components/ui/select";
 import { useApp } from "@/components/providers/app-provider";
 
-const SORT_VALUES = ["pertinence", "prix_croissant", "prix_decroissant", "note"];
+const SORT_VALUES = ["pertinence", "prix_croissant", "prix_decroissant", "note", "newest"];
 
 const SORT_LABEL_KEYS: Record<string, string> = {
   pertinence: "logements.sortRelevance",
   prix_croissant: "logements.sortPriceAsc",
   prix_decroissant: "logements.sortPriceDesc",
   note: "logements.sortRating",
+  newest: "logements.sortNewest",
 };
 
 interface SortBarProps {

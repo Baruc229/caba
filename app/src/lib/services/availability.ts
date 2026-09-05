@@ -72,6 +72,10 @@ export interface BusyInterval {
 interface SejourRules {
   minNuits?: number;
   maxNuits?: number;
+  minSemaines?: number;
+  maxSemaines?: number;
+  minMois?: number;
+  maxMois?: number;
 }
 
 function parseSejourRules(regles: { typeRegle: string; valeur: string | null }[]): SejourRules {
@@ -83,6 +87,10 @@ function parseSejourRules(regles: { typeRegle: string; valeur: string | null }[]
       return {
         minNuits: typeof parsed.minNuits === "number" ? parsed.minNuits : undefined,
         maxNuits: typeof parsed.maxNuits === "number" ? parsed.maxNuits : undefined,
+        minSemaines: typeof parsed.minSemaines === "number" ? parsed.minSemaines : undefined,
+        maxSemaines: typeof parsed.maxSemaines === "number" ? parsed.maxSemaines : undefined,
+        minMois: typeof parsed.minMois === "number" ? parsed.minMois : undefined,
+        maxMois: typeof parsed.maxMois === "number" ? parsed.maxMois : undefined,
       };
     }
     if (typeof parsed === "number") return { minNuits: parsed };
@@ -286,11 +294,29 @@ export function evaluateAvailability(params: {
 
   const totalNights = Math.max(1, Math.ceil(nightsBetween(query.startDate, query.endDate)));
   if (!isHourlyType(query.typeReservation)) {
-    if (sejourRules.minNuits !== undefined && totalNights < sejourRules.minNuits) {
-      return { available: false, reasonCode: "duree_insuffisante", reason: REASON_LABELS.duree_insuffisante };
-    }
-    if (sejourRules.maxNuits !== undefined && totalNights > sejourRules.maxNuits) {
-      return { available: false, reasonCode: "duree_excessive", reason: REASON_LABELS.duree_excessive };
+    if (query.typeReservation === "semaine") {
+      const totalSemaines = Math.floor(totalNights / 7);
+      if (sejourRules.minSemaines !== undefined && totalSemaines < sejourRules.minSemaines) {
+        return { available: false, reasonCode: "duree_insuffisante", reason: REASON_LABELS.duree_insuffisante };
+      }
+      if (sejourRules.maxSemaines !== undefined && totalSemaines > sejourRules.maxSemaines) {
+        return { available: false, reasonCode: "duree_excessive", reason: REASON_LABELS.duree_excessive };
+      }
+    } else if (query.typeReservation === "mois") {
+      const totalMois = Math.floor(totalNights / 30);
+      if (sejourRules.minMois !== undefined && totalMois < sejourRules.minMois) {
+        return { available: false, reasonCode: "duree_insuffisante", reason: REASON_LABELS.duree_insuffisante };
+      }
+      if (sejourRules.maxMois !== undefined && totalMois > sejourRules.maxMois) {
+        return { available: false, reasonCode: "duree_excessive", reason: REASON_LABELS.duree_excessive };
+      }
+    } else {
+      if (sejourRules.minNuits !== undefined && totalNights < sejourRules.minNuits) {
+        return { available: false, reasonCode: "duree_insuffisante", reason: REASON_LABELS.duree_insuffisante };
+      }
+      if (sejourRules.maxNuits !== undefined && totalNights > sejourRules.maxNuits) {
+        return { available: false, reasonCode: "duree_excessive", reason: REASON_LABELS.duree_excessive };
+      }
     }
   }
 
@@ -617,7 +643,7 @@ export interface SearchEngineParams {
   equipements?: string[];
   prixMin?: number;
   prixMax?: number;
-  tri?: "pertinence" | "prix_croissant" | "prix_decroissant" | "note";
+  tri?: "pertinence" | "prix_croissant" | "prix_decroissant" | "note" | "newest";
   page?: number;
   limit?: number;
 }
@@ -717,7 +743,7 @@ async function runSearch(params: SearchEngineParams): Promise<SearchResult> {
     endDate
   );
 
-  type Scored = { item: SearchResultItem; sortPrice: number; sortNote: number };
+  type Scored = { item: SearchResultItem; sortPrice: number; sortNote: number; sortDate: number };
   const available: Scored[] = [];
 
   for (const property of candidates) {
@@ -780,7 +806,7 @@ async function runSearch(params: SearchEngineParams): Promise<SearchResult> {
       promotionAppliquee: price.promotionAppliquee,
     };
 
-    available.push({ item, sortPrice: price.total, sortNote: noteMoyenne ?? 0 });
+    available.push({ item, sortPrice: price.total, sortNote: noteMoyenne ?? 0, sortDate: new Date(property.createdAt).getTime() });
   }
 
   switch (params.tri) {
@@ -792,6 +818,9 @@ async function runSearch(params: SearchEngineParams): Promise<SearchResult> {
       break;
     case "note":
       available.sort((a, b) => b.sortNote - a.sortNote);
+      break;
+    case "newest":
+      available.sort((a, b) => b.sortDate - a.sortDate);
       break;
     default:
       break;

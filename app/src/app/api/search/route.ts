@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
     const prixMax = parseFloat(searchParams.get("prixMax") ?? "") || undefined;
     const triParam = searchParams.get("tri");
     const tri =
-      triParam === "prix_croissant" || triParam === "prix_decroissant" || triParam === "note"
+      triParam === "prix_croissant" || triParam === "prix_decroissant" || triParam === "note" || triParam === "newest"
         ? triParam
         : "pertinence";
     const page = parseInt(searchParams.get("page") ?? "1", 10) || 1;
