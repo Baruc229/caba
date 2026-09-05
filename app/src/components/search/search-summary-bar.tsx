@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useLayoutEffect } from "react";
 import { createPortal } from "react-dom";
 import { FaCalendarDays, FaUserGroup, FaBed, FaSliders, FaX } from "react-icons/fa6";
 import { SearchBarCompact } from "@/components/search/search-bar-compact";
@@ -49,7 +49,10 @@ export function SearchSummaryBar({
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
-  useEffect(() => { setMounted(true); }, []);
+  useEffect(() => {
+    const raf = requestAnimationFrame(() => setMounted(true));
+    return () => cancelAnimationFrame(raf);
+  }, []);
 
   useEffect(() => {
     if (drawerOpen) {
