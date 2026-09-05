@@ -69,7 +69,6 @@ export default async function LogementsPage({ searchParams }: LogementsPageProps
   const adultes = parseInt(get("adultes", "2"), 10) || 2;
   const enfants = parseInt(get("enfants", "0"), 10) || 0;
   const bebes = parseInt(get("bebes", "0"), 10) || 0;
-  const type = get("type", "");
   const typeReservation = get("typeReservation", "nuee");
   const heureArrivee = get("heureArrivee", "08:00");
   const heureDepart = get("heureDepart", "18:00");
