@@ -1,9 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, useTransition } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { SearchResult, SearchResultItem } from "@/lib/services/availability";
-import { SearchBarCompact } from "@/components/search/search-bar-compact";
 import { SearchSummaryBar } from "@/components/search/search-summary-bar";
 import { PropertyCard } from "@/components/search/property-card";
 import { FilterPanel, type FilterState } from "@/components/search/filter-panel";
@@ -15,13 +14,12 @@ import { DocumentTitle } from "@/components/seo/document-title";
 
 const LIMIT = 12;
 
+const SORT_VALUES = ["pertinence", "prix_croissant", "prix_decroissant", "note", "newest"];
+
 interface LogementsClientProps {
-  initialArrivee: string;
-  initialDepart: string;
   initialAdultes: number;
   initialEnfants: number;
   initialBebes: number;
-  initialType: string;
   initialTypeReservation: string;
   initialHeureArrivee: string;
   initialHeureDepart: string;
@@ -30,13 +28,16 @@ interface LogementsClientProps {
   initialPublished: SearchResultItem[];
 }
 
+function intParam(value: string | string[] | null | undefined, fallback: number): number {
+  if (typeof value !== "string") return fallback;
+  const n = parseInt(value, 10);
+  return Number.isFinite(n) ? n : fallback;
+}
+
 export function LogementsClient({
-  initialArrivee,
-  initialDepart,
   initialAdultes,
   initialEnfants,
   initialBebes,
-  initialType,
   initialTypeReservation,
   initialHeureArrivee,
   initialHeureDepart,
@@ -48,169 +49,263 @@ export function LogementsClient({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const gridRef = useRef<HTMLDivElement>(null);
-  const tRef = useRef(t);
 
-  useEffect(() => {
-    tRef.current = t;
-  }, [t]);
+  /* ── L'URL est la source de vérité ─────────────────────────── */
+  const arrivee = searchParams.get("arrivee") ?? "";
+  const depart = searchParams.get("depart") ?? "";
+  const adultes = intParam(searchParams.get("adultes"), initialAdultes);
+  const enfants = intParam(searchParams.get("enfants"), initialEnfants);
+  const bebes = intParam(searchParams.get("bebes"), initialBebes);
+  const type = searchParams.get("type") ?? "";
+  const typeReservation = searchParams.get("typeReservation") ?? initialTypeReservation;
+  const heureArrivee = searchParams.get("heureArrivee") ?? initialHeureArrivee;
+  const heureDepart = searchParams.get("heureDepart") ?? initialHeureDepart;
+  const tri = searchParams.get("tri") ?? initialTri;
+  const page = Math.max(1, intParam(searchParams.get("page"), initialPage));
 
-  const [results, setResults] = useState<SearchResultItem[]>(
-    initialPublished ?? []
-  );
+  const hasSearch = Boolean(arrivee && depart);
+
+  const filters = useMemo<FilterState>(() => {
+    const typesParam = searchParams.get("type");
+    const types =
+      typesParam && typesParam !== "" ? typesParam.split(",").filter(Boolean) : [];
+    const equipementsParam = searchParams.get("equipements");
+    const equipements = equipementsParam
+      ? equipementsParam.split(",").filter(Boolean)
+      : [];
+    return {
+      types,
+      chambresMin: intParam(searchParams.get("chambres"), 0),
+      litsMin: intParam(searchParams.get("lits"), 0),
+      prixMin: intParam(searchParams.get("prixMin"), 0),
+      prixMax: intParam(searchParams.get("prixMax"), 0),
+      equipements,
+    };
+  }, [searchParams]);
+
+  /* ── Résultats (état local piloté par l'URL) ───────────────── */
+  const [results, setResults] = useState<SearchResultItem[]>(initialPublished ?? []);
   const [total, setTotal] = useState(initialPublished?.length ?? 0);
   const [totalPages, setTotalPages] = useState(
     Math.max(1, Math.ceil((initialPublished?.length ?? 0) / LIMIT))
   );
-  const [loading, setLoading] = useState((initialPublished?.length ?? 0) === 0);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [tri, setTri] = useState(initialTri);
-  const [page, setPage] = useState(initialPage);
-  const [filters, setFilters] = useState<FilterState>({
-    types: initialType ? [initialType] : [],
-    chambresMin: 0,
-    litsMin: 0,
-    prixMin: 0,
-    prixMax: 0,
-    equipements: [],
-  });
-  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
-
+  /* ── Options de filtres (types / équipements) ──────────────── */
   const [filterOptions, setFilterOptions] = useState<{
     types: Array<{ type: string; count: number }>;
     equipements: Array<{ id: string; nom: string }>;
   }>({ types: [], equipements: [] });
 
-  const [, startTransition] = useTransition();
-
-  /* Fetch filter options */
   useEffect(() => {
     fetch("/api/search/filters")
       .then((r) => r.json())
       .then((data) => {
-        if (data.types) setFilterOptions(data);
+        if (data.types && data.equipements) setFilterOptions(data);
       })
       .catch(() => {});
   }, []);
 
-  /* Fetch search results */
-  const doSearch = useCallback(async () => {
-    if (!initialArrivee || !initialDepart) {
-      setLoading(false);
-      return;
-    }
+  /* ── Mise à jour de l'URL ──────────────────────────────────── */
+  const syncParams = useCallback(
+    (patch: Record<string, string | number | null>, resetPage = false) => {
+      const params = new URLSearchParams(searchParams.toString());
+      const preset = Object.entries(patch);
+      for (const [key, value] of preset) {
+        if (value === null || value === "" || value === 0 || value === "0") params.delete(key);
+        else params.set(key, String(value));
+      }
+      if (resetPage) params.delete("page");
+      // Garde un tri valide
+      if (!SORT_VALUES.includes(params.get("tri") ?? "")) params.delete("tri");
+      const qs = params.toString();
+      router.replace(`${pathname}${qs ? `?${qs}` : ""}`, { scroll: false });
+    },
+    [pathname, router, searchParams]
+  );
 
+  /* ── Requête serveur ───────────────────────────────────────── */
+  const searchKey = useMemo(
+    () =>
+      JSON.stringify([
+        hasSearch,
+        arrivee,
+        depart,
+        adultes,
+        enfants,
+        bebes,
+        type,
+        typeReservation,
+        heureArrivee,
+        heureDepart,
+        tri,
+        page,
+        filters.types,
+        filters.chambresMin,
+        filters.litsMin,
+        filters.prixMin,
+        filters.prixMax,
+        filters.equipements,
+      ]),
+    [
+      hasSearch,
+      arrivee,
+      depart,
+      adultes,
+      enfants,
+      bebes,
+      type,
+      typeReservation,
+      heureArrivee,
+      heureDepart,
+      tri,
+      page,
+      filters,
+    ]
+  );
+
+  useEffect(() => {
+    if (!hasSearch) return;
+
+    let cancelled = false;
+    // Chargement transitoire avant requête : pattern de fetch accepté par React.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
     setError(null);
 
     const params = new URLSearchParams();
-    params.set("arrivee", initialArrivee);
-    params.set("depart", initialDepart);
-    params.set("adultes", String(initialAdultes));
-    if (initialEnfants > 0) params.set("enfants", String(initialEnfants));
-    if (initialBebes > 0) params.set("bebes", String(initialBebes));
-    if (initialTypeReservation) params.set("typeReservation", initialTypeReservation);
-    if (initialHeureArrivee) params.set("heureArrivee", initialHeureArrivee);
-    if (initialHeureDepart) params.set("heureDepart", initialHeureDepart);
+    params.set("arrivee", arrivee);
+    params.set("depart", depart);
+    params.set("adultes", String(Math.max(1, adultes)));
+    if (enfants > 0) params.set("enfants", String(enfants));
+    if (bebes > 0) params.set("bebes", String(bebes));
+    if (typeReservation) params.set("typeReservation", typeReservation);
+    if (heureArrivee) params.set("heureArrivee", heureArrivee);
+    if (heureDepart) params.set("heureDepart", heureDepart);
+    if (type) params.set("type", type);
+    params.set("chambres", String(filters.chambresMin));
+    params.set("lits", String(filters.litsMin));
+    if (filters.prixMin > 0) params.set("prixMin", String(filters.prixMin));
+    if (filters.prixMax > 0) params.set("prixMax", String(filters.prixMax));
+    if (filters.equipements.length > 0) params.set("equipements", filters.equipements.join(","));
     params.set("tri", tri);
     params.set("page", String(page));
     params.set("limit", String(LIMIT));
 
-    if (filters.types.length === 1) params.set("type", filters.types[0]);
-    if (filters.chambresMin > 0) params.set("chambres", String(filters.chambresMin));
-    if (filters.litsMin > 0) params.set("lits", String(filters.litsMin));
-    if (filters.prixMin > 0) params.set("prixMin", String(filters.prixMin));
-    if (filters.prixMax > 0) params.set("prixMax", String(filters.prixMax));
-    if (filters.equipements.length > 0) params.set("equipements", filters.equipements.join(","));
+    fetch(`/api/search?${params.toString()}`)
+      .then((res) => {
+        if (!res.ok) throw new Error("bad status");
+        return res.json() as Promise<SearchResult>;
+      })
+      .then((data) => {
+        if (cancelled) return;
+        setResults(data.results);
+        setTotal(data.total);
+        setTotalPages(data.totalPages);
+      })
+      .catch(() => {
+        if (!cancelled) setError(t("logements.error"));
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
 
-    try {
-      const res = await fetch(`/api/search?${params.toString()}`);
-      if (!res.ok) throw new Error("Erreur serveur");
-      const data: SearchResult = await res.json();
-      setResults(data.results);
-      setTotal(data.total);
-      setTotalPages(data.totalPages);
-    } catch {
-      setError(tRef.current("logements.error"));
-    } finally {
-      setLoading(false);
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchKey]);
+
+  /* ── Sans recherche : filtre + tri côté client (SEO/entrée directe) ── */
+  const clientResult = useMemo(() => {
+    if (hasSearch) return null;
+    let filtered = initialPublished;
+    if (filters.types.length > 0) filtered = filtered.filter((i) => filters.types.includes(i.type));
+    if (filters.chambresMin > 0) filtered = filtered.filter((i) => i.nombreChambres >= filters.chambresMin);
+    if (filters.litsMin > 0) filtered = filtered.filter((i) => i.nombreLits >= filters.litsMin);
+    if (filters.equipements.length > 0) {
+      const names = new Set(
+        filterOptions.equipements
+          .filter((e) => filters.equipements.includes(e.id))
+          .map((e) => e.nom)
+      );
+      if (names.size > 0) {
+        filtered = filtered.filter((i) => i.equipements.some((eq) => names.has(eq)));
+      }
     }
-  }, [
-    initialArrivee,
-    initialDepart,
-    initialAdultes,
-    initialEnfants,
-    initialBebes,
-    initialTypeReservation,
-    initialHeureArrivee,
-    initialHeureDepart,
-    tri,
-    page,
-    filters,
-  ]);
+    if (filters.prixMin > 0) filtered = filtered.filter((i) => (i.prixParNuit || 0) >= filters.prixMin);
+    if (filters.prixMax > 0) filtered = filtered.filter((i) => (i.prixParNuit || 0) <= filters.prixMax);
 
-  /* Trigger search on param change */
-  const mountedRef = useRef(true);
-  useEffect(() => {
-    if (mountedRef.current) {
-      mountedRef.current = false;
-      doSearch();
-      return;
+    switch (tri) {
+      case "prix_croissant":
+        filtered = [...filtered].sort((a, b) => (a.prixParNuit || 0) - (b.prixParNuit || 0));
+        break;
+      case "prix_decroissant":
+        filtered = [...filtered].sort((a, b) => (b.prixParNuit || 0) - (a.prixParNuit || 0));
+        break;
+      case "note":
+        filtered = [...filtered].sort((a, b) => (b.noteMoyenne ?? 0) - (a.noteMoyenne ?? 0));
+        break;
     }
-    startTransition(() => {
-      doSearch();
-    });
-  }, [doSearch, startTransition]);
 
-  /* Update URL when filters/tri/page change */
-  useEffect(() => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("tri", tri);
-    params.set("page", String(page));
-    if (filters.types.length === 1) {
-      params.set("type", filters.types[0]);
-    } else {
-      params.delete("type");
-    }
-    if (filters.chambresMin > 0) params.set("chambres", String(filters.chambresMin));
-    else params.delete("chambres");
-    if (filters.litsMin > 0) params.set("lits", String(filters.litsMin));
-    else params.delete("lits");
-    if (filters.prixMin > 0) params.set("prixMin", String(filters.prixMin));
-    else params.delete("prixMin");
-    if (filters.prixMax > 0) params.set("prixMax", String(filters.prixMax));
-    else params.delete("prixMax");
-    if (filters.equipements.length > 0) params.set("equipements", filters.equipements.join(","));
-    else params.delete("equipements");
+    const totalCount = filtered.length;
+    return {
+      items: filtered.slice((page - 1) * LIMIT, page * LIMIT),
+      total: totalCount,
+      totalPages: Math.max(1, Math.ceil(totalCount / LIMIT)),
+    };
+  }, [hasSearch, initialPublished, filters, tri, page, filterOptions]);
 
-    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
-  }, [tri, page, filters, pathname, router, searchParams]);
+  const shownResults = hasSearch ? results : (clientResult?.items ?? []);
+  const shownTotal = hasSearch ? total : (clientResult?.total ?? 0);
+  const shownTotalPages = hasSearch ? totalPages : (clientResult?.totalPages ?? 1);
+  const shownLoading = hasSearch && loading;
 
-  const handleFiltersChange = (newFilters: FilterState) => {
-    setFilters(newFilters);
-    setPage(1);
+  /* ── Handlers ──────────────────────────────────────────────── */
+  const handleFiltersChange = (next: FilterState) => {
+    syncParams(
+      {
+        type: next.types.length > 0 ? next.types.join(",") : null,
+        chambres: next.chambresMin,
+        lits: next.litsMin,
+        prixMin: next.prixMin,
+        prixMax: next.prixMax,
+        equipements: next.equipements.length > 0 ? next.equipements.join(",") : null,
+      },
+      true
+    );
   };
 
-  const handleTriChange = (newTri: string) => {
-    setTri(newTri);
-    setPage(1);
+  const handleTriChange = (nextTri: string) => {
+    if (nextTri === tri) return;
+    syncParams({ tri: nextTri }, true);
   };
+
+  const handlePageChange = (nextPage: number) => {
+    if (nextPage === page) return;
+    syncParams({ page: nextPage });
+  };
+
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+
+  const gridId = "logements-grid";
 
   return (
     <section className="logements-page" aria-label={t("search.formAriaLabel")}>
       <DocumentTitle titleKey="meta.logementsTitle" descKey="meta.logementsDesc" />
+
       <div className="logements-search-wrap">
         <SearchSummaryBar
-          initialArrivee={initialArrivee}
-          initialDepart={initialDepart}
-          initialAdultes={initialAdultes}
-          initialEnfants={initialEnfants}
-          initialBebes={initialBebes}
-          initialType={initialType}
-          initialTypeReservation={initialTypeReservation}
-          initialHeureArrivee={initialHeureArrivee}
-          initialHeureDepart={initialHeureDepart}
+          initialArrivee={arrivee}
+          initialDepart={depart}
+          initialAdultes={adultes}
+          initialEnfants={enfants}
+          initialBebes={bebes}
+          initialType={type}
+          initialTypeReservation={typeReservation}
+          initialHeureArrivee={heureArrivee}
+          initialHeureDepart={heureDepart}
         />
       </div>
 
@@ -218,7 +313,7 @@ export function LogementsClient({
         <FilterPanel
           filters={filters}
           onChange={handleFiltersChange}
-          availableTypes={filterOptions.types.map((t) => t.type)}
+          availableTypes={filterOptions.types.map((o) => o.type)}
           availableEquipements={filterOptions.equipements}
           mobileOpen={mobileFiltersOpen}
           onCloseMobile={() => setMobileFiltersOpen(false)}
@@ -226,43 +321,34 @@ export function LogementsClient({
 
         <div className="logements-main">
           <SortBar
-            total={total}
+            total={shownTotal}
             tri={tri}
             onTriChange={handleTriChange}
             onOpenFilters={() => setMobileFiltersOpen(true)}
           />
 
-          <div ref={gridRef} className="logements-grid" role="list">
-            {loading ? (
+          <div id={gridId} className="logements-grid" role="list">
+            {shownLoading ? (
               Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)
             ) : error ? (
               <div className="logements-error">
                 <p>{error}</p>
-                <button type="button" className="logements-retry" onClick={doSearch}>
+                <button type="button" className="logements-retry" onClick={() => syncParams({}, false)}>
                   {t("logements.retry")}
                 </button>
               </div>
-            ) : results.length === 0 ? (
+            ) : shownResults.length === 0 ? (
               <div className="logements-empty">
                 <p className="logements-empty-title">{t("logements.emptyTitle")}</p>
-                <p className="logements-empty-desc">
-                  {t("logements.emptyDesc")}
-                </p>
+                <p className="logements-empty-desc">{t("logements.emptyDesc")}</p>
               </div>
             ) : (
-              results.map((item) => (
-                <PropertyCard key={item.id} item={item} />
-              ))
+              shownResults.map((item) => <PropertyCard key={item.id} item={item} />)
             )}
           </div>
 
-          {!loading && results.length > 0 && (
-            <Pagination
-              page={page}
-              totalPages={totalPages}
-              onPageChange={setPage}
-              gridRef={gridRef}
-            />
+          {!shownLoading && shownResults.length > 0 && (
+            <Pagination page={page} totalPages={shownTotalPages} onPageChange={handlePageChange} gridId={gridId} />
           )}
         </div>
       </div>

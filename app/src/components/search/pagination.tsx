@@ -7,15 +7,15 @@ interface PaginationProps {
   page: number;
   totalPages: number;
   onPageChange: (page: number) => void;
-  gridRef: React.RefObject<HTMLDivElement | null>;
+  gridId: string;
 }
 
-export function Pagination({ page, totalPages, onPageChange, gridRef }: PaginationProps) {
+export function Pagination({ page, totalPages, onPageChange, gridId }: PaginationProps) {
   const { t } = useApp();
   if (totalPages <= 1) return null;
 
   const scrollToGrid = () => {
-    gridRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    document.getElementById(gridId)?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   const goTo = (p: number) => {

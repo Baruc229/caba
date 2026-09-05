@@ -82,12 +82,9 @@ export default async function LogementsPage({ searchParams }: LogementsPageProps
   return (
     <Suspense>
       <LogementsClient
-        initialArrivee={arrivee}
-        initialDepart={depart}
         initialAdultes={adultes}
         initialEnfants={enfants}
         initialBebes={bebes}
-        initialType={type}
         initialTypeReservation={typeReservation}
         initialHeureArrivee={heureArrivee}
         initialHeureDepart={heureDepart}
