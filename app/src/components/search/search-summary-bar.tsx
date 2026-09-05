@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { FaCalendarDays, FaUserGroup, FaBed, FaSliders, FaX } from "react-icons/fa6";
 import { SearchBarCompact } from "@/components/search/search-bar-compact";
 import { useApp } from "@/components/providers/app-provider";
@@ -46,6 +47,18 @@ export function SearchSummaryBar({
 }: SearchSummaryBarProps) {
   const { t, lang } = useApp();
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => { setMounted(true); }, []);
+
+  useEffect(() => {
+    if (drawerOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => { document.body.style.overflow = ""; };
+  }, [drawerOpen]);
 
   const guests = initialAdultes + initialEnfants + initialBebes;
   const hasDates = Boolean(initialArrivee && initialDepart);
@@ -54,7 +67,7 @@ export function SearchSummaryBar({
     : `${guests} ${t("home.guestAdultesSingular")}`;
   const typeLabel = TYPE_SHORT[initialTypeReservation] ?? initialTypeReservation;
 
-  const pills: { label: string; icon: React.ReactNode; onClear?: () => void }[] = [];
+  const pills: { label: string; icon: React.ReactNode }[] = [];
   if (hasDates) {
     pills.push({
       label: `${formatDate(initialArrivee, lang)} → ${formatDate(initialDepart, lang)}`,
@@ -82,8 +95,49 @@ export function SearchSummaryBar({
     pills.push({ label, icon: <FaBed aria-hidden="true" size={13} /> });
   }
   if (initialTypeReservation && TYPE_SHORT[initialTypeReservation]) {
-    pills.push({ label: typeLabel, icon: null });
+    pills.push({ label: typeLabel, icon: null as unknown as React.ReactNode });
   }
+
+  const drawerContent = drawerOpen && mounted ? (
+    <div className="search-drawer-portal">
+      <div
+        className="search-drawer-backdrop"
+        onClick={() => setDrawerOpen(false)}
+        aria-hidden="true"
+      />
+      <div
+        className="search-drawer-panel"
+        role="dialog"
+        aria-modal="true"
+        aria-label={t("logements.editSearch") ?? "Modifier la recherche"}
+      >
+        <div className="search-drawer-header">
+          <h2 className="search-drawer-title">
+            {t("logements.editSearch") ?? "Modifier la recherche"}
+          </h2>
+          <button
+            type="button"
+            className="search-drawer-close"
+            onClick={() => setDrawerOpen(false)}
+            aria-label={t("common.fermer") ?? "Fermer"}
+          >
+            <FaX aria-hidden="true" size={18} />
+          </button>
+        </div>
+        <SearchBarCompact
+          initialArrivee={initialArrivee}
+          initialDepart={initialDepart}
+          initialAdultes={initialAdultes}
+          initialEnfants={initialEnfants}
+          initialBebes={initialBebes}
+          initialType={initialType}
+          initialTypeReservation={initialTypeReservation}
+          initialHeureArrivee={initialHeureArrivee}
+          initialHeureDepart={initialHeureDepart}
+        />
+      </div>
+    </div>
+  ) : null;
 
   return (
     <>
@@ -113,35 +167,7 @@ export function SearchSummaryBar({
         </button>
       </div>
 
-      {/* Drawer formulaire complet */}
-      {drawerOpen && (
-        <div className="search-drawer-overlay" onClick={() => setDrawerOpen(false)}>
-          <div className="search-drawer" onClick={(e) => e.stopPropagation()}>
-            <div className="search-drawer-header">
-              <h2 className="search-drawer-title">{t("logements.editSearch") ?? "Modifier la recherche"}</h2>
-              <button
-                type="button"
-                className="search-drawer-close"
-                onClick={() => setDrawerOpen(false)}
-                aria-label={t("common.fermer") ?? "Fermer"}
-              >
-                <FaX aria-hidden="true" size={18} />
-              </button>
-            </div>
-            <SearchBarCompact
-              initialArrivee={initialArrivee}
-              initialDepart={initialDepart}
-              initialAdultes={initialAdultes}
-              initialEnfants={initialEnfants}
-              initialBebes={initialBebes}
-              initialType={initialType}
-              initialTypeReservation={initialTypeReservation}
-              initialHeureArrivee={initialHeureArrivee}
-              initialHeureDepart={initialHeureDepart}
-            />
-          </div>
-        </div>
-      )}
+      {mounted ? createPortal(drawerContent, document.body) : null}
     </>
   );
 }
