@@ -4,7 +4,7 @@ import { PageHeader } from "@/components/layout/page-header";
 export default function HomePage() {
   return (
     <>
-      <div className="max-w-[1300px] mx-auto px-4 sm:px-6 pt-4">
+      <div className="mx-auto max-w-[1300px] px-4 pt-8 sm:px-6 sm:pt-10">
         <PageHeader
           crumbs={[{ labelKey: "logementDetail.breadcrumbAccueil" }]}
         />

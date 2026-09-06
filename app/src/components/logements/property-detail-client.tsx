@@ -7,6 +7,7 @@ import { FaClock, FaShareNodes, FaHeart, FaArrowLeft } from "react-icons/fa6";
 import { useSession } from "next-auth/react";
 import { useApp } from "@/components/providers/app-provider";
 import { DoubleMonthCalendar } from "@/components/logements/double-month-calendar";
+import { ReservationDatePicker } from "@/components/logements/reservation-date-picker";
 import { PropertyMap } from "@/components/logements/property-map";
 import { GuestsField } from "@/components/ui/guests-field";
 import { Select } from "@/components/ui/select";
@@ -276,7 +277,7 @@ export function PropertyDetailClient({
 
     if (!arrivee || !depart) {
       setMessage(t("logements.emptyDesc"));
-      if (window.innerWidth <= 900) scrollToCalendar();
+      if (window.innerWidth <= 900) scrollToPicker();
       return;
     }
 
@@ -298,9 +299,9 @@ export function PropertyDetailClient({
     attemptReserve();
   }
 
-  const scrollToCalendar = () => {
+  const scrollToPicker = () => {
     document
-      .getElementById("disponibilite")
+      .getElementById("reservation-dates")
       ?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
@@ -605,7 +606,6 @@ export function PropertyDetailClient({
               propertyId={property.id}
               arrivee={arrivee}
               depart={depart}
-              onChange={handleDatesChange}
             />
             {hasDates && (
               <p className="detail-cal-selection" aria-live="polite">
@@ -632,16 +632,9 @@ export function PropertyDetailClient({
               {property.latitude != null && property.longitude != null ? (
                 <PropertyMap lat={property.latitude} lon={property.longitude} />
               ) : (
-                <a
-                  href={`https://www.openstreetmap.org/search?query=${encodeURIComponent(
-                    `${property.adresse ?? ""} ${property.ville} ${property.pays}`.trim()
-                  )}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="detail-map-link"
-                >
+                <div className="detail-map-link">
                   {property.ville}, {property.pays}
-                </a>
+                </div>
               )}
             </div>
           )}
@@ -704,32 +697,12 @@ export function PropertyDetailClient({
                   </div>
                 </div>
 
-                <div className="detail-dates-fields">
-                  <button
-                    type="button"
-                    className={`detail-date-field ${hasDates ? "detail-date-field--filled" : ""}`}
-                    onClick={scrollToCalendar}
-                  >
-                    <span className="detail-date-field-label">
-                      {t("logementDetail.arrivee")}
-                    </span>
-                    <span className="detail-date-field-value">
-                      {hasDates ? formatFullDate(arrivee) : t("logementDetail.choisirDates")}
-                    </span>
-                  </button>
-                  <button
-                    type="button"
-                    className={`detail-date-field ${hasDates ? "detail-date-field--filled" : ""}`}
-                    onClick={scrollToCalendar}
-                  >
-                    <span className="detail-date-field-label">
-                      {t("logementDetail.depart")}
-                    </span>
-                    <span className="detail-date-field-value">
-                      {hasDates ? formatFullDate(depart) : t("logementDetail.choisirDates")}
-                    </span>
-                  </button>
-                </div>
+                <ReservationDatePicker
+                  propertyId={property.id}
+                  arrivee={arrivee}
+                  depart={depart}
+                  onChange={handleDatesChange}
+                />
 
                 <GuestsField
                   maxes={{
