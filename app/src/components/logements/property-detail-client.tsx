@@ -12,7 +12,7 @@ import { PropertyMap } from "@/components/logements/property-map";
 import { GuestsField } from "@/components/ui/guests-field";
 import { Select } from "@/components/ui/select";
 import { PageHeader } from "@/components/layout/page-header";
-import { nightsBetween } from "@/lib/calendar-utils";
+import { formatISODate, nightsBetween } from "@/lib/calendar-utils";
 import { convertAmount, formatAmount } from "@/lib/i18n/currency";
 import type { IconType } from "react-icons";
 import {
@@ -252,15 +252,6 @@ export function PropertyDetailClient({
 
   const hasDates = Boolean(arrivee && depart);
   const nights = hasDates ? nightsBetween(arrivee, depart) : 0;
-
-  const formatFullDate = (iso: string) => {
-    if (!iso) return "";
-    const date = new Date(`${iso}T12:00:00Z`);
-    return date.toLocaleDateString(
-      lang === "fr" ? "fr-FR" : "en-GB",
-      { weekday: "short", day: "numeric", month: "short", year: "numeric" }
-    );
-  };
 
   function handleCountsChange(counts: {
     adultes: number;
@@ -609,9 +600,9 @@ export function PropertyDetailClient({
             />
             {hasDates && (
               <p className="detail-cal-selection" aria-live="polite">
-                <strong>{formatFullDate(arrivee)}</strong>
+                <strong>{formatISODate(arrivee, lang, { weekday: true })}</strong>
                 <span aria-hidden="true"> → </span>
-                <strong>{formatFullDate(depart)}</strong>
+                <strong>{formatISODate(depart, lang, { weekday: true })}</strong>
                 <span className="detail-cal-selection-nights">
                   · {nights} {nights > 1 ? t("logementDetail.nuits") : t("logementDetail.nuit")}
                 </span>

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   addMonths,
   daysInMonth,
+  formatISODate,
   leadingBlanks,
   nextSelection,
   nightsBetween,
@@ -59,5 +60,11 @@ describe("calendar-utils", () => {
     expect(rangeRole("2026-05-10", "", "2026-05-10")).toBe("start");
     expect(rangeRole("2026-05-10", "", "2026-05-11")).toBeNull();
     expect(rangeRole("2026-05-10", "2026-05-12", "2026-05-13")).toBeNull();
+  });
+
+  it("formatISODate formate selon la langue", () => {
+    expect(formatISODate("2026-09-15", "fr")).toBe("15 sept. 2026");
+    expect(formatISODate("2026-09-15", "en")).toBe("15 Sept 2026");
+    expect(formatISODate("", "fr")).toBe("");
   });
 });

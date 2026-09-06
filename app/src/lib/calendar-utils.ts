@@ -60,3 +60,19 @@ export function rangeRole(
   if (arrivee && !depart && date === arrivee) return "start";
   return null;
 }
+
+/** Formate une date ISO YYYY-MM-DD dans la langue de l'interface. */
+export function formatISODate(
+  iso: string,
+  lang: string,
+  options?: { weekday?: boolean }
+): string {
+  if (!iso) return "";
+  const date = new Date(`${iso}T12:00:00Z`);
+  return date.toLocaleDateString(lang === "fr" ? "fr-FR" : "en-GB", {
+    weekday: options?.weekday ? "short" : undefined,
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+}

@@ -1,18 +1,12 @@
 "use client";
 
-import { useMemo, useState, type ReactNode } from "react";
+import { useMemo, useState } from "react";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa6";
 import { useApp } from "@/components/providers/app-provider";
-import { MONTH_NAMES, WEEKDAYS_SHORT } from "@/lib/i18n/dictionaries";
-import {
-  addMonths,
-  daysInMonth,
-  leadingBlanks,
-  rangeRole,
-  toISO,
-  type MonthRef,
-} from "@/lib/calendar-utils";
+import { MONTH_NAMES } from "@/lib/i18n/dictionaries";
+import { addMonths, toISO, type MonthRef } from "@/lib/calendar-utils";
 import { useAvailabilityMonth } from "@/hooks/use-availability-month";
+import { AvailabilityMonthGrid } from "./availability-month-grid";
 
 const LEGEND_KEYS = [
   { statut: "disponible", tKey: "calendar.statutDisponible" },
@@ -65,63 +59,6 @@ export function DoubleMonthCalendar({
 
   const changeAnchor = (delta: number) => setAnchor((ref) => addMonths(ref, delta));
 
-  function renderPanel(ref: MonthRef, days: Record<string, { statut: string; libelle?: string }> | null) {
-    const blanks = leadingBlanks(ref.year, ref.month);
-    const total = daysInMonth(ref.year, ref.month);
-    const cells: ReactNode[] = [];
-
-    if (loading) {
-      for (let i = 0; i < 35; i++) {
-        cells.push(
-          <span key={`skeleton-${i}`} className="cal-day cal-day--skeleton" aria-hidden="true" />
-        );
-      }
-    } else {
-      for (let i = 0; i < blanks; i++) {
-        cells.push(
-          <span key={`blank-${i}`} className="cal-day is-empty" aria-hidden="true" />
-        );
-      }
-      for (let d = 1; d <= total; d++) {
-        const iso = toISO(ref.year, ref.month, d);
-        const info = days?.[iso];
-        const statut = info?.statut ?? "disponible";
-        const past = iso < todayStr;
-        const role = rangeRole(arrivee, depart, iso);
-
-        const classes = [
-          "cal-day",
-          `cal-day--${statut}`,
-          iso === todayStr ? "cal-day--aujourdhui" : null,
-          past ? "cal-day--passe" : null,
-          role ? `cal-day--sel-${role}` : null,
-        ].filter(Boolean);
-
-        cells.push(
-          <span
-            key={iso}
-            className={classes.join(" ")}
-            aria-label={`${iso}${info?.libelle ? ` — ${info.libelle}` : ""}`}
-            title={`${iso}${info?.libelle ? ` — ${info.libelle}` : ""}`}
-          >
-            {d}
-          </span>
-        );
-      }
-    }
-
-    return (
-      <div className="cal-panel-grid">
-        {WEEKDAYS_SHORT[lang].map((weekday) => (
-          <span key={weekday} className="cal-panel-weekday" aria-hidden="true">
-            {weekday}
-          </span>
-        ))}
-        {cells}
-      </div>
-    );
-  }
-
   return (
     <div
       className="cal-double cal-visual"
@@ -143,7 +80,14 @@ export function DoubleMonthCalendar({
             {MONTH_NAMES[lang][visible.first.month - 1]} {visible.first.year}
           </span>
         </div>
-        {renderPanel(visible.first, firstData.days)}
+        <AvailabilityMonthGrid
+          month={visible.first}
+          todayStr={todayStr}
+          days={firstData.days}
+          loading={loading}
+          arrivee={arrivee}
+          depart={depart}
+        />
       </div>
 
       <div className="cal-card">
@@ -161,7 +105,14 @@ export function DoubleMonthCalendar({
             <FaChevronRight aria-hidden="true" size={12} />
           </button>
         </div>
-        {renderPanel(visible.second, secondData.days)}
+        <AvailabilityMonthGrid
+          month={visible.second}
+          todayStr={todayStr}
+          days={secondData.days}
+          loading={loading}
+          arrivee={arrivee}
+          depart={depart}
+        />
       </div>
 
       <div className="calendar-legend">
