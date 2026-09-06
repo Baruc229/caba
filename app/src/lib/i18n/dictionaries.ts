@@ -291,7 +291,7 @@ export const dictionaries = {
       vosDates: "Vos dates",
       arrivee: "Date d'arrivée",
       depart: "Date de départ",
-      choisirDates: "JJ MM AAAA",
+      choisirDates: "JJ/MM/AAAA",
       modifier: "Modifier",
     },
     verify: {
@@ -870,7 +870,7 @@ export const dictionaries = {
       vosDates: "Your dates",
       arrivee: "Arrival date",
       depart: "Departure date",
-      choisirDates: "DD MM YYYY",
+      choisirDates: "DD/MM/YYYY",
       modifier: "Edit",
     },
     verify: {
