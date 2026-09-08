@@ -288,6 +288,22 @@ export function LogementsClient({
     syncParams({ page: nextPage });
   };
 
+  const resetAllFilters = () => {
+    syncParams(
+      {
+        type: null,
+        chambres: null,
+        lits: null,
+        prixMin: null,
+        prixMax: null,
+        equipements: null,
+        tri: null,
+        page: null,
+      },
+      false
+    );
+  };
+
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
   const gridId = "logements-grid";
@@ -335,6 +351,13 @@ export function LogementsClient({
             tri={tri}
             onTriChange={handleTriChange}
             onOpenFilters={() => setMobileFiltersOpen(true)}
+            activeFilterCount={
+              filters.types.length +
+              (filters.chambresMin > 0 ? 1 : 0) +
+              (filters.litsMin > 0 ? 1 : 0) +
+              (filters.prixMin > 0 || filters.prixMax > 0 ? 1 : 0) +
+              filters.equipements.length
+            }
           />
 
           <div id={gridId} className="logements-grid" role="list">
@@ -342,6 +365,13 @@ export function LogementsClient({
               Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)
             ) : error ? (
               <div className="logements-error">
+                <div className="logements-error-icon" aria-hidden="true">
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="12" y1="8" x2="12" y2="12" />
+                    <line x1="12" y1="16" x2="12.01" y2="16" />
+                  </svg>
+                </div>
                 <p>{error}</p>
                 <button type="button" className="logements-retry" onClick={() => syncParams({}, false)}>
                   {t("logements.retry")}
@@ -349,8 +379,20 @@ export function LogementsClient({
               </div>
             ) : shownResults.length === 0 ? (
               <div className="logements-empty">
+                <div className="logements-empty-icon" aria-hidden="true">
+                  <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+                    <rect x="8" y="20" width="48" height="36" rx="4" stroke="var(--color-border-input)" strokeWidth="2" />
+                    <path d="M8 28h48" stroke="var(--color-border-input)" strokeWidth="2" />
+                    <path d="M20 20V12a4 4 0 0 1 4-4h16a4 4 0 0 1 4 4v8" stroke="var(--color-border-input)" strokeWidth="2" strokeLinecap="round" />
+                    <circle cx="32" cy="38" r="6" stroke="var(--color-text-secondary)" strokeWidth="2" />
+                    <path d="M32 35v6M29 38h6" stroke="var(--color-text-secondary)" strokeWidth="2" strokeLinecap="round" />
+                  </svg>
+                </div>
                 <p className="logements-empty-title">{t("logements.emptyTitle")}</p>
                 <p className="logements-empty-desc">{t("logements.emptyDesc")}</p>
+                <button type="button" className="logements-empty-reset" onClick={resetAllFilters}>
+                  {t("logements.resetFilters")}
+                </button>
               </div>
             ) : (
               shownResults.map((item) => <PropertyCard key={item.id} item={item} />)

@@ -19,21 +19,25 @@ interface SortBarProps {
   tri: string;
   onTriChange: (tri: string) => void;
   onOpenFilters: () => void;
+  activeFilterCount?: number;
 }
 
-export function SortBar({ total, tri, onTriChange, onOpenFilters }: SortBarProps) {
+export function SortBar({ total, tri, onTriChange, onOpenFilters, activeFilterCount = 0 }: SortBarProps) {
   const { t } = useApp();
   return (
     <div className="sort-bar">
       <div className="sort-bar-left">
         <button
           type="button"
-          className="sort-bar-filter-btn"
+          className={`sort-bar-filter-btn ${activeFilterCount > 0 ? "sort-bar-filter-btn--active" : ""}`}
           onClick={onOpenFilters}
           aria-label={t("logements.openFilters")}
         >
           <FaSliders aria-hidden="true" size={14} />
           <span>{t("logements.filters")}</span>
+          {activeFilterCount > 0 && (
+            <span className="sort-bar-filter-badge">{activeFilterCount}</span>
+          )}
         </button>
         <p className="sort-bar-count">
           <strong>{total}</strong>{" "}
