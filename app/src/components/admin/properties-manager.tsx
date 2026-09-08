@@ -1,6 +1,14 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import {
+  Children,
+  cloneElement,
+  isValidElement,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { useRouter } from "next/navigation";
 import {
   FaPlus,
@@ -23,32 +31,6 @@ interface PropertyRow {
   devise: string;
   nombreAvis: number;
   note: number | null;
-}
-
-interface PropertyFull {
-  id: string;
-  nom: string;
-  type: string;
-  statut: string;
-  superCategorie: string;
-  descriptionCourte: string | null;
-  descriptionComplete: string | null;
-  capaciteMaximale: number;
-  adultesMax: number;
-  enfantsMax: number;
-  bebesMax: number;
-  nombreChambres: number;
-  nombreLits: number;
-  nombreSallesDeBains: number;
-  superficieM2: number | null;
-  adresse: string;
-  ville: string;
-  pays: string;
-  codePostal: string | null;
-  devise: string;
-  photoPrincipale: string | null;
-  tarifBase: string | null;
-  typeTarif: string;
 }
 
 const PROPERTY_TYPES = [
@@ -91,6 +73,74 @@ const DEVISE_OPTIONS = [
   { value: "FCFA", label: "FCFA" },
   { value: "USD", label: "USD ($)" },
 ];
+
+const FIELD_IDS: Partial<Record<keyof FormState, string>> = {
+  nom: "pr-nom",
+  capaciteMaximale: "pr-cap",
+  ville: "pr-ville",
+  adresse: "pr-adresse",
+  tarifPrix: "pr-tarif",
+};
+
+function validateForm(f: FormState): Record<string, string> {
+  const errs: Record<string, string> = {};
+
+  if (!f.nom.trim()) {
+    errs.nom = "Le nom du logement est obligatoire.";
+  }
+
+  if (!f.ville.trim()) {
+    errs.ville = "La ville est obligatoire.";
+  }
+
+  if (!f.adresse.trim()) {
+    errs.adresse = "L'adresse est obligatoire.";
+  }
+
+  const cap = Number(f.capaciteMaximale);
+  if (!Number.isInteger(cap) || cap < 1) {
+    errs.capaciteMaximale = "Entrez une capacité d'au moins 1 personne.";
+  } else {
+    const total =
+      (Number(f.adultesMax) || 0) +
+      (Number(f.enfantsMax) || 0) +
+      (Number(f.bebesMax) || 0);
+    if (total > cap) {
+      errs.capaciteMaximale = `La capacité (${cap}) doit couvrir ${total} personnes (adultes + enfants + bébés).`;
+    }
+  }
+
+  if (f.tarifPrix !== "") {
+    const tarif = Number(f.tarifPrix);
+    if (!Number.isFinite(tarif) || tarif < 0) {
+      errs.tarifPrix = "Le tarif doit être un montant positif.";
+    }
+  }
+
+  return errs;
+}
+
+function trapTabFocus(
+  event: React.KeyboardEvent<HTMLElement>,
+  container: HTMLElement | null
+) {
+  if (event.key !== "Tab" || !container) return;
+  const focusables = Array.from(
+    container.querySelectorAll<HTMLElement>(
+      'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    )
+  ).filter((el) => el.offsetParent !== null || el === document.activeElement);
+  if (focusables.length === 0) return;
+  const first = focusables[0];
+  const last = focusables[focusables.length - 1];
+  if (event.shiftKey && document.activeElement === first) {
+    event.preventDefault();
+    last.focus();
+  } else if (!event.shiftKey && document.activeElement === last) {
+    event.preventDefault();
+    first.focus();
+  }
+}
 
 function StatusBadge({ status }: { status: string }) {
   const map: Record<string, { cls: string; label: string }> = {
@@ -172,21 +222,50 @@ function Field({
   htmlFor,
   required,
   hint,
+  error,
   children,
 }: {
   label: string;
   htmlFor: string;
   required?: boolean;
   hint?: string;
+  error?: string;
   children: React.ReactNode;
 }) {
+  const errId = `${htmlFor}-error`;
+  const singleChild =
+    Children.count(children) === 1 && isValidElement(children)
+      ? (children as React.ReactElement<{
+          className?: string;
+          "aria-invalid"?: boolean;
+          "aria-describedby"?: string;
+        }>)
+      : null;
+  const control = singleChild
+    ? cloneElement(
+        singleChild,
+        error
+          ? {
+              "aria-invalid": true,
+              "aria-describedby": errId,
+              className: `${singleChild.props.className ?? ""} bo-input--invalid`.trim(),
+            }
+          : {}
+      )
+    : children;
+
   return (
     <div className="bo-field">
       <label htmlFor={htmlFor} className="bo-label">
         {label} {required && <span style={{ color: "var(--bo-accent)" }}>*</span>}
       </label>
-      {children}
-      {hint && <p className="bo-form-hint">{hint}</p>}
+      {control}
+      {error && (
+        <p id={errId} className="bo-form-error bo-form-field-error" role="alert">
+          {error}
+        </p>
+      )}
+      {hint && !error && <p className="bo-form-hint">{hint}</p>}
     </div>
   );
 }
@@ -197,6 +276,7 @@ export function PropertiesManager({ initialRows }: { initialRows: PropertyRow[] 
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<FormState>(emptyForm);
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [status, setStatus] = useState<"idle" | "loading">("idle");
   const [banner, setBanner] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
@@ -213,10 +293,45 @@ export function PropertiesManager({ initialRows }: { initialRows: PropertyRow[] 
   }
 
   const setField = useCallback(
-    (field: keyof FormState, value: string) =>
-      setForm((f) => ({ ...f, [field]: value })),
+    (field: keyof FormState, value: string) => {
+      setForm((f) => ({ ...f, [field]: value }));
+      setFormErrors((errors) => {
+        if (!(field in errors)) return errors;
+        const next = { ...errors };
+        delete next[field];
+        return next;
+      });
+    },
     []
   );
+
+  const formModalRef = useRef<HTMLDivElement>(null);
+  const confirmModalRef = useRef<HTMLDivElement>(null);
+  const returnFocusRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    if (modalOpen) {
+      const target =
+        formModalRef.current?.querySelector<HTMLElement>(
+          "input, select, textarea"
+        ) ?? formModalRef.current?.querySelector<HTMLElement>("button");
+      target?.focus();
+    } else {
+      returnFocusRef.current?.focus?.();
+      returnFocusRef.current = null;
+    }
+  }, [modalOpen]);
+
+  useEffect(() => {
+    if (confirmDelete) {
+      confirmModalRef.current
+        ?.querySelector<HTMLButtonElement>(".bo-btn--secondary")
+        ?.focus();
+    } else {
+      returnFocusRef.current?.focus?.();
+      returnFocusRef.current = null;
+    }
+  }, [confirmDelete]);
 
   const [uploadState, setUploadState] = useState<
     "idle" | "uploading" | "error"
@@ -242,6 +357,7 @@ export function PropertiesManager({ initialRows }: { initialRows: PropertyRow[] 
       }
       setForm((f) => ({ ...f, photoUrl: data.url }));
       setUploadState("idle");
+      event.target.value = "";
     } catch {
       setUploadState("error");
       setUploadError("Erreur lors de l'upload.");
@@ -364,7 +480,9 @@ export function PropertiesManager({ initialRows }: { initialRows: PropertyRow[] 
   }
 
   async function openCreate() {
+    returnFocusRef.current = document.activeElement as HTMLElement | null;
     setForm(emptyForm);
+    setFormErrors({});
     setEditingId(null);
     setGallery([]);
     setBanner(null);
@@ -372,7 +490,9 @@ export function PropertiesManager({ initialRows }: { initialRows: PropertyRow[] 
   }
 
   async function openEdit(id: string) {
+    returnFocusRef.current = document.activeElement as HTMLElement | null;
     setBanner(null);
+    setFormErrors({});
     const res = await fetch(`/api/admin/properties?id=${id}`);
     if (!res.ok) {
       setBanner({ type: "error", text: "Impossible de charger le logement." });
@@ -419,8 +539,25 @@ export function PropertiesManager({ initialRows }: { initialRows: PropertyRow[] 
 
   async function save(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
+    const validationErrors = validateForm(form);
+    if (Object.keys(validationErrors).length > 0) {
+      setFormErrors(validationErrors);
+      setBanner({
+        type: "error",
+        text: "Veuillez corriger les champs en rouge avant d'enregistrer.",
+      });
+      const firstKey = Object.keys(validationErrors)[0] as keyof FormState;
+      const firstId = FIELD_IDS[firstKey];
+      if (firstId) {
+        document.getElementById(firstId)?.focus();
+      }
+      return;
+    }
+
     setStatus("loading");
     setBanner(null);
+    setFormErrors({});
 
     const payload = {
       nom: form.nom,
@@ -485,6 +622,11 @@ export function PropertiesManager({ initialRows }: { initialRows: PropertyRow[] 
     setBanner({ type: "success", text: "Logement supprimé." });
   }
 
+  function askDelete(id: string) {
+    returnFocusRef.current = document.activeElement as HTMLElement | null;
+    setConfirmDelete(id);
+  }
+
   return (
     <div className="bo-card">
       <div className="bo-card-header">
@@ -499,6 +641,7 @@ export function PropertiesManager({ initialRows }: { initialRows: PropertyRow[] 
         <p
           className={`bo-form-${banner.type === "success" ? "success" : "error"}`}
           style={{ margin: "14px 18px 0" }}
+          role={banner.type === "success" ? "status" : "alert"}
         >
           {banner.text}
         </p>
@@ -566,7 +709,7 @@ export function PropertiesManager({ initialRows }: { initialRows: PropertyRow[] 
                     <button
                       type="button"
                       className="bo-btn bo-btn--danger"
-                      onClick={() => setConfirmDelete(row.id)}
+                      onClick={() => askDelete(row.id)}
                       aria-label={`Supprimer ${row.nom}`}
                     >
                       <FaTrash aria-hidden="true" />
@@ -578,7 +721,7 @@ export function PropertiesManager({ initialRows }: { initialRows: PropertyRow[] 
             ))}
             {rows.length === 0 && (
               <tr>
-                <td colSpan={8}>
+                <td colSpan={9}>
                   <div className="bo-empty">
                     <h3 className="bo-empty-title">Aucun logement</h3>
                     <p>Créez votre premier logement.</p>
@@ -598,12 +741,25 @@ export function PropertiesManager({ initialRows }: { initialRows: PropertyRow[] 
             aria-label="Fermer"
             onClick={() => setConfirmDelete(null)}
           />
-          <div className="bo-modal" role="dialog" aria-modal="true">
+          <div
+            ref={confirmModalRef}
+            className="bo-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="confirm-delete-title"
+            aria-describedby="confirm-delete-desc"
+            onKeyDown={(e) => {
+              if (e.key === "Escape") setConfirmDelete(null);
+              trapTabFocus(e, confirmModalRef.current);
+            }}
+          >
             <div className="bo-modal-header">
-              <h4 className="bo-card-title">Supprimer ce logement ?</h4>
+              <h4 id="confirm-delete-title" className="bo-card-title">
+                Supprimer ce logement ?
+              </h4>
             </div>
             <div className="bo-modal-body">
-              <p>
+              <p id="confirm-delete-desc">
                 Cette action supprime définitivement le logement, ses photos, tarifs et
                 réservations associées.
               </p>
@@ -629,11 +785,16 @@ export function PropertiesManager({ initialRows }: { initialRows: PropertyRow[] 
             onClick={() => setModalOpen(false)}
           />
           <div
+            ref={formModalRef}
             className="bo-modal"
             role="dialog"
             aria-modal="true"
             aria-labelledby="property-form-title"
             style={{ maxWidth: 720 }}
+            onKeyDown={(e) => {
+              if (e.key === "Escape") setModalOpen(false);
+              trapTabFocus(e, formModalRef.current);
+            }}
           >
             <div className="bo-modal-header">
               <h4 id="property-form-title" className="bo-card-title">
@@ -649,17 +810,21 @@ export function PropertiesManager({ initialRows }: { initialRows: PropertyRow[] 
               </button>
             </div>
 
-            <form onSubmit={save}>
+            <form onSubmit={save} aria-busy={status === "loading"}>
               <div className="bo-modal-body">
-                <div className="bo-form-grid" style={{ gridTemplateColumns: "1fr 1fr" }}>
-                  <Field label="Nom du logement" htmlFor="pr-nom" required>
+                <div className="bo-form-grid">
+                  <Field
+                    label="Nom du logement"
+                    htmlFor="pr-nom"
+                    required
+                    error={formErrors.nom}
+                  >
                     <input
                       id="pr-nom"
                       type="text"
                       className="bo-input"
                       value={form.nom}
                       onChange={(e) => setField("nom", e.target.value)}
-                      required
                     />
                   </Field>
                   <Field label="Type" htmlFor="pr-type" required>
@@ -698,7 +863,12 @@ export function PropertiesManager({ initialRows }: { initialRows: PropertyRow[] 
                       ))}
                     </select>
                   </Field>
-                  <Field label="Capacité max (personnes)" htmlFor="pr-cap" required>
+                  <Field
+                    label="Capacité max (personnes)"
+                    htmlFor="pr-cap"
+                    required
+                    error={formErrors.capaciteMaximale}
+                  >
                     <input
                       id="pr-cap"
                       type="number"
@@ -706,13 +876,13 @@ export function PropertiesManager({ initialRows }: { initialRows: PropertyRow[] 
                       className="bo-input"
                       value={form.capaciteMaximale}
                       onChange={(e) => setField("capaciteMaximale", e.target.value)}
-                      required
                     />
                   </Field>
                   <Field label="Adultes max" htmlFor="pr-adultes">
                     <input
                       id="pr-adultes"
                       type="number"
+                      min={0}
                       className="bo-input"
                       value={form.adultesMax}
                       onChange={(e) => setField("adultesMax", e.target.value)}
@@ -722,6 +892,7 @@ export function PropertiesManager({ initialRows }: { initialRows: PropertyRow[] 
                     <input
                       id="pr-enfants"
                       type="number"
+                      min={0}
                       className="bo-input"
                       value={form.enfantsMax}
                       onChange={(e) => setField("enfantsMax", e.target.value)}
@@ -731,6 +902,7 @@ export function PropertiesManager({ initialRows }: { initialRows: PropertyRow[] 
                     <input
                       id="pr-bebes"
                       type="number"
+                      min={0}
                       className="bo-input"
                       value={form.bebesMax}
                       onChange={(e) => setField("bebesMax", e.target.value)}
@@ -740,6 +912,7 @@ export function PropertiesManager({ initialRows }: { initialRows: PropertyRow[] 
                     <input
                       id="pr-chambres"
                       type="number"
+                      min={0}
                       className="bo-input"
                       value={form.nombreChambres}
                       onChange={(e) => setField("nombreChambres", e.target.value)}
@@ -749,6 +922,7 @@ export function PropertiesManager({ initialRows }: { initialRows: PropertyRow[] 
                     <input
                       id="pr-lits"
                       type="number"
+                      min={0}
                       className="bo-input"
                       value={form.nombreLits}
                       onChange={(e) => setField("nombreLits", e.target.value)}
@@ -758,6 +932,7 @@ export function PropertiesManager({ initialRows }: { initialRows: PropertyRow[] 
                     <input
                       id="pr-sdb"
                       type="number"
+                      min={0}
                       className="bo-input"
                       value={form.nombreSallesDeBains}
                       onChange={(e) => setField("nombreSallesDeBains", e.target.value)}
@@ -767,44 +942,48 @@ export function PropertiesManager({ initialRows }: { initialRows: PropertyRow[] 
                     <input
                       id="pr-superficie"
                       type="number"
+                      min={0}
+                      step="any"
                       className="bo-input"
                       value={form.superficieM2}
                       onChange={(e) => setField("superficieM2", e.target.value)}
                     />
                   </Field>
-                  <Field label="Ville" htmlFor="pr-ville" required>
+                  <Field label="Ville" htmlFor="pr-ville" required error={formErrors.ville}>
                     <input
                       id="pr-ville"
                       type="text"
+                      autoComplete="address-level2"
                       className="bo-input"
                       value={form.ville}
                       onChange={(e) => setField("ville", e.target.value)}
-                      required
                     />
                   </Field>
                   <Field label="Pays" htmlFor="pr-pays">
                     <input
                       id="pr-pays"
                       type="text"
+                      autoComplete="country-name"
                       className="bo-input"
                       value={form.pays}
                       onChange={(e) => setField("pays", e.target.value)}
                     />
                   </Field>
-                  <Field label="Adresse" htmlFor="pr-adresse" required>
+                  <Field label="Adresse" htmlFor="pr-adresse" required error={formErrors.adresse}>
                     <input
                       id="pr-adresse"
                       type="text"
+                      autoComplete="street-address"
                       className="bo-input"
                       value={form.adresse}
                       onChange={(e) => setField("adresse", e.target.value)}
-                      required
                     />
                   </Field>
                   <Field label="Code postal" htmlFor="pr-cp">
                     <input
                       id="pr-cp"
                       type="text"
+                      autoComplete="postal-code"
                       className="bo-input"
                       value={form.codePostal}
                       onChange={(e) => setField("codePostal", e.target.value)}
@@ -822,10 +1001,11 @@ export function PropertiesManager({ initialRows }: { initialRows: PropertyRow[] 
                       ))}
                     </select>
                   </Field>
-                  <Field label="Tarif de base" htmlFor="pr-tarif">
+                  <Field label="Tarif de base" htmlFor="pr-tarif" error={formErrors.tarifPrix}>
                     <input
                       id="pr-tarif"
                       type="number"
+                      min={0}
                       step="any"
                       className="bo-input"
                       value={form.tarifPrix}
@@ -852,7 +1032,8 @@ export function PropertiesManager({ initialRows }: { initialRows: PropertyRow[] 
                     {form.photoUrl && (
                       <img
                         src={form.photoUrl}
-                        alt="Aperçu"
+                        alt="Aperçu de la photo principale"
+                        loading="lazy"
                         style={{
                           width: "100%",
                           maxHeight: 140,
@@ -997,6 +1178,7 @@ export function PropertiesManager({ initialRows }: { initialRows: PropertyRow[] 
                           <button
                             type="button"
                             onClick={() => galleryRemove(photo.id)}
+                            aria-label="Supprimer la photo"
                             style={{
                               position: "absolute",
                               top: 4,

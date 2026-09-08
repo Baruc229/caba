@@ -804,6 +804,23 @@
   color: var(--bo-green);
 }
 
+.bo-form-field-error {
+  margin: 4px 0 0;
+  padding: 6px 10px;
+  border-radius: var(--bo-radius-sm);
+  background-color: rgba(210, 16, 52, 0.07);
+  border: 1px solid rgba(210, 16, 52, 0.25);
+  font-size: 12px;
+  color: var(--bo-accent);
+}
+
+.bo-input--invalid,
+.bo-input--invalid:hover,
+.bo-input--invalid:focus {
+  border-color: var(--bo-accent);
+  box-shadow: 0 0 0 3px rgba(210, 16, 52, 0.1);
+}
+
 /* ─── État vide / placeholder ─── */
 .bo-empty {
   padding: 44px 24px;
