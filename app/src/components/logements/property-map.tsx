@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { FaLocationDot, FaUpRightFromSquare } from "react-icons/fa6";
 import { useApp } from "@/components/providers/app-provider";
 
 function buildPin(size: number): L.DivIcon {
@@ -17,20 +18,81 @@ function buildPin(size: number): L.DivIcon {
 }
 
 interface PropertyMapProps {
-  lat: number;
-  lon: number;
+  lat: number | null;
+  lon: number | null;
+  nom?: string;
+  adresse?: string | null;
+  ville?: string | null;
+  pays?: string | null;
 }
 
-export function PropertyMap({ lat, lon }: PropertyMapProps) {
+function searchQuery(adresse?: string | null, ville?: string | null, pays?: string | null): string {
+  return [adresse, ville, pays].filter(Boolean).join(", ").trim();
+}
+
+export function PropertyMap({ lat, lon, nom, adresse, ville, pays }: PropertyMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<L.Map | null>(null);
   const { t } = useApp();
 
+  const latLonKnown = lat != null && lon != null;
+  const [coords, setCoords] = useState<{ lat: number; lon: number } | null>(() =>
+    latLonKnown && lat != null && lon != null ? { lat, lon } : null
+  );
+  const [failed, setFailed] = useState(false);
+
+  /* Secours : géocodage côté client (Nominatim) quand le serveur
+     n'a pas pu résoudre les coordonnées. Effect idempotent : il ne
+     tourne qu'une fois tant que coords reste null. */
   useEffect(() => {
-    if (!containerRef.current) return;
-    const instance = L.map(containerRef.current, {
-      scrollWheelZoom: true,
+    if (coords) return;
+    const query = searchQuery(adresse, ville, pays);
+    if (!query) {
+      setFailed(true);
+      return;
+    }
+    const ctrl = new AbortController();
+    let cancelled = false;
+    fetch(
+      `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=1`,
+      { signal: ctrl.signal, headers: { "Accept-Language": "fr" } }
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        if (cancelled) return;
+        if (data?.[0]?.lat && data[0]?.lon) {
+          setCoords({ lat: parseFloat(data[0].lat), lon: parseFloat(data[0].lon) });
+        } else {
+          setFailed(true);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setFailed(true);
+      });
+    return () => {
+      cancelled = true;
+      ctrl.abort();
+    };
+  }, [coords, adresse, ville, pays]);
+
+  /* Initialisation Leaflet : une seule instance par montée. */
+  useEffect(() => {
+    if (!coords) return;
+    const host = containerRef.current;
+    if (!host) return;
+    if (mapRef.current) {
+      mapRef.current.setView([coords.lat, coords.lon], 15);
+      return;
+    }
+
+    const instance = L.map(host, {
+      scrollWheelZoom: false,
+      dragging: true,
+      touchZoom: true,
+      doubleClickZoom: true,
       zoomControl: true,
     });
+    mapRef.current = instance;
 
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       maxZoom: 19,
@@ -38,19 +100,58 @@ export function PropertyMap({ lat, lon }: PropertyMapProps) {
         '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     }).addTo(instance);
 
-    L.marker([lat, lon], { icon: buildPin(30) }).addTo(instance);
-    instance.setView([lat, lon], 15);
+    const marker = L.marker([coords.lat, coords.lon], { icon: buildPin(30) }).addTo(instance);
+    if (nom) marker.bindPopup(nom, { closeButton: false });
+    instance.setView([coords.lat, coords.lon], 15);
 
     return () => {
-      instance.remove();
+      const inst = mapRef.current;
+      mapRef.current = null;
+      if (inst) inst.remove();
     };
-  }, [lat, lon]);
+  }, [coords, nom]);
+
+  const mapsHref = coords
+    ? `https://www.google.com/maps/search/?api=1&query=${coords.lat},${coords.lon}`
+    : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(searchQuery(adresse, ville, pays))}`;
+
+  if (!coords && !failed) {
+    return (
+      <div
+        className="detail-map detail-map--loading"
+        aria-busy="true"
+        aria-label={t("logementDetail.carteLocalisation")}
+      >
+        <span className="detail-map-spinner" aria-hidden="true" />
+        <span className="detail-map-loading-text">{t("logementDetail.carteChargement")}</span>
+      </div>
+    );
+  }
+
+  if (!coords && failed) {
+    return (
+      <div className="detail-map-fallback">
+        <span className="detail-map-fallback-icon" aria-hidden="true">
+          <FaLocationDot size={22} />
+        </span>
+        <p className="detail-map-fallback-address">
+          {[adresse, ville, pays].filter(Boolean).join(", ")}
+        </p>
+        <a className="detail-map-fallback-link" href={mapsHref} target="_blank" rel="noopener noreferrer">
+          {t("logementDetail.ouvrirMaps")}
+          <FaUpRightFromSquare aria-hidden="true" size={13} />
+        </a>
+      </div>
+    );
+  }
 
   return (
-    <div
-      className="detail-map"
-      ref={containerRef}
-      aria-label={t("logementDetail.carteLocalisation")}
-    />
+    <div className="detail-map">
+      <div className="detail-map-canvas" ref={containerRef} aria-label={t("logementDetail.carteLocalisation")} />
+      <a className="detail-map-action" href={mapsHref} target="_blank" rel="noopener noreferrer">
+        {t("logementDetail.agrandirCarte")}
+        <FaUpRightFromSquare aria-hidden="true" size={12} />
+      </a>
+    </div>
   );
 }

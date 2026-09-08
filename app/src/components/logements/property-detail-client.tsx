@@ -620,13 +620,14 @@ export function PropertyDetailClient({
                 {property.adresse ? `${property.adresse}, ` : ""}
                 {property.ville}, {property.pays}
               </p>
-              {property.latitude != null && property.longitude != null ? (
-                <PropertyMap lat={property.latitude} lon={property.longitude} />
-              ) : (
-                <div className="detail-map-link">
-                  {property.ville}, {property.pays}
-                </div>
-              )}
+              <PropertyMap
+                lat={property.latitude}
+                lon={property.longitude}
+                nom={property.nom}
+                adresse={property.adresse}
+                ville={property.ville}
+                pays={property.pays}
+              />
             </div>
           )}
         </div>
