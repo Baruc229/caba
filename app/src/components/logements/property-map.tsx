@@ -46,29 +46,31 @@ export function PropertyMap({ lat, lon, nom, adresse, ville, pays }: PropertyMap
      tourne qu'une fois tant que coords reste null. */
   useEffect(() => {
     if (coords) return;
-    const query = searchQuery(adresse, ville, pays);
-    if (!query) {
-      setFailed(true);
-      return;
-    }
     const ctrl = new AbortController();
     let cancelled = false;
-    fetch(
-      `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=1`,
-      { signal: ctrl.signal, headers: { "Accept-Language": "fr" } }
-    )
-      .then((res) => res.json())
-      .then((data) => {
-        if (cancelled) return;
-        if (data?.[0]?.lat && data[0]?.lon) {
-          setCoords({ lat: parseFloat(data[0].lat), lon: parseFloat(data[0].lon) });
-        } else {
-          setFailed(true);
-        }
-      })
-      .catch(() => {
-        if (!cancelled) setFailed(true);
-      });
+    const query = searchQuery(adresse, ville, pays);
+    const attempt: Promise<{ lat: number; lon: number } | null> = query
+      ? fetch(
+          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=1`,
+          { signal: ctrl.signal, headers: { "Accept-Language": "fr" } }
+        )
+          .then((res) => res.json())
+          .then((data) => {
+            if (data?.[0]?.lat && data[0]?.lon) {
+              return { lat: parseFloat(data[0].lat), lon: parseFloat(data[0].lon) };
+            }
+            return null;
+          })
+          .catch(() => null)
+      : Promise.resolve(null);
+    attempt.then((result) => {
+      if (cancelled) return;
+      if (result) {
+        setCoords(result);
+      } else {
+        setFailed(true);
+      }
+    });
     return () => {
       cancelled = true;
       ctrl.abort();
