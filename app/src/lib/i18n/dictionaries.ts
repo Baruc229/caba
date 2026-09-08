@@ -246,6 +246,9 @@ export const dictionaries = {
       pagination: "Pagination",
       prevPage: "Page précédente",
       nextPage: "Page suivante",
+      browseAllHint:
+        "Parcourez notre sélection de chambres et de logements disponibles.",
+      searchWithDates: "Rechercher avec vos dates",
     },
     logementDetail: {
       retour: "Retour aux logements",
@@ -822,6 +825,9 @@ export const dictionaries = {
       sortPriceDesc: "Price descending",
       sortRating: "Rating",
       sortNewest: "Newest",
+      browseAllHint:
+        "Browse our selection of available rooms and accommodations.",
+      searchWithDates: "Search with your dates",
       pagination: "Pagination",
       prevPage: "Previous page",
       nextPage: "Next page",

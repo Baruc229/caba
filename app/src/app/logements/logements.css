@@ -122,6 +122,8 @@
   position: absolute;
   inset: 0;
   background: rgba(0, 0, 0, 0.45);
+  border: none;
+  cursor: pointer;
   animation: fadeIn 150ms ease;
 }
 
@@ -132,16 +134,29 @@
   max-height: 90vh;
   background: var(--color-bg-card);
   border-radius: 20px 20px 0 0;
-  padding: 20px 20px 32px;
+  padding: 28px 20px 32px;
   overflow-y: auto;
   animation: drawerUp 250ms cubic-bezier(0.32, 0.72, 0, 1);
   box-shadow: 0 -12px 40px -12px rgba(0, 0, 0, 0.3);
+  outline: none;
 }
 
-/* Mobile: bottom-sheet (inchangé) */
+/* Poignée de saisie (bottom sheet mobile) */
+.drawer-handle {
+  display: none;
+  width: 44px;
+  height: 5px;
+  border-radius: 999px;
+  background: var(--color-border-subtle);
+  margin: -8px auto 16px;
+}
+
 @media (max-width: 639px) {
   .drawer-panel {
     max-height: 92vh;
+  }
+  .drawer-handle {
+    display: block;
   }
 }
 
@@ -1275,6 +1290,24 @@
 /* ══════════════════════════════════════════════════════════
    GRID
    ══════════════════════════════════════════════════════════ */
+.logements-browse-hint {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--color-accent-gold) 12%, var(--color-bg-card));
+  border: 1px solid color-mix(in srgb, var(--color-accent-gold) 45%, var(--color-border-subtle));
+  font-size: 14px;
+  color: var(--color-text-primary);
+}
+
+.logements-browse-hint svg {
+  color: var(--color-text-secondary);
+  flex-shrink: 0;
+}
+
 .logements-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

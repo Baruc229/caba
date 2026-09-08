@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { FaCalendarDays, FaUserGroup, FaBed, FaSliders, FaX } from "react-icons/fa6";
 import { SearchBarCompact } from "@/components/search/search-bar-compact";
@@ -58,24 +58,65 @@ export function SearchSummaryBar({
   const { t, lang } = useApp();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const scrollYRef = useRef(0);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const previouslyFocused = useRef<Element | null>(null);
 
   useEffect(() => {
     const raf = requestAnimationFrame(() => setMounted(true));
     return () => cancelAnimationFrame(raf);
   }, []);
 
+  const closeDrawer = useCallback(() => setDrawerOpen(false), []);
+
   useEffect(() => {
-    if (drawerOpen) {
-      scrollYRef.current = window.scrollY;
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
+    document.body.style.overflow = drawerOpen ? "hidden" : "";
     return () => {
       document.body.style.overflow = "";
     };
   }, [drawerOpen]);
+
+  // Focus management + Escape + focus trap : comportement modal accessible.
+  useEffect(() => {
+    if (!drawerOpen || !mounted) return;
+
+    previouslyFocused.current = document.activeElement;
+
+    // Déplace le focus dans le panneau (sur le bouton fermer) à l'ouverture.
+    const panel = panelRef.current;
+    panel?.querySelector<HTMLElement>(".drawer-close")?.focus();
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        closeDrawer();
+        return;
+      }
+      if (e.key !== "Tab") return;
+      const focusables = Array.from(
+        panel?.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), input:not([disabled]):not([type="hidden"]), [href], select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        ) ?? []
+      );
+      if (focusables.length === 0) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      // Restaure le focus sur le bouton déclencheur à la fermeture.
+      if (previouslyFocused.current instanceof HTMLElement) {
+        previouslyFocused.current.focus();
+      }
+    };
+  }, [drawerOpen, mounted, closeDrawer]);
 
   const guests = Math.max(1, initialAdultes) + initialEnfants + initialBebes;
   const hasDates = Boolean(initialArrivee && initialDepart);
@@ -107,13 +148,21 @@ export function SearchSummaryBar({
   const drawerContent =
     drawerOpen && mounted ? (
       <div className="drawer-root">
-        <div className="drawer-backdrop" onClick={() => setDrawerOpen(false)} aria-hidden="true" />
+        <button
+          type="button"
+          className="drawer-backdrop"
+          aria-label={t("common.fermer") ?? "Fermer"}
+          tabIndex={-1}
+          onClick={closeDrawer}
+        />
         <div
+          ref={panelRef}
           className="drawer-panel"
           role="dialog"
           aria-modal="true"
           aria-label={t("logements.editSearch") ?? "Modifier la recherche"}
         >
+          <div className="drawer-handle" aria-hidden="true" />
           <div className="drawer-header">
             <h2 className="drawer-title">
               {searchDone
@@ -123,7 +172,7 @@ export function SearchSummaryBar({
             <button
               type="button"
               className="drawer-close"
-              onClick={() => setDrawerOpen(false)}
+              onClick={closeDrawer}
               aria-label={t("common.fermer") ?? "Fermer"}
             >
               <FaX aria-hidden="true" size={18} />
@@ -166,6 +215,8 @@ export function SearchSummaryBar({
           className="search-summary-edit-btn"
           onClick={() => setDrawerOpen(true)}
           aria-label={ctaLabel}
+          aria-expanded={drawerOpen}
+          aria-haspopup="dialog"
         >
           <FaSliders aria-hidden="true" size={13} />
           {ctaLabel}
