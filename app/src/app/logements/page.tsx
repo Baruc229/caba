@@ -14,7 +14,16 @@ interface LogementsPageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
+/* Cache en mémoire très court : évite de retaper la base à chaque visite
+   de /logements alors que le catalogue change rarement en cours de session. */
+const initialLoadCache = new Map<string, { expires: number; value: SearchResultItem[] }>();
+const INITIAL_LOAD_TTL_MS = 10_000;
+
 async function loadPublishedProperties(): Promise<SearchResultItem[]> {
+  const now = Date.now();
+  const hit = initialLoadCache.get("published");
+  if (hit && hit.expires > now) return hit.value;
+
   const properties = await prisma.property.findMany({
     where: { statut: "publie" },
     orderBy: { createdAt: "desc" },
@@ -26,7 +35,7 @@ async function loadPublishedProperties(): Promise<SearchResultItem[]> {
     },
   });
 
-  return properties.map((p) => {
+  const value = properties.map((p) => {
     const notes = p.avis.map((a) => a.note);
     const noteMoyenne =
       notes.length > 0
@@ -54,6 +63,9 @@ async function loadPublishedProperties(): Promise<SearchResultItem[]> {
       promotionAppliquee: null,
     };
   });
+
+  initialLoadCache.set("published", { expires: now + INITIAL_LOAD_TTL_MS, value });
+  return value;
 }
 
 export default async function LogementsPage({ searchParams }: LogementsPageProps) {

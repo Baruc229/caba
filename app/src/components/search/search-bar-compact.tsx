@@ -22,7 +22,7 @@ const SEJOUR_ENTRIES: [string, string][] = [
 const NEEDS_HOURS = new Set(["vingt_quatre_heures", "plusieurs_heures", "heure"]);
 
 const TYPE_ENTRIES: [string, string][] = [
-  ["", "allTypes"],
+  ["", "home.allTypes"],
   ...PROPERTY_TYPES.map((pt) => [pt.value, pt.labelKey] as [string, string]),
 ];
 
@@ -208,6 +208,10 @@ export function SearchBarCompact({
           </>
         ) : (
           <div className="search-bar-compact-field search-bar-compact-field--dates">
+            <label className="search-bar-compact-label" aria-hidden="false">
+              <FaCalendarDays aria-hidden="true" size={13} />
+              {t("calendar.dates")}
+            </label>
             <DateRangePicker
               arrivee={arrivee}
               depart={depart}
