@@ -3,7 +3,13 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { FaClock, FaShareNodes, FaHeart, FaArrowLeft } from "react-icons/fa6";
+import {
+  FaClock,
+  FaShareNodes,
+  FaHeart,
+  FaArrowLeft,
+  FaCheck,
+} from "react-icons/fa6";
 import { useSession } from "next-auth/react";
 import { useApp } from "@/components/providers/app-provider";
 import { DoubleMonthCalendar } from "@/components/logements/double-month-calendar";
@@ -177,7 +183,11 @@ export function PropertyDetailClient({
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [equipmentOpen, setEquipmentOpen] = useState(false);
   const [favori, setFavori] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [mobileError, setMobileError] = useState<string | null>(null);
   const mobileTrackRef = useRef<HTMLDivElement>(null);
+  const galleryCloseRef = useRef<HTMLButtonElement>(null);
+  const galleryLastFocusedRef = useRef<HTMLElement | null>(null);
 
   const typeLabel = property.type.replace(/_/g, " ");
   const formattedPrice =
@@ -217,6 +227,8 @@ export function PropertyDetailClient({
   function handleDatesChange(a: string, d: string) {
     setArrivee(a);
     setDepart(d);
+    setMessage(null);
+    setMobileError(null);
   }
 
   useEffect(() => {
@@ -265,10 +277,17 @@ export function PropertyDetailClient({
 
   function attemptReserve() {
     setMessage(null);
+    setMobileError(null);
 
     if (!arrivee || !depart) {
-      setMessage(t("logements.emptyDesc"));
-      if (window.innerWidth <= 900) scrollToPicker();
+      const err = t("logements.emptyDesc");
+      setMessage(err);
+      if (window.innerWidth <= 900) {
+        setMobileError(err);
+        document
+          .getElementById("disponibilite")
+          ?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
       return;
     }
 
@@ -289,12 +308,6 @@ export function PropertyDetailClient({
     e.preventDefault();
     attemptReserve();
   }
-
-  const scrollToPicker = () => {
-    document
-      .getElementById("reservation-dates")
-      ?.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
 
   const composedH1 = [
     typeLabel,
@@ -334,9 +347,15 @@ export function PropertyDetailClient({
   const handleShare = () => {
     if (navigator.share) {
       navigator.share({ title: property.nom, url: window.location.href });
-    } else {
-      navigator.clipboard.writeText(window.location.href);
+      return;
     }
+    navigator.clipboard
+      .writeText(window.location.href)
+      .then(() => {
+        setCopied(true);
+        window.setTimeout(() => setCopied(false), 2000);
+      })
+      .catch(() => {});
   };
 
   const handleFavori = () => {
@@ -380,6 +399,40 @@ export function PropertyDetailClient({
     return () => track.removeEventListener("scroll", updateIndex);
   }, []);
 
+  /* Lightbox : focus, clavier (Échap, ←/→), restauration du focus à la fermeture. */
+  useEffect(() => {
+    if (!galleryOpen) return;
+    galleryLastFocusedRef.current = document.activeElement as HTMLElement | null;
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setGalleryOpen(false);
+        return;
+      }
+      if (e.key === "ArrowRight") {
+        e.preventDefault();
+        setActivePhotoIndex((i) => (i + 1) % totalPhotos);
+        return;
+      }
+      if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        setActivePhotoIndex((i) => (i - 1 + totalPhotos) % totalPhotos);
+      }
+    };
+    document.addEventListener("keydown", onKey, true);
+
+    const focusTimer = window.setTimeout(() => {
+      galleryCloseRef.current?.focus();
+    }, 0);
+
+    const previousFocused = galleryLastFocusedRef.current;
+    return () => {
+      window.clearTimeout(focusTimer);
+      document.removeEventListener("keydown", onKey, true);
+      previousFocused?.focus();
+    };
+  }, [galleryOpen, totalPhotos]);
+
   return (
     <section className="detail-page">
       {/* ─── Fil d'ariane ─── */}
@@ -408,11 +461,19 @@ export function PropertyDetailClient({
           <div className="detail-gallery-actions">
             <button
               type="button"
-              className="detail-gallery-action"
+              className={`detail-gallery-action${copied ? " is-copied" : ""}`}
               onClick={handleShare}
-              aria-label={t("logementDetail.partager") ?? "Partager"}
+              aria-label={
+                copied
+                  ? (t("logementDetail.lienCopie") ?? "Lien copié !")
+                  : (t("logementDetail.partager") ?? "Partager")
+              }
             >
-              <FaShareNodes size={15} />
+              {copied ? (
+                <FaCheck size={15} aria-hidden="true" />
+              ) : (
+                <FaShareNodes size={15} aria-hidden="true" />
+              )}
             </button>
             <button
               type="button"
@@ -432,7 +493,12 @@ export function PropertyDetailClient({
             onClick={() => setGalleryOpen(true)}
             role="button"
             tabIndex={0}
-            onKeyDown={(e) => e.key === "Enter" && setGalleryOpen(true)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                setGalleryOpen(true);
+              }
+            }}
             aria-label={`${t("logementDetail.voirPhoto") ?? "Voir la galerie"} (${totalPhotos} photos)`}
           >
             {activePhoto ? (
@@ -440,6 +506,8 @@ export function PropertyDetailClient({
                 src={activePhoto}
                 alt={`${property.nom} — photo ${activePhotoIndex + 1}`}
                 className="detail-gallery-main-img"
+                fetchPriority="high"
+                decoding="async"
               />
             ) : (
               <div className="detail-gallery-placeholder">{property.nom}</div>
@@ -492,16 +560,26 @@ export function PropertyDetailClient({
         </div>
 
         {/* Mobile: swipe horizontal */}
-        <div className="detail-gallery-mobile" aria-hidden="true">
+        <div className="detail-gallery-mobile">
           <div className="detail-gallery-mobile-track" ref={mobileTrackRef}>
             {property.photos.map((p, i) => (
-              <div key={p.id} className="detail-gallery-mobile-item">
+              <button
+                key={p.id}
+                type="button"
+                className="detail-gallery-mobile-item"
+                onClick={() => setGalleryOpen(true)}
+                aria-label={
+                  p.legende ??
+                  `${property.nom} — ${t("logementDetail.photo") ?? "Photo"} ${i + 1} · ${t("logementDetail.voirPhoto") ?? "Voir la galerie"}`
+                }
+              >
                 <img
                   src={p.url}
-                  alt={`${property.nom} — ${i + 1}`}
+                  alt=""
                   loading="lazy"
+                  decoding="async"
                 />
-              </div>
+              </button>
             ))}
           </div>
           <div className="detail-gallery-mobile-dots" aria-hidden="true">
@@ -706,61 +784,68 @@ export function PropertyDetailClient({
                   onCountsChange={handleCountsChange}
                 />
 
-                {hasDates && quoteLoading && <p className="detail-quote-loading" aria-hidden="true" />}
-
-                {hasDates && quote && !quoteLoading && (
-                  <div className="detail-quote">
-                    <div className="detail-quote-line">
-                      <span>
-                        {nights}{" "}
-                        {nights > 1
-                          ? t("logementDetail.nuits")
-                          : t("logementDetail.nuit")}{" "}
-                        ×{" "}
-                        {formatAmount(
-                          convertAmount(quote.unitPrice, quote.currency, currency),
-                          lang
-                        )}{" "}
-                        {currency}
-                      </span>
-                      <span>
-                        {formatAmount(
-                          convertAmount(quote.subtotal, quote.currency, currency),
-                          lang
-                        )}{" "}
-                        {currency}
-                      </span>
-                    </div>
-                    {quote.discount > 0 && (
-                      <div className="detail-quote-line detail-quote-promo">
-                        <span>
-                          {quote.promotionAppliquee ?? t("common.promo")}
-                        </span>
-                        <span>
-                          −
-                          {formatAmount(
-                            convertAmount(quote.discount, quote.currency, currency),
-                            lang
-                          )}{" "}
-                          {currency}
-                        </span>
-                      </div>
+                {hasDates && (
+                  <div className="detail-quote" aria-live="polite">
+                    {quoteLoading && (
+                      <p className="detail-quote-loading" aria-hidden="true" />
                     )}
-                    <div className="detail-quote-line detail-quote-total">
-                      <span>{t("logementDetail.total") ?? "Total"}</span>
-                      <span>
-                        {formatAmount(
-                          convertAmount(quote.total, quote.currency, currency),
-                          lang
-                        )}{" "}
-                        {currency}
-                      </span>
-                    </div>
+                    {quote && !quoteLoading && (
+                      <>
+                        <div className="detail-quote-line">
+                          <span>
+                            {nights}{" "}
+                            {nights > 1
+                              ? t("logementDetail.nuits")
+                              : t("logementDetail.nuit")}{" "}
+                            ×{" "}
+                            {formatAmount(
+                              convertAmount(quote.unitPrice, quote.currency, currency),
+                              lang
+                            )}{" "}
+                            {currency}
+                          </span>
+                          <span>
+                            {formatAmount(
+                              convertAmount(quote.subtotal, quote.currency, currency),
+                              lang
+                            )}{" "}
+                            {currency}
+                          </span>
+                        </div>
+                        {quote.discount > 0 && (
+                          <div className="detail-quote-line detail-quote-promo">
+                            <span>
+                              {quote.promotionAppliquee ?? t("common.promo")}
+                            </span>
+                            <span>
+                              −
+                              {formatAmount(
+                                convertAmount(quote.discount, quote.currency, currency),
+                                lang
+                              )}{" "}
+                              {currency}
+                            </span>
+                          </div>
+                        )}
+                        <div className="detail-quote-line detail-quote-total">
+                          <span>{t("logementDetail.total") ?? "Total"}</span>
+                          <span>
+                            {formatAmount(
+                              convertAmount(quote.total, quote.currency, currency),
+                              lang
+                            )}{" "}
+                            {currency}
+                          </span>
+                        </div>
+                      </>
+                    )}
                   </div>
                 )}
 
                 {message && (
-                  <p className="detail-form-error">{message}</p>
+                  <p className="detail-form-error" role="alert">
+                    {message}
+                  </p>
                 )}
                 <button type="submit" className="detail-submit">
                   {t("logementDetail.reserver")}
@@ -792,16 +877,27 @@ export function PropertyDetailClient({
         </div>
       )}
 
+      {/* Message d'erreur mobile (barre fixe) */}
+      {mobileError && (
+        <div className="detail-mobile-toast" role="alert">
+          {mobileError}
+        </div>
+      )}
+
       {/* ─── Lightbox ─── */}
       {galleryOpen && (
         <div
           className="detail-gallery-lightbox"
           role="dialog"
+          aria-modal="true"
           aria-label={t("logementDetail.galerie") ?? "Galerie photos"}
+          aria-keyshortcuts="Escape ← →"
+          tabIndex={-1}
           onClick={() => setGalleryOpen(false)}
         >
           <button
             type="button"
+            ref={galleryCloseRef}
             className="detail-gallery-lightbox-close"
             onClick={() => setGalleryOpen(false)}
             aria-label={t("common.fermer") ?? "Fermer"}
@@ -812,20 +908,24 @@ export function PropertyDetailClient({
             className="detail-gallery-lightbox-content"
             onClick={(e) => e.stopPropagation()}
           >
-            <img
-              src={activePhoto}
-              alt={`${property.nom} — ${activePhotoIndex + 1}`}
-              className="detail-gallery-lightbox-img"
-            />
+            {activePhoto ? (
+              <img
+                src={activePhoto}
+                alt={`${property.nom} — ${activePhotoIndex + 1}`}
+                className="detail-gallery-lightbox-img"
+              />
+            ) : (
+              <div className="detail-gallery-lightbox-empty">
+                {t("logementDetail.galerie") ?? "Galerie photos"}
+              </div>
+            )}
             <button
               type="button"
               className="detail-gallery-lightbox-prev"
               onClick={() =>
-                setActivePhotoIndex(
-                  (i) => (i - 1 + totalPhotos) % totalPhotos
-                )
+                setActivePhotoIndex((i) => (i - 1 + totalPhotos) % totalPhotos)
               }
-              aria-label={t("calendar.prevMonth")}
+              aria-label={t("logementDetail.photoPrecedente")}
             >
               ‹
             </button>
@@ -835,7 +935,7 @@ export function PropertyDetailClient({
               onClick={() =>
                 setActivePhotoIndex((i) => (i + 1) % totalPhotos)
               }
-              aria-label={t("calendar.nextMonth")}
+              aria-label={t("logementDetail.photoSuivante")}
             >
               ›
             </button>

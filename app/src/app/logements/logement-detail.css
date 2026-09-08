@@ -99,6 +99,11 @@
   background: #fff;
 }
 
+.detail-gallery-action.is-copied {
+  color: var(--color-success);
+  background: #fff;
+}
+
 /* ── Desktop: grande photo à gauche + grille de vignettes à droite ── */
 .detail-gallery-desktop {
   display: grid;
@@ -262,6 +267,12 @@
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
+}
+
+.detail-gallery-lightbox-empty {
+  color: #fff;
+  font-size: 18px;
+  font-family: var(--font-body), sans-serif;
 }
 
 .detail-gallery-lightbox-prev,
@@ -880,6 +891,26 @@
   display: none;
 }
 
+/* Message d'erreur affiché au-dessus de la barre mobile */
+.detail-mobile-toast {
+  position: fixed;
+  left: 20px;
+  right: 20px;
+  bottom: calc(76px + env(safe-area-inset-bottom));
+  z-index: 210;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: var(--color-error);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
 /* ── Responsive ── */
 @media (max-width: 900px) {
   .detail-page {
@@ -924,6 +955,10 @@
   scroll-snap-align: start;
   overflow: hidden;
   background: #1a1a1a;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
 }
 
 .detail-gallery-mobile-item img {
@@ -1012,6 +1047,10 @@
 
   .detail-mobile-bar-cta:hover {
     background: var(--color-accent-hover);
+  }
+
+  .detail-mobile-toast {
+    display: flex;
   }
 }
 
