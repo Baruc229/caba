@@ -1,6 +1,5 @@
-﻿import { SectionPlaceholder } from "@/components/admin/section-placeholder";
+﻿import { CalendarManager } from "@/components/admin/calendar-manager";
 
 export default function Page() {
-  return <SectionPlaceholder slug="calendrier" />;
+  return <CalendarManager />;
 }
-

@@ -73,6 +73,26 @@ export async function notifyNewBooking(bookingId: string) {
   }
 }
 
+export async function notifyBookingConfirmed(bookingId: string) {
+  const booking = await prisma.booking.findUnique({
+    where: { id: bookingId },
+    include: {
+      property: { select: { nom: true } },
+      client: { select: { id: true, prenom: true, nom: true } },
+    },
+  });
+
+  if (!booking) return;
+
+  await createNotification({
+    userId: booking.client.id,
+    type: "modification",
+    title: "Reservation confirmee",
+    message: `Votre reservation ${booking.numero} pour ${booking.property.nom} est confirmee.`,
+    link: `/espace-client/reservations/${booking.id}`,
+  });
+}
+
 export async function notifyPaymentReceived(bookingId: string) {
   const booking = await prisma.booking.findUnique({
     where: { id: bookingId },

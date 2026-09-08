@@ -1,6 +1,5 @@
-﻿import { SectionPlaceholder } from "@/components/admin/section-placeholder";
+﻿import { ReservationsManager } from "@/components/admin/reservations-manager";
 
 export default function Page() {
-  return <SectionPlaceholder slug="reservations" />;
+  return <ReservationsManager />;
 }
-

@@ -233,6 +233,97 @@ export async function cancelBooking(bookingId: string, motif?: string): Promise<
   };
 }
 
+export async function markBookingPaid(bookingId: string): Promise<BookingResult> {
+  const booking = await prisma.booking.findUnique({
+    where: { id: bookingId },
+  });
+
+  if (!booking) {
+    return { success: false, error: "Reservation introuvable" };
+  }
+
+  if (booking.statut === "payee" || booking.statut === "terminee" || booking.statut === "annulee") {
+    return { success: false, error: "Cette reservation ne peut pas etre marquee payee" };
+  }
+
+  const updated = await prisma.$transaction(async (tx) => {
+    const result = await tx.booking.update({
+      where: { id: bookingId },
+      data: { statut: "payee" },
+    });
+
+    await tx.bookingHistory.create({
+      data: {
+        reservationId: bookingId,
+        action: "paiement",
+        details: JSON.parse(JSON.stringify({
+          montant: Number(booking.prixTotal),
+          devise: booking.devise,
+        })),
+      },
+    });
+
+    return result;
+  });
+
+  clearAvailabilityCache();
+
+  return {
+    success: true,
+    booking: {
+      id: updated.id,
+      numero: updated.numero,
+      statut: updated.statut,
+      prixTotal: Number(updated.prixTotal),
+      devise: updated.devise,
+    },
+  };
+}
+
+export async function completeBooking(bookingId: string): Promise<BookingResult> {
+  const booking = await prisma.booking.findUnique({
+    where: { id: bookingId },
+  });
+
+  if (!booking) {
+    return { success: false, error: "Reservation introuvable" };
+  }
+
+  if (booking.statut !== "confirmee" && booking.statut !== "payee") {
+    return { success: false, error: "Seule une reservation confirmee ou payee peut etre terminee" };
+  }
+
+  const updated = await prisma.$transaction(async (tx) => {
+    const result = await tx.booking.update({
+      where: { id: bookingId },
+      data: { statut: "terminee" },
+    });
+
+    await tx.bookingHistory.create({
+      data: {
+        reservationId: bookingId,
+        action: "modification",
+        details: JSON.parse(JSON.stringify({ action: "terminaison" })),
+      },
+    });
+
+    return result;
+  });
+
+  clearAvailabilityCache();
+
+  return {
+    success: true,
+    booking: {
+      id: updated.id,
+      numero: updated.numero,
+      statut: updated.statut,
+      prixTotal: Number(updated.prixTotal),
+      devise: updated.devise,
+    },
+  };
+}
+
 export async function modifyBooking(
   bookingId: string,
   updates: {
