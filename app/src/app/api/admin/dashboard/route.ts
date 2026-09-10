@@ -22,7 +22,7 @@ function whereBookingDay(field: string, dateStr: string): any {
   };
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const session = await auth();
     if (!session?.user || !["administrateur", "gestionnaire", "reception"].includes(session.user.role)) {
@@ -34,6 +34,11 @@ export async function GET() {
     const todayDepart = whereBookingDay("dateDepart", today);
     const septJours = daysAgoISO(7);
     const trenteJours = daysAgoISO(30);
+
+    const periodeRaw = new URL(request.url).searchParams.get("periode");
+    const periode = periodeRaw === "jour" || periodeRaw === "mois" ? periodeRaw : "semaine";
+    const fenetre = periode === "jour" ? 7 : periode === "mois" ? 30 : 14;
+    const debutFenetre = daysAgoISO(fenetre - 1);
 
     const [
       reservationsJour,
@@ -47,14 +52,16 @@ export async function GET() {
       dernieresReservations,
       notifications,
       paiementsRecents,
-      // Graphiques : revenus 14 jours
+      // Graphiques : revenus par fenêtre
       revenusGraphRaw,
-      // Graphiques : occupation 14 jours
+      // Graphiques : occupation par fenêtre
       occupationRaw,
       // Répartition par type
       repartitionType,
       // Sources
       sourcesReservation,
+      // Réservations à traiter
+      reservationsEnAttente,
     ] = await Promise.all([
       // 1. Réservations du jour (confirmées ou payées)
       prisma.booking.count({
@@ -160,30 +167,30 @@ export async function GET() {
         },
       }),
 
-      // 12. Revenus par jour (14 derniers jours)
+      // 12. Revenus par jour (fenêtre sélectionnée)
       prisma.$queryRaw<{ date: string; montant: number }[]>`
         SELECT DATE(p."datePaiement")::text as date, COALESCE(SUM(p.montant), 0)::float as montant
         FROM "Paiement" p
         WHERE p.statut = 'confirme'
           AND p."datePaiement" >= ${new Date(Date.UTC(
-            Number(daysAgoISO(13).slice(0, 4)),
-            Number(daysAgoISO(13).slice(5, 7)) - 1,
-            Number(daysAgoISO(13).slice(8, 10)),
+            Number(debutFenetre.slice(0, 4)),
+            Number(debutFenetre.slice(5, 7)) - 1,
+            Number(debutFenetre.slice(8, 10)),
             0, 0,
           ))}
         GROUP BY DATE(p."datePaiement")
         ORDER BY date ASC
       `,
 
-      // 13. Taux d'occupation (14 jours)
+      // 13. Taux d'occupation (fenêtre sélectionnée)
       prisma.$queryRaw<{ date: string; reserves: number }[]>`
         SELECT d.date::text, COUNT(*)::int as reserves
         FROM "Disponibilite" d
         WHERE d.statut = 'reserve'
           AND d.date >= ${new Date(Date.UTC(
-            Number(daysAgoISO(13).slice(0, 4)),
-            Number(daysAgoISO(13).slice(5, 7)) - 1,
-            Number(daysAgoISO(13).slice(8, 10)),
+            Number(debutFenetre.slice(0, 4)),
+            Number(debutFenetre.slice(5, 7)) - 1,
+            Number(debutFenetre.slice(8, 10)),
             0, 0,
           ))}
         GROUP BY d.date
@@ -211,6 +218,13 @@ export async function GET() {
         },
         _count: true,
       }),
+
+      // 16. Réservations à traiter (demandes / options en attente)
+      prisma.booking.count({
+        where: {
+          statut: { in: ["demande_en_attente", "reservation_temporaire", "en_attente_paiement"] },
+        },
+      }),
     ]);
 
     // --- Assemblage des données ---
@@ -220,16 +234,16 @@ export async function GET() {
 
     // Graphique revenus : remplir les jours manquants
     const revenusMap = new Map(revenusGraphRaw.map((r) => [r.date, r.montant]));
-    const revenusGraph = Array.from({ length: 14 }, (_, i) => {
-      const d = daysAgoISO(13 - i);
+    const revenusGraph = Array.from({ length: fenetre }, (_, i) => {
+      const d = daysAgoISO(fenetre - 1 - i);
       return { date: d, montant: revenusMap.get(d) ?? 0 };
     });
 
     // Graphique occupation : total des logements publiés pour calculer le taux
     const totalLogements = logementsDisponibles + logementsOccupes || 1;
     const occupationMap = new Map(occupationRaw.map((o) => [o.date, o.reserves]));
-    const occupationGraph = Array.from({ length: 14 }, (_, i) => {
-      const d = daysAgoISO(13 - i);
+    const occupationGraph = Array.from({ length: fenetre }, (_, i) => {
+      const d = daysAgoISO(fenetre - 1 - i);
       const reserves = occupationMap.get(d) ?? 0;
       return { date: d, taux: Math.min(100, Math.round((reserves / totalLogements) * 100)) };
     });
@@ -306,6 +320,7 @@ export async function GET() {
         logementsDisponibles,
         logementsOccupes,
         whatsappEnAttente,
+        reservationsEnAttente,
         revenusJour: Number(revenusJour._sum.montant ?? 0),
         revenusSemaine: Number(revenusSemaine._sum.montant ?? 0),
         revenusMois: Number(revenusMois._sum.montant ?? 0),

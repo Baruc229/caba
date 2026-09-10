@@ -2409,6 +2409,155 @@ button.bo-cal-cell:hover {
   color: #fff;
 }
 
+/* ─── Toolbar (actualisation) ─── */
+.bo-dash-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.bo-dash-updated {
+  font-size: 12px;
+  color: var(--bo-text-2);
+}
+
+.bo-refresh-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 14px;
+  border: 1px solid var(--bo-border);
+  border-radius: var(--bo-radius-pill);
+  background-color: var(--bo-card);
+  color: var(--bo-text);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 120ms ease, background-color 120ms ease, color 120ms ease;
+}
+
+.bo-refresh-btn:hover:not(:disabled) {
+  border-color: var(--bo-accent);
+  background-color: var(--bo-bg-2);
+  color: var(--bo-accent);
+}
+
+.bo-refresh-btn:disabled {
+  opacity: 0.65;
+  cursor: default;
+}
+
+.bo-refresh-spin {
+  animation: bo-spin 800ms linear infinite;
+}
+
+@keyframes bo-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ─── Erreur d'actualisation (données conservées à l'écran) ─── */
+.bo-dash-error-inline {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 10px 16px;
+  margin-bottom: 16px;
+  border: 1px solid var(--bo-accent);
+  border-radius: var(--bo-radius-sm);
+  background-color: var(--bo-accent-soft);
+  color: var(--bo-accent);
+  font-size: 13px;
+}
+
+.bo-dash-error-inline button {
+  margin-left: auto;
+  padding: 4px 12px;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 120ms ease, color 120ms ease;
+}
+
+.bo-dash-error-inline button:hover:not(:disabled) {
+  background-color: currentColor;
+  color: var(--bo-card);
+}
+
+.bo-dash-error-inline button:disabled {
+  opacity: 0.65;
+  cursor: default;
+}
+
+/* ─── Alerte : réservations à traiter ─── */
+.bo-dash-alert {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 10px 16px;
+  margin-bottom: 16px;
+  border: 1px solid var(--bo-orange);
+  border-radius: var(--bo-radius-sm);
+  background-color: var(--bo-orange-soft);
+  color: var(--bo-orange);
+  font-size: 13px;
+}
+
+.bo-dash-alert strong {
+  color: var(--bo-text);
+}
+
+.bo-dash-alert a {
+  margin-left: auto;
+  font-weight: 700;
+  color: var(--bo-orange);
+  text-decoration: none;
+}
+
+.bo-dash-alert a:hover {
+  text-decoration: underline;
+}
+
+/* ─── Sparkline occupation ─── */
+.bo-occ-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 42px;
+  margin-top: 18px;
+}
+
+.bo-occ-bar {
+  flex: 1;
+  min-height: 4px;
+  border-radius: 2px 2px 0 0;
+  background-color: var(--bo-accent);
+  opacity: 0.5;
+  transition: opacity 120ms ease;
+}
+
+.bo-occ-bar:hover {
+  opacity: 1;
+}
+
+/* ─── Bar chart dense (30 jours) + état de rafraîchissement ─── */
+.bo-bars--dense {
+  gap: 2px;
+  height: 140px;
+}
+
+.bo-is-refreshing {
+  opacity: 0.75;
+  transition: opacity 180ms ease;
+}
+
 /* ─── Responsive dashboard ─── */
 @media (max-width: 1023.98px) {
   .bo-kpi-grid {
@@ -2435,6 +2584,10 @@ button.bo-cal-cell:hover {
   .bo-sidebar {
     animation: none;
     transition: none;
+  }
+
+  .bo-refresh-spin {
+    animation: none;
   }
 
   .bo-shell *,

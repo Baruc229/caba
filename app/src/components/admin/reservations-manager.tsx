@@ -280,9 +280,20 @@ export function ReservationsManager() {
     if (trigger && document.contains(trigger)) trigger.focus();
   }, []);
 
-  /* Chargement initial de la liste */
+  /* Chargement initial de la liste (filtre statut possible via l'URL) */
   useEffect(() => {
-    fetchList(1, EMPTY_FILTERS);
+    const statut = new URLSearchParams(window.location.search).get("statut");
+    if (statut && statut in STATUT_LABEL) {
+      const init = { ...EMPTY_FILTERS, status: statut };
+      Promise.resolve().then(() => {
+        setFilters(init);
+        setAppliedFilters(init);
+      });
+      fetchList(1, init);
+      history.replaceState(null, "", window.location.pathname);
+    } else {
+      fetchList(1, EMPTY_FILTERS);
+    }
   }, [fetchList]);
 
   /* ─── Chargement des logements pour le filtre ─── */

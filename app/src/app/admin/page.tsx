@@ -14,6 +14,8 @@ import {
   FaEye,
   FaEyeSlash,
   FaRegFolderOpen,
+  FaRotateRight,
+  FaTriangleExclamation,
 } from "react-icons/fa6";
 
 /* ─── Types ─── */
@@ -24,6 +26,7 @@ interface KPIs {
   logementsDisponibles: number;
   logementsOccupes: number;
   whatsappEnAttente: number;
+  reservationsEnAttente: number;
   revenusJour: number;
   revenusSemaine: number;
   revenusMois: number;
@@ -220,11 +223,12 @@ function WidgetToggle({ isHidden, onClick }: WidgetToggleProps) {
 }
 
 /* ─── Chart: Barres verticales (revenus) ─── */
-function RevenueBarChart({ data, period }: { data: RevenuPoint[]; period: Period }) {
+function RevenueBarChart({ data, windowSize }: { data: RevenuPoint[]; windowSize: number }) {
   const max = Math.max(...data.map((d) => d.montant), 1);
-  const step = period === "jour" ? 1 : period === "semaine" ? 1 : 2;
+  const step = windowSize > 21 ? 4 : windowSize > 7 ? 2 : 1;
+  const dense = windowSize > 21;
   return (
-    <div className="bo-bars">
+    <div className={`bo-bars ${dense ? "bo-bars--dense" : ""}`}>
       {data.map((d, i) => {
         const h = Math.max(2, (d.montant / max) * 100);
         const dayNum = new Date(d.date + "T00:00:00Z").getUTCDate();
@@ -256,9 +260,9 @@ function OccupationGauge({ data }: { data: OccupationPoint[] }) {
   const libre = 100 - occupe;
 
   return (
-    <div className="bo-gauge-wrap">
+    <div className="bo-gauge-wrap" role="img" aria-label={`Taux d'occupation moyen sur la période : ${avgTaux} %`}>
       <div className="bo-gauge">
-        <svg viewBox="0 0 120 120">
+        <svg viewBox="0 0 120 120" aria-hidden="true">
           <circle className="bo-gauge-bg" cx="60" cy="60" r={radius} />
           <circle
             className="bo-gauge-fill"
@@ -270,21 +274,38 @@ function OccupationGauge({ data }: { data: OccupationPoint[] }) {
             strokeDashoffset={offset}
           />
         </svg>
-        <div className="bo-gauge-center">
+        <div className="bo-gauge-center" aria-hidden="true">
           <span className="bo-gauge-value">{avgTaux}%</span>
           <span className="bo-gauge-label">moy.</span>
         </div>
       </div>
-      <div className="bo-gauge-legend">
+      <div className="bo-gauge-legend" aria-hidden="true">
         <div className="bo-gauge-legend-item">
           <span className="bo-gauge-legend-dot" style={{ backgroundColor: color }} />
           <span>Occupe : {occupe}%</span>
         </div>
         <div className="bo-gauge-legend-item">
-          <span className="bo-gauge-legend-dot" style={{ backgroundColor: "var(--bo-bg)" }} />
+          <span className="bo-gauge-legend-dot" style={{ backgroundColor: "var(--bo-gray)" }} />
           <span>Libre : {libre}%</span>
         </div>
       </div>
+    </div>
+  );
+}
+
+/* ─── Sparkline occupation (aperçu des 7/14/30 jours) ─── */
+function OccupancySparkline({ data }: { data: OccupationPoint[] }) {
+  if (data.length === 0) return null;
+  return (
+    <div className="bo-occ-bars" aria-hidden="true">
+      {data.map((d) => (
+        <span
+          key={d.date}
+          className="bo-occ-bar"
+          style={{ height: `${Math.max(4, d.taux)}%` }}
+          title={`${formatDay(d.date)} : ${d.taux} %`}
+        />
+      ))}
     </div>
   );
 }
@@ -348,23 +369,51 @@ export default function TableauDeBordPage() {
 
   const hiddenCount = hiddenWidgets.size;
 
-  /* Fetch data */
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const res = await fetch("/api/admin/dashboard");
+  /* Chargement + actualisation des données */
+  const [refreshing, setRefreshing] = useState(false);
+  const [loadedPeriod, setLoadedPeriod] = useState<Period>("mois");
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+
+  const fetchDashboard = useCallback((p: Period) => {
+    fetch(`/api/admin/dashboard?periode=${p}`)
+      .then((res) => {
         if (!res.ok) throw new Error("Erreur de chargement");
-        const json = await res.json();
-        if (!cancelled) setData(json);
-      } catch (e) {
-        if (!cancelled) setError(e instanceof Error ? e.message : "Erreur inconnue");
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => { cancelled = true; };
+        return res.json();
+      })
+      .then((json) => {
+        setData(json);
+        setLoadedPeriod(p);
+        setLastUpdated(new Date());
+        setError(null);
+        setLoading(false);
+        setRefreshing(false);
+      })
+      .catch((e) => {
+        setError(e instanceof Error ? e.message : "Erreur inconnue");
+        setLoading(false);
+        setRefreshing(false);
+      });
   }, []);
+
+  const handleRefresh = useCallback(() => {
+    setRefreshing(true);
+    fetchDashboard(period);
+  }, [fetchDashboard, period]);
+
+  /* Chargement initial + changement de période */
+  useEffect(() => {
+    fetchDashboard(period);
+  }, [fetchDashboard, period]);
+
+  /* Auto-actualisation silencieuse toutes les 60 s (pausée si l'onglet est masqué) */
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      if (!document.hidden) fetchDashboard(period);
+    }, 60000);
+    return () => window.clearInterval(id);
+  }, [fetchDashboard, period]);
+
+  const busy = loading || refreshing || period !== loadedPeriod;
 
   /* Revenue for selected period */
   const revenusValue = useMemo(() => {
@@ -373,6 +422,7 @@ export default function TableauDeBordPage() {
   }, [data, period]);
 
   const periodLabel = period === "jour" ? "Aujourd'hui" : period === "semaine" ? "7 derniers jours" : "30 derniers jours";
+  const windowSize = period === "jour" ? 7 : period === "semaine" ? 14 : 30;
 
   /* Source max for bar chart */
   const sourceMax = useMemo(() => data ? Math.max(...data.sourcesReservation.map((s) => s.count), 1) : 1, [data]);
@@ -404,8 +454,8 @@ export default function TableauDeBordPage() {
     );
   }
 
-  /* ─── ERROR STATE ─── */
-  if (error) {
+  /* ─── ERROR STATE (aucune donnée encore) ─── */
+  if (error && !data) {
     return (
       <div>
         <div className="bo-page-head">
@@ -418,6 +468,9 @@ export default function TableauDeBordPage() {
           <div className="bo-empty">
             <h3 className="bo-empty-title">Erreur de chargement</h3>
             <p>{error}</p>
+            <button type="button" className="bo-btn bo-btn--secondary" onClick={handleRefresh} style={{ marginTop: 12 }}>
+              Réessayer
+            </button>
           </div>
         </div>
       </div>
@@ -426,13 +479,52 @@ export default function TableauDeBordPage() {
 
   /* ─── KPI section ─── */
   return (
-    <div>
+    <div aria-busy={busy}>
       <div className="bo-page-head">
         <div>
           <h2 className="bo-page-title">Tableau de bord</h2>
           <p className="bo-page-desc">Vue d&apos;ensemble de l&apos;activite du complexe.</p>
         </div>
+        <div className="bo-dash-toolbar">
+          {lastUpdated && (
+            <span className="bo-dash-updated" role="status">
+              Mis à jour à{" "}
+              {lastUpdated.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
+            </span>
+          )}
+          <button
+            type="button"
+            className={`bo-refresh-btn ${busy ? "is-loading" : ""}`}
+            onClick={handleRefresh}
+            aria-label="Actualiser les données"
+            disabled={busy}
+          >
+            <FaRotateRight aria-hidden="true" className={busy ? "bo-refresh-spin" : undefined} />
+            <span>{busy ? "Actualisation…" : "Actualiser"}</span>
+          </button>
+        </div>
       </div>
+
+      {error && data && (
+        <div className="bo-dash-error-inline" role="alert">
+          <FaTriangleExclamation aria-hidden="true" />
+          <span>Actualisation impossible : {error}</span>
+          <button type="button" onClick={handleRefresh} disabled={busy}>
+            Réessayer
+          </button>
+        </div>
+      )}
+
+      {data && data.kpis.reservationsEnAttente > 0 && (
+        <div className="bo-dash-alert" role="status">
+          <FaTriangleExclamation aria-hidden="true" />
+          <span>
+            <strong>{data.kpis.reservationsEnAttente}</strong> réservation
+            {data.kpis.reservationsEnAttente > 1 ? "s" : ""} à traiter
+          </span>
+          <Link href="/admin/reservations?statut=demande_en_attente">Traiter</Link>
+        </div>
+      )}
 
       {hiddenCount > 0 && (
         <div className="bo-widget-reset">
@@ -523,7 +615,7 @@ export default function TableauDeBordPage() {
 
       {/* ─── GRAPHIQUES ─── */}
       {isHidden("charts") ? null : (
-        <div className="bo-chart-grid">
+        <div className={`bo-chart-grid ${busy ? "bo-is-refreshing" : ""}`}>
           {loading ? (
             <>
               <ChartSkeleton />
@@ -534,20 +626,21 @@ export default function TableauDeBordPage() {
               {/* Revenus */}
               <div className="bo-chart-card">
                 <div className="bo-chart-header">
-                  <h3 className="bo-chart-title">Revenus (14 jours)</h3>
+                  <h3 className="bo-chart-title">Revenus détaillés — {windowSize} derniers jours</h3>
                 </div>
                 <div className="bo-chart-body">
-                  <RevenueBarChart data={data!.revenusGraph} period={period} />
+                  <RevenueBarChart data={data!.revenusGraph} windowSize={windowSize} />
                 </div>
               </div>
 
               {/* Occupation */}
               <div className="bo-chart-card">
                 <div className="bo-chart-header">
-                  <h3 className="bo-chart-title">Taux d&apos;occupation</h3>
+                  <h3 className="bo-chart-title">Taux d&apos;occupation — {windowSize} derniers jours</h3>
                 </div>
                 <div className="bo-chart-body">
                   <OccupationGauge data={data!.occupationGraph} />
+                  <OccupancySparkline data={data!.occupationGraph} />
                 </div>
               </div>
             </>
@@ -557,7 +650,7 @@ export default function TableauDeBordPage() {
 
       {/* ─── REPARTITION + SOURCES ─── */}
       {isHidden("repartition") ? null : (
-        <div className="bo-chart-grid">
+        <div className={`bo-chart-grid ${busy ? "bo-is-refreshing" : ""}`}>
           {loading ? (
             <>
               <ChartSkeleton />
@@ -628,7 +721,7 @@ export default function TableauDeBordPage() {
                       <Link href={`/admin/reservations?id=${r.id}`} className="bo-list-item" style={{ textDecoration: "none", color: "inherit" }}>
                         <div className="bo-list-item-main">
                           <div className="bo-list-item-title">{r.logement} — {r.client}</div>
-                          <div className="bo-list-item-sub">{formatDay(r.arrivee)} → {formatDay(r.depart)}</div>
+                          <div className="bo-list-item-sub">{r.numero} · {formatDay(r.arrivee)} → {formatDay(r.depart)}</div>
                         </div>
                         <div className="bo-list-item-right">
                           <span className={`bo-badge ${STATUT_BADGE[r.statut] ?? "bo-badge--gray"}`}>
@@ -663,8 +756,8 @@ export default function TableauDeBordPage() {
               ) : (
                 <ul className="bo-list-items">
                   {data!.notifications.map((n) => (
-                    <li key={n.id}>
-                      <span className="bo-list-item-notif-dot" />
+                    <li key={n.id} className="bo-list-item">
+                      <span className="bo-list-item-notif-dot" aria-hidden="true" />
                       <div className="bo-list-item-main">
                         <div className="bo-list-item-title">{n.titre}</div>
                         <div className="bo-list-item-sub">{n.message}</div>
