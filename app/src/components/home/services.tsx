@@ -37,7 +37,7 @@ export function ServicesPhare() {
   ];
 
   return (
-    <section className="svc-section" aria-labelledby="svc-title">
+    <section className="container-caba svc-section" aria-labelledby="svc-title">
       <h2 id="svc-title" className="sr-only">
         {t("home.services.title")}
       </h2>
