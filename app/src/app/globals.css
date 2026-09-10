@@ -385,6 +385,7 @@
     left: 60px;
     transform: translateY(50%);
     background-color: var(--color-bg-primary);
+    border: 1px solid var(--color-border-subtle);
     border-radius: 18px;
     padding: 18px 22px 22px;
   }
