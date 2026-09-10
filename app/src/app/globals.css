@@ -384,7 +384,7 @@
     bottom: 0;
     left: 60px;
     transform: translateY(50%);
-    background-color: var(--color-bg-card);
+    background-color: var(--color-bg-primary);
     border-radius: 18px;
     box-shadow:
       0 24px 48px -12px rgba(31, 26, 20, 0.28),
