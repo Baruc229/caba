@@ -141,7 +141,7 @@ interface PropertyOption {
 /* ─── Helpers ─── */
 
 function fmtMoney(n: number): string {
-  return new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 }).format(n);
+  return new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(n);
 }
 
 function fmtDate(iso: string): string {
@@ -156,6 +156,25 @@ function fmtDateTime(iso: string): string {
 }
 
 const EMPTY_FILTERS = { status: "", propertyId: "", search: "", from: "", to: "" };
+
+function trapTabFocus(event: KeyboardEvent, container: HTMLElement | null) {
+  if (event.key !== "Tab" || !container) return;
+  const focusables = Array.from(
+    container.querySelectorAll<HTMLElement>(
+      'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    )
+  ).filter((el) => el.offsetParent !== null || el === document.activeElement);
+  if (focusables.length === 0) return;
+  const first = focusables[0];
+  const last = focusables[focusables.length - 1];
+  if (event.shiftKey && document.activeElement === first) {
+    event.preventDefault();
+    last.focus();
+  } else if (!event.shiftKey && document.activeElement === last) {
+    event.preventDefault();
+    first.focus();
+  }
+}
 
 function SkeletonRows() {
   return (
@@ -200,39 +219,71 @@ export function ReservationsManager() {
   const pageSize = 25;
   const detailModalRef = useRef<HTMLDivElement>(null);
   const cancelModalRef = useRef<HTMLDivElement>(null);
+  const detailTriggerRef = useRef<HTMLButtonElement | null>(null);
+  const cancelTriggerRef = useRef<HTMLButtonElement | null>(null);
 
   const pageSizeRef = useRef(pageSize);
   pageSizeRef.current = pageSize;
 
   /* ─── Chargement liste ─── */
-  const load = useCallback(
-    async (pageNum: number, filtersToApply: typeof EMPTY_FILTERS) => {
-      setLoading(true);
-      setError(null);
-      try {
-        const params = new URLSearchParams();
-        params.set("page", String(pageNum));
-        params.set("limit", String(pageSizeRef.current));
-        if (filtersToApply.status) params.set("status", filtersToApply.status);
-        if (filtersToApply.propertyId) params.set("propertyId", filtersToApply.propertyId);
-        if (filtersToApply.search) params.set("search", filtersToApply.search);
-        if (filtersToApply.from) params.set("from", filtersToApply.from);
-        if (filtersToApply.to) params.set("to", filtersToApply.to);
+  const fetchList = useCallback(
+    (pageNum: number, filtersToApply: typeof EMPTY_FILTERS) => {
+      const params = new URLSearchParams();
+      params.set("page", String(pageNum));
+      params.set("limit", String(pageSizeRef.current));
+      if (filtersToApply.status) params.set("status", filtersToApply.status);
+      if (filtersToApply.propertyId) params.set("propertyId", filtersToApply.propertyId);
+      if (filtersToApply.search) params.set("search", filtersToApply.search);
+      if (filtersToApply.from) params.set("from", filtersToApply.from);
+      if (filtersToApply.to) params.set("to", filtersToApply.to);
 
-        const res = await fetch(`/api/admin/bookings?${params.toString()}`);
-        if (!res.ok) throw new Error("Erreur de chargement");
-        const data = await res.json();
-        setRows(data.bookings);
-        setTotal(data.total);
-        setPage(data.page);
-      } catch (e) {
-        setError(e instanceof Error ? e.message : "Erreur inconnue");
-      } finally {
-        setLoading(false);
-      }
+      fetch(`/api/admin/bookings?${params.toString()}`)
+        .then((res) => {
+          if (!res.ok) throw new Error("Erreur de chargement");
+          return res.json();
+        })
+        .then((data) => {
+          setRows(data.bookings);
+          setTotal(data.total);
+          setPage(data.page);
+          setError(null);
+          setLoading(false);
+        })
+        .catch((e) => {
+          setError(e instanceof Error ? e.message : "Erreur inconnue");
+          setLoading(false);
+        });
     },
     []
   );
+
+  const load = useCallback(
+    (pageNum: number, filtersToApply: typeof EMPTY_FILTERS) => {
+      setLoading(true);
+      setBanner(null);
+      fetchList(pageNum, filtersToApply);
+    },
+    [fetchList]
+  );
+
+  const closeDetail = useCallback(() => {
+    setDetail(null);
+    const trigger = detailTriggerRef.current;
+    detailTriggerRef.current = null;
+    if (trigger && document.contains(trigger)) trigger.focus();
+  }, []);
+
+  const closeCancel = useCallback(() => {
+    setCancelTarget(null);
+    const trigger = cancelTriggerRef.current;
+    cancelTriggerRef.current = null;
+    if (trigger && document.contains(trigger)) trigger.focus();
+  }, []);
+
+  /* Chargement initial de la liste */
+  useEffect(() => {
+    fetchList(1, EMPTY_FILTERS);
+  }, [fetchList]);
 
   /* ─── Chargement des logements pour le filtre ─── */
   useEffect(() => {
@@ -254,6 +305,7 @@ export function ReservationsManager() {
     const id = new URLSearchParams(window.location.search).get("id");
     if (id) {
       openDetail(id);
+      history.replaceState(null, "", window.location.pathname);
     }
   }, []);
 
@@ -269,6 +321,37 @@ export function ReservationsManager() {
       cancelModalRef.current?.querySelector<HTMLButtonElement>(".bo-btn--secondary")?.focus();
     }
   }, [cancelTarget]);
+
+  /* Escape + trap de focus au niveau document : fonctionne quel que soit le focus */
+  useEffect(() => {
+    if (!detail || cancelTarget) return;
+    const container = detailModalRef.current;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        closeDetail();
+      } else {
+        trapTabFocus(e, container);
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [detail, cancelTarget, closeDetail]);
+
+  useEffect(() => {
+    if (!cancelTarget) return;
+    const container = cancelModalRef.current;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        closeCancel();
+      } else {
+        trapTabFocus(e, container);
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [cancelTarget, closeCancel]);
 
   async function openDetail(id: string) {
     setDetailLoading(true);
@@ -299,8 +382,9 @@ export function ReservationsManager() {
         setBanner({ type: "error", text: body.error ?? "Action impossible" });
         return;
       }
-      setBanner({ type: "success", text: `${label} : ${body.booking?.numero ?? ""}`.trim() });
       await Promise.all([load(page, appliedFilters), detail ? openDetail(id) : Promise.resolve()]);
+      const numero = body.booking?.numero ? ` : ${body.booking.numero}` : "";
+      setBanner({ type: "success", text: `${label}${numero}` });
     } catch {
       setBanner({ type: "error", text: "Erreur réseau." });
     } finally {
@@ -310,6 +394,7 @@ export function ReservationsManager() {
 
   async function confirmCancel() {
     if (!cancelTarget) return;
+    const numero = cancelTarget.numero;
     setBusy(cancelTarget.id);
     try {
       const res = await fetch("/api/admin/bookings", {
@@ -322,10 +407,10 @@ export function ReservationsManager() {
         setBanner({ type: "error", text: body.error ?? "Annulation impossible" });
         return;
       }
-      setBanner({ type: "success", text: `${cancelTarget.numero} annulée.` });
+      await Promise.all([load(page, appliedFilters), detail ? openDetail(cancelTarget.id) : Promise.resolve()]);
+      setBanner({ type: "success", text: `${numero} annulée.` });
       setCancelTarget(null);
       setMotif("");
-      await Promise.all([load(page, appliedFilters), detail ? openDetail(cancelTarget.id) : Promise.resolve()]);
     } catch {
       setBanner({ type: "error", text: "Erreur réseau." });
     } finally {
@@ -366,8 +451,15 @@ export function ReservationsManager() {
     load(1, EMPTY_FILTERS);
   }
 
-  const canOffer = (statut: string) => ["reservation_temporaire", "en_attente_paiement"].includes(statut);
-  const canPay = (statut: string) => !["payee", "annulee", "terminee"].includes(statut);
+  const hasAppliedFilters =
+    appliedFilters.status !== "" ||
+    appliedFilters.propertyId !== "" ||
+    appliedFilters.search !== "" ||
+    appliedFilters.from !== "" ||
+    appliedFilters.to !== "";
+
+  const canOffer = (statut: string) => ["demande_en_attente", "reservation_temporaire", "en_attente_paiement"].includes(statut);
+  const canPay = (statut: string) => ["confirmee", "modifiee"].includes(statut);
   const canFinish = (statut: string) => ["confirmee", "payee"].includes(statut);
   const canCancel = (statut: string) => !["annulee", "terminee"].includes(statut);
 
@@ -470,7 +562,7 @@ export function ReservationsManager() {
         </p>
       )}
 
-      {error && !banner && (
+      {error && (
         <p className="bo-form-error" style={{ margin: "14px 18px 0" }} role="alert">
           {error}
         </p>
@@ -482,30 +574,57 @@ export function ReservationsManager() {
           <h3 className="bo-card-title">
             {total} réservation{total > 1 ? "s" : ""}
           </h3>
+          {loading && rows.length > 0 && (
+            <span className="bo-loading-hint" role="status">
+              Mise à jour…
+            </span>
+          )}
         </div>
 
-        <div className="bo-table-wrap">
+        <div className="bo-table-wrap" aria-busy={loading && rows.length === 0}>
           <table className="bo-table">
             <thead>
               <tr>
-                <th>Réservation</th>
-                <th>Client</th>
-                <th>Séjour</th>
-                <th>Voy.</th>
-                <th>Total</th>
-                <th>Statut</th>
-                <th>Actions</th>
+                <th scope="col">Réservation</th>
+                <th scope="col">Client</th>
+                <th scope="col">Séjour</th>
+                <th scope="col">Voy.</th>
+                <th scope="col">Total</th>
+                <th scope="col">Statut</th>
+                <th scope="col">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {loading ? (
+              {loading && rows.length === 0 ? (
                 <SkeletonRows />
+              ) : error && rows.length === 0 ? (
+                <tr>
+                  <td colSpan={7}>
+                    <div className="bo-empty">
+                      <h3 className="bo-empty-title">Chargement impossible</h3>
+                      <p>{error}</p>
+                      <button
+                        type="button"
+                        className="bo-btn bo-btn--secondary"
+                        style={{ marginTop: 14 }}
+                        onClick={() => load(page, appliedFilters)}
+                      >
+                        <FaRotate aria-hidden="true" />
+                        Réessayer
+                      </button>
+                    </div>
+                  </td>
+                </tr>
               ) : rows.length === 0 ? (
                 <tr>
                   <td colSpan={7}>
                     <div className="bo-empty">
                       <h3 className="bo-empty-title">Aucune réservation</h3>
-                      <p>Ajustez vos filtres ou créez une nouvelle réservation.</p>
+                      <p>
+                        {hasAppliedFilters
+                          ? "Aucune réservation ne correspond à vos filtres."
+                          : "Ajustez vos filtres ou créez une nouvelle réservation."}
+                      </p>
                     </div>
                   </td>
                 </tr>
@@ -537,7 +656,10 @@ export function ReservationsManager() {
                         <button
                           type="button"
                           className="bo-btn bo-btn--secondary"
-                          onClick={() => openDetail(row.id)}
+                          onClick={(e) => {
+                            detailTriggerRef.current = e.currentTarget;
+                            openDetail(row.id);
+                          }}
                         >
                           Détails
                         </button>
@@ -548,6 +670,7 @@ export function ReservationsManager() {
                             onClick={() => runAction(row.id, "confirmer", "Réservation confirmée")}
                             disabled={busy === row.id}
                             title="Confirmer la réservation"
+                            aria-label="Confirmer la réservation"
                           >
                             <FaCheck aria-hidden="true" />
                             <span className="bo-btn-label">Confirmer</span>
@@ -597,7 +720,10 @@ export function ReservationsManager() {
             type="button"
             className="bo-backdrop bo-modal-backdrop"
             aria-label="Fermer"
-            onClick={() => setDetail(null)}
+            tabIndex={-1}
+            aria-hidden={cancelTarget ? "true" : undefined}
+            style={cancelTarget ? { pointerEvents: "none", opacity: 0.4 } : undefined}
+            onClick={closeDetail}
           />
           <div
             ref={detailModalRef}
@@ -605,15 +731,14 @@ export function ReservationsManager() {
             role="dialog"
             aria-modal="true"
             aria-labelledby="reservation-detail-title"
-            onKeyDown={(e) => {
-              if (e.key === "Escape") setDetail(null);
-            }}
+            aria-busy={detailLoading || undefined}
+            inert={!!cancelTarget}
           >
             <div className="bo-modal-header">
               <h4 id="reservation-detail-title" className="bo-card-title">
                 Réservation {detail?.numero ?? "…"}
               </h4>
-              <button type="button" className="bo-icon-btn" aria-label="Fermer" onClick={() => setDetail(null)}>
+              <button type="button" className="bo-icon-btn" aria-label="Fermer" onClick={closeDetail}>
                 <FaXmark aria-hidden="true" />
               </button>
             </div>
@@ -678,9 +803,7 @@ export function ReservationsManager() {
                     {/* Colonne droite : prix + actions */}
                     <div>
                       <div className="bo-res-detail-block">
-                        <span className="bo-label">
-                          Total · <strong>{fmtMoney(detail.prixTotal)} {detail.devise}</strong>
-                        </span>
+                        <span className="bo-label">Montants ({detail.devise})</span>
                         <div className="bo-res-price-line">
                           <span>Séjour</span>
                           <span>{fmtMoney(detail.prixSejour)}</span>
@@ -755,6 +878,7 @@ export function ReservationsManager() {
                               type="button"
                               className="bo-btn bo-btn--danger"
                               onClick={() => {
+                                cancelTriggerRef.current = document.activeElement as HTMLButtonElement | null;
                                 setMotif("");
                                 setCancelTarget({ id: detail.id, numero: detail.numero });
                               }}
@@ -844,7 +968,7 @@ export function ReservationsManager() {
                 </div>
 
                 <div className="bo-modal-footer">
-                  <button type="button" className="bo-btn bo-btn--secondary" onClick={() => setDetail(null)}>
+                  <button type="button" className="bo-btn bo-btn--secondary" onClick={closeDetail}>
                     Fermer
                   </button>
                 </div>
@@ -861,7 +985,7 @@ export function ReservationsManager() {
             type="button"
             className="bo-backdrop bo-modal-backdrop"
             aria-label="Fermer"
-            onClick={() => setCancelTarget(null)}
+            onClick={closeCancel}
           />
           <div
             ref={cancelModalRef}
@@ -870,14 +994,14 @@ export function ReservationsManager() {
             aria-modal="true"
             aria-labelledby="cancel-booking-title"
             aria-describedby="cancel-booking-desc"
-            onKeyDown={(e) => {
-              if (e.key === "Escape") setCancelTarget(null);
-            }}
           >
             <div className="bo-modal-header">
               <h4 id="cancel-booking-title" className="bo-card-title">
                 Annuler {cancelTarget.numero} ?
               </h4>
+              <button type="button" className="bo-icon-btn" aria-label="Fermer" onClick={closeCancel}>
+                <FaXmark aria-hidden="true" />
+              </button>
             </div>
             <div className="bo-modal-body">
               <p id="cancel-booking-desc">
@@ -897,7 +1021,7 @@ export function ReservationsManager() {
               />
             </div>
             <div className="bo-modal-footer">
-              <button type="button" className="bo-btn bo-btn--secondary" onClick={() => setCancelTarget(null)}>
+              <button type="button" className="bo-btn bo-btn--secondary" onClick={closeCancel}>
                 Retour
               </button>
               <button

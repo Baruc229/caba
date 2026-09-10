@@ -152,7 +152,11 @@ export async function confirmBooking(bookingId: string): Promise<BookingResult> 
     return { success: false, error: "Reservation introuvable" };
   }
 
-  if (booking.statut !== "en_attente_paiement" && booking.statut !== "reservation_temporaire") {
+  if (
+    booking.statut !== "demande_en_attente" &&
+    booking.statut !== "reservation_temporaire" &&
+    booking.statut !== "en_attente_paiement"
+  ) {
     return { success: false, error: "Cette reservation ne peut pas etre confirmee" };
   }
 

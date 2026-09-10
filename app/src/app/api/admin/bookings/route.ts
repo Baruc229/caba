@@ -146,6 +146,18 @@ export async function GET(request: NextRequest) {
     }
 
     // ─── Liste avec filtres + pagination ───
+    const ALLOWED_STATUSES = [
+      "demande_en_attente",
+      "reservation_temporaire",
+      "en_attente_paiement",
+      "confirmee",
+      "payee",
+      "modifiee",
+      "annulee",
+      "terminee",
+    ];
+    const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+
     const status = searchParams.get("status") || undefined;
     const propertyId = searchParams.get("propertyId") || undefined;
     const search = searchParams.get("search")?.trim() || undefined;
@@ -153,6 +165,13 @@ export async function GET(request: NextRequest) {
     const to = searchParams.get("to") || undefined;
     const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10) || 1);
     const pageSize = Math.min(100, Math.max(1, parseInt(searchParams.get("limit") || "25", 10) || 25));
+
+    if (status && !ALLOWED_STATUSES.includes(status)) {
+      return NextResponse.json({ error: "Statut invalide" }, { status: 400 });
+    }
+    if ((from && !DATE_PATTERN.test(from)) || (to && !DATE_PATTERN.test(to))) {
+      return NextResponse.json({ error: "Date invalide (format attendu : AAAA-MM-JJ)" }, { status: 400 });
+    }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const where: any = {};
@@ -245,6 +264,13 @@ export async function PATCH(request: NextRequest) {
       case "terminer":
         return run(() => completeBooking(id));
       case "notes": {
+        const exists = await prisma.booking.findUnique({
+          where: { id },
+          select: { id: true },
+        });
+        if (!exists) {
+          return NextResponse.json({ error: "Reservation introuvable" }, { status: 404 });
+        }
         await prisma.booking.update({
           where: { id },
           data: { notesInternes: notesInternes ?? null },
