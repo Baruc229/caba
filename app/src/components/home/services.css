@@ -1,19 +1,21 @@
 /* ─── Section Services phares (page d'accueil) ─── */
 
+/* Bande blanche plein largeur (bleed), grille centrée dans le conteneur */
 .svc-section {
-  margin-bottom: 72px;
+  width: 100%;
+  background: var(--color-bg-card);
+  border-block: 1px solid var(--color-border-subtle);
+  padding-block: 48px;
 }
 
-/* Panneau blanc unique contenant toute la grille */
 .svc-grid {
   display: grid;
   grid-template-columns: 1.6fr 1fr;
   gap: 12px;
   align-items: stretch;
-  background: var(--color-bg-card);
-  border: 1px solid var(--color-border-subtle);
-  border-radius: 16px;
-  padding: 24px;
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding-inline: clamp(16px, 4vw, 48px);
 }
 
 .svc-col {
@@ -180,13 +182,11 @@
 
 @media (max-width: 1023.98px) {
   .svc-section {
-    margin-bottom: 56px;
+    padding-block: 28px;
   }
 
   .svc-grid {
     grid-template-columns: 1fr;
-    padding: 14px;
-    border-radius: 14px;
   }
 
   .svc-col--a,
