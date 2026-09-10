@@ -4,6 +4,30 @@
   margin-bottom: 72px;
 }
 
+/* Introduction de la section (eyebrow + titre) */
+.svc-intro {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 32px;
+}
+
+.svc-eyebrow {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+}
+
+.svc-intro-title {
+  margin: 0;
+  font-size: clamp(26px, 3vw, 40px);
+  color: var(--color-text-primary);
+}
+
 /* Layout asymétrique : colonne A large + colonne B étroite */
 .svc-grid {
   display: grid;
@@ -52,9 +76,8 @@
   gap: 14px;
   padding: 16px 20px;
   background: var(--color-bg-card);
-  border: 1px solid var(--color-border-subtle);
+  border: 0.5px solid var(--color-border-subtle);
   border-radius: 14px;
-  box-shadow: var(--shadow-card);
   min-width: 0;
 }
 
@@ -67,13 +90,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 42px;
-  height: 42px;
   flex-shrink: 0;
-  border-radius: 12px;
-  background: rgba(0, 20, 137, 0.07);
+  width: 34px;
+  height: 40px;
+  font-size: 21px;
+  line-height: 1;
   color: var(--color-accent-secondary);
-  font-size: 17px;
 }
 
 .svc-row-text,
@@ -105,9 +127,8 @@
   gap: 16px;
   padding: 20px;
   background: var(--color-bg-card);
-  border: 1px solid var(--color-border-subtle);
+  border: 0.5px solid var(--color-border-subtle);
   border-radius: 14px;
-  box-shadow: var(--shadow-card);
   min-width: 0;
   min-height: 0;
 }
@@ -115,11 +136,9 @@
 .svc-tile--blue {
   background: var(--color-accent-secondary);
   border: none;
-  box-shadow: none;
 }
 
 .svc-tile--blue .svc-tile-icon {
-  background: rgba(255, 255, 255, 0.16);
   color: #ffffff;
 }
 
@@ -186,6 +205,10 @@
 @media (max-width: 1023.98px) {
   .svc-section {
     margin-bottom: 56px;
+  }
+
+  .svc-intro {
+    margin-bottom: 24px;
   }
 
   .svc-grid {

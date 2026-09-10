@@ -210,7 +210,8 @@ export const dictionaries = {
       stepperReduce: "Réduire le nombre",
       stepperIncrease: "Augmenter le nombre",
       services: {
-        title: "Services",
+        eyebrow: "L'expérience Caba",
+        introTitle: "Un séjour pensé dans les moindres détails",
         electLabel: "Électricité continue",
         electDesc: "Groupe électrogène silencieux : plus aucune coupure.",
         eauLabel: "Eau chaude",
@@ -819,7 +820,8 @@ export const dictionaries = {
       stepperReduce: "Decrease number",
       stepperIncrease: "Increase number",
       services: {
-        title: "Services",
+        eyebrow: "The Caba experience",
+        introTitle: "A stay crafted down to the last detail",
         electLabel: "Non-stop electricity",
         electDesc: "Silent standby generator: no more power cuts.",
         eauLabel: "Hot water",
